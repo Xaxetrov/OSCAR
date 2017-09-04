@@ -1,0 +1,11 @@
+#Blacklist all
+/*
+
+#Whitelist some directories
+
+#Whitelist some extensions
+
+#Whitelist some files
+!LICENSE
+!README.md
+!.gitignore
