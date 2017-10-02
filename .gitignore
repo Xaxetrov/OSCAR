@@ -2,6 +2,7 @@
 /*
 
 #Whitelist some directories
+!src/
 
 #Whitelist some extensions
 
