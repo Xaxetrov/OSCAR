@@ -3,6 +3,7 @@
 
 #Whitelist some directories
 !src/
+src/__pycache__/
 
 #Whitelist some extensions
 
