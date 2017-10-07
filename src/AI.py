@@ -121,7 +121,7 @@ class CollectMyShards(base_agent.BaseAgent):
             #print("target subgroups : ", neutrals_1, neutrals_2)
 
             #Closest neighbour queue for each marine
-            self.marines = list(zip(player_x, player_y))
+            self.marines = list(sorted(zip(player_x, player_y)))
             for marine_idx, marine in enumerate(self.marines):
                 current_position = marine
                 unvisited = neutrals[marine_idx].tolist()
@@ -152,13 +152,18 @@ class CollectMyShards(base_agent.BaseAgent):
                     try:
                         self.marine_selected[marine_idx+1] = True
                     except IndexError:
+                        self.state = 2
                         return actions.FunctionCall(_NO_OP, [])
                     else:
                         return actions.FunctionCall(_SELECT_POINT, [[0], self.marines[marine_idx+1]])
 
-            self.state = 2
-            return actions.FunctionCall(_NO_OP, [])
 
         # Done wait for new points
         else: #state == 2
+            # Find our units and targets
+            player_relative = obs.observation["screen"][_PLAYER_RELATIVE]
+            neutral_y, neutral_x = (player_relative == _PLAYER_NEUTRAL).nonzero()
+            if len(neutral_y) == 20:
+                self.state = 0
+                return self.step(obs)
             return actions.FunctionCall(_NO_OP, [])
