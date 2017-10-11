@@ -24,6 +24,8 @@ _SELECT_ARMY = actions.FUNCTIONS.select_army.id
 _NOT_QUEUED = [0]
 _SELECT_ALL = [0]
 
+_EPSILON_GREEDY = 0.9
+
 
 class DQNAgent(base_agent.BaseAgent):
     """A NN agent for starcraft."""
@@ -37,6 +39,19 @@ class DQNAgent(base_agent.BaseAgent):
         self.state_old = None
         self.predicted_reward_old = 0
         self.best_old_action_pos = [0, [0, 0]]
+        self.epsilon = _EPSILON_GREEDY
+
+    def int_to_action(self, x):
+
+        non_spatial_act =[numpy.zeros(2)]
+        spatial_act = [numpy.zeros([16, 16])]
+
+        if x < 2:
+            non_spatial_act[0][x] = 1
+        else:
+            spatial_act[0][(x-2) // 16][(x-2) % 16] = 1
+        action = numpy.array([non_spatial_act, spatial_act])
+        return action
 
     def step(self, obs):
         super(DQNAgent, self).step(obs)
@@ -49,7 +64,10 @@ class DQNAgent(base_agent.BaseAgent):
                 formatted_case[0] = state0_case
                 formatted_case[1] = state1_case
 
-        action = self.model.predict(formatted_state, batch_size=1)
+        if numpy.random.uniform() < self.epsilon:
+            action = self.model.predict(formatted_state, batch_size=1)
+        else:
+            action = self.int_to_action(numpy.random.randint(0, 257))
 
         action_vector = action[0][0]
         if _SELECT_ARMY not in obs.observation["available_actions"]:
