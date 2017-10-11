@@ -10,9 +10,6 @@ from keras.layers import Conv2D, Input, Dense, Flatten, BatchNormalization
 
 from neuralmodel import get_neural_network
 
-_MOVE_ACTION = actions.FUNCTIONS.Move_screen.id
-_NOP = actions.FUNCTIONS.no_op.id
-
 _PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
 _PLAYER_FRIENDLY = 1
 _PLAYER_NEUTRAL = 3  # beacon/minerals
@@ -24,7 +21,10 @@ _SELECT_ARMY = actions.FUNCTIONS.select_army.id
 _NOT_QUEUED = [0]
 _SELECT_ALL = [0]
 
-_EPSILON_GREEDY = 0.9
+_EPSILON_GREEDY = 0.9 # exploration vs exploitation criteria
+_GAMMA = 0.9 # discount factor
+_ALPHA = 0.5 # learning rate
+
 
 
 class DQNAgent(base_agent.BaseAgent):
@@ -39,19 +39,53 @@ class DQNAgent(base_agent.BaseAgent):
         self.state_old = None
         self.predicted_reward_old = 0
         self.best_old_action_pos = [0, [0, 0]]
+        self.best_action_pos = [0, [0, 0]]
         self.epsilon = _EPSILON_GREEDY
 
-    def int_to_action(self, x):
-
-        non_spatial_act =[numpy.zeros(2)]
-        spatial_act = [numpy.zeros([16, 16])]
-
-        if x < 2:
-            non_spatial_act[0][x] = 1
+    def get_random_action(self, obs):
+        """return a available random action
+            -obs: the obs parameter given to the agent for the step call
+        """
+        number_of_possible_action = 1
+        if _MOVE_SCREEN in obs.observation["available_actions"]:
+            number_of_possible_action += 256
+        if _SELECT_ARMY in obs.observation["available_actions"]:
+            number_of_possible_action += 1
+        # get a random number to select an action (including _NO_OP)
+        selected_action_id = numpy.random.randint(0, number_of_possible_action)
+        if _MOVE_SCREEN in obs.observation["available_actions"] and selected_action_id < 256:
+            return self.get_move_action(selected_action_id)
         else:
-            spatial_act[0][(x-2) // 16][(x-2) % 16] = 1
-        action = numpy.array([non_spatial_act, spatial_act])
-        return action
+            # here two case, or we have action id 256 or 257 or we have 0 or 1
+            # in both case if _SELECT_ARMY is not available the following call handle it
+            return self.get_none_spacial_action(selected_action_id % 256)
+
+    def get_move_action(self, linear_position):
+        """return a pysc2 action and argument to do a move action at the pos given
+            -linear_position : position of the move on a 16x16 grid, integer equal to y*16+x
+            """
+        x_16 = (linear_position % 16)
+        y_16 = (linear_position // 16)
+        x_64 = x_16 * 4
+        y_64 = y_16 * 4
+        action_args = [_NOT_QUEUED, [x_64, y_64]]
+        self.best_action_pos = [1, [x_16, y_16]]
+        return _MOVE_SCREEN, action_args
+
+    def get_none_spacial_action(self, action_id):
+        """return a pysc2 action coresponding to the given action id
+            -action id: 0 -> NO_OP
+                        1 -> Select all army
+        """
+        if action_id == 1:
+            selected_action = _SELECT_ARMY
+            action_args = [_SELECT_ALL]
+            self.best_action_pos = [0, 1]
+        else:
+            selected_action = _NO_OP
+            action_args = []
+            self.best_action_pos = [0, 0]
+        return selected_action, action_args
 
     def step(self, obs):
         super(DQNAgent, self).step(obs)
@@ -64,52 +98,48 @@ class DQNAgent(base_agent.BaseAgent):
                 formatted_case[0] = state0_case
                 formatted_case[1] = state1_case
 
+        # get reward prediction from neural network
+        action = self.model.predict(formatted_state, batch_size=1)
+
+        # compute best reward of the two main branch
+        best_reward_spacial_action = numpy.max(action[1])
+        best_reward_non_spacial_action = numpy.max(action[0])
+
+        # epsilon greedy exploration, epsilon probability to use neural network prediction
         if numpy.random.uniform() < self.epsilon:
-            action = self.model.predict(formatted_state, batch_size=1)
-        else:
-            action = self.int_to_action(numpy.random.randint(0, 257))
+            action_vector = action[0][0]
+            # mask _SELECT_ARMY action if not available
+            if _SELECT_ARMY not in obs.observation["available_actions"]:
+                action_vector[1] = 0.0
+                # /!\ in this case the neural network will learn not to do this action -> side effect ?
 
-        action_vector = action[0][0]
-        if _SELECT_ARMY not in obs.observation["available_actions"]:
-            action_vector[1] = 0.0
-
-        if numpy.max(action[0]) < numpy.max(action[1]) and _MOVE_SCREEN in obs.observation["available_actions"]:
-            selected_action = _MOVE_ACTION
-            position_vector = action[1][0]
-            # get the best position according to "score"
-            max_coordinate = numpy.argmax(position_vector)
-            x_16 = (max_coordinate % 16)
-            y_16 = (max_coordinate // 16)
-            x_64 = x_16 * 4
-            y_64 = y_16 * 4
-            action_args = [[0], [x_64, y_64]]
-            predicted_reward = position_vector[x_16][y_16]
-            best_action_pos = [1, [x_16, y_16]]
-        else:
-            # select best action according to reward
-            best_action_id = numpy.argmax(action_vector)
-            predicted_reward = numpy.max(action[0])
-            if best_action_id == 1:
-                selected_action = _SELECT_ARMY
-                # select all
-                action_args = [[0]]
-                best_action_pos = [0, 1]
+            if best_reward_non_spacial_action < best_reward_spacial_action \
+                    and _MOVE_SCREEN in obs.observation["available_actions"]:
+                # get the best position according to reward
+                position_vector = action[1][0]
+                max_coordinate = numpy.argmax(position_vector)
+                selected_action, action_args = self.get_move_action(max_coordinate)
+                predicted_reward = best_reward_spacial_action
             else:
-                selected_action = _NO_OP
-                action_args = []
-                best_action_pos = [0, 0]
+                # select best action according to reward
+                best_action_id = numpy.argmax(action_vector)
+                predicted_reward = best_reward_non_spacial_action
+                selected_action, action_args = self.get_none_spacial_action(best_action_id)
+        # 1 - epsilon probability to choose a random action
+        else:
+            # compute best reward according to neural network (used for learning)
+            if best_reward_non_spacial_action < best_reward_spacial_action \
+                    and _MOVE_SCREEN in obs.observation["available_actions"]:
+                predicted_reward = best_reward_spacial_action
+            else:
+                predicted_reward = best_reward_non_spacial_action
+            selected_action, action_args = self.get_random_action(obs)
 
-        # if numpy.random.rand() > 0.8:
-        #     randnum = numpy.random.rand()
-        #     if randnum < 0.33:
-        #         best_action_pos = [0, 1]
-        #         selected_action = _SELECT_ARMY
-        #         # select all
-        #         action_args = [[0]]
-
+        # if we are not in the first step and so we have something to learn from our previous choice
         if self.action_old is not None and self.state_old is not None:
             # learn
-            new_reward = self.predicted_reward_old + 0.5 * (obs.reward + 0.9 * predicted_reward - self.predicted_reward_old)
+            new_reward = self.predicted_reward_old + _ALPHA * \
+                         (obs.reward + _GAMMA * predicted_reward - self.predicted_reward_old)
             if self.best_old_action_pos[0] == 0:
                 self.action_old[0][0][self.best_old_action_pos[1]] = new_reward
             else:
@@ -123,7 +153,7 @@ class DQNAgent(base_agent.BaseAgent):
         # remember the current values for next loop:
         self.action_old = action
         self.state_old = formatted_state
-        self.best_old_action_pos = best_action_pos
+        self.best_old_action_pos = self.best_action_pos
         self.predicted_reward_old = predicted_reward
 
         return actions.FunctionCall(selected_action, action_args)
