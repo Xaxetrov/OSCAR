@@ -81,6 +81,14 @@ class DQNAgent(base_agent.BaseAgent):
                 action_args = []
                 best_action_pos = [0, 0]
 
+        # if numpy.random.rand() > 0.8:
+        #     randnum = numpy.random.rand()
+        #     if randnum < 0.33:
+        #         best_action_pos = [0, 1]
+        #         selected_action = _SELECT_ARMY
+        #         # select all
+        #         action_args = [[0]]
+
         if self.action_old is not None and self.state_old is not None:
             # learn
             new_reward = self.predicted_reward_old + 0.5 * (obs.reward + 0.9 * predicted_reward - self.predicted_reward_old)
