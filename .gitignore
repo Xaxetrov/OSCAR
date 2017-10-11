@@ -4,6 +4,7 @@
 #Whitelist some directories
 
 #Whitelist some extensions
+!*.py
 
 #Whitelist some files
 !LICENSE
