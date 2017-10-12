@@ -103,9 +103,9 @@ class PlayAgent(base_agent.BaseAgent):
             # get reward prediction from neural network
             action = self.model.predict(formatted_state, batch_size=1)
 
-            # if numpy.isnan(numpy.sum(action[0])) or numpy.isnan(numpy.sum(action[1])):
+            # if numpy.isnan(numpy.max(action[0])) or numpy.isnan(numpy.max(action[1])):
             #     print("action contain NaN !")
-            #     if numpy.isnan(numpy.sum(formatted_state)):
+            #     if numpy.isnan(numpy.max(formatted_state)):
             #         print("formatted_state contain NaN too !!!")
             #     exit(1)
 
