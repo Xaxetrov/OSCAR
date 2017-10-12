@@ -123,7 +123,7 @@ class DQNAgent(base_agent.BaseAgent):
             else:
                 # select best action according to reward
                 best_action_id = numpy.argmax(action_vector)
-                current_predicted_reward = predicted_reward = best_reward_non_spacial_action
+                current_predicted_reward = best_predicted_reward = best_reward_non_spacial_action
                 selected_action, action_args = self.get_non_spacial_action(best_action_id)
         # 1 - epsilon probability to choose a random action
         else:
