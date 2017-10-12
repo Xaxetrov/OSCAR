@@ -1,15 +1,15 @@
 """A random agent for starcraft."""
-import numpy
+from collections import namedtuple
 
+import numpy
+from keras.models import save_model
 from pysc2.agents import base_agent
 from pysc2.lib import actions
 from pysc2.lib import features
 
-from keras.models import Model, load_model, save_model
-from keras.layers import Conv2D, Input, Dense, Flatten, BatchNormalization
+from src.nnModels.neuralmodel import get_neural_network
 
-from neuralmodel import get_neural_network
-
+"""API Constants"""
 _PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
 _PLAYER_FRIENDLY = 1
 _PLAYER_NEUTRAL = 3  # beacon/minerals
@@ -21,18 +21,20 @@ _SELECT_ARMY = actions.FUNCTIONS.select_army.id
 _NOT_QUEUED = [0]
 _SELECT_ALL = [0]
 
-_EPSILON_GREEDY = 0.9 # exploration vs exploitation criteria
-_GAMMA = 0.9 # discount factor
-_ALPHA = 0.5 # learning rate
+"""Learning constants"""
+_EPSILON_GREEDY = 0.9  # exploration vs exploitation criteria
+_GAMMA = 0.9  # discount factor
+_ALPHA = 0.5  # learning rate
 
-
+InputStructure = namedtuple("InputStructure", "screen_size screen_number non_spatial_features")
+OutputStructure = namedtuple("OutputStructure", "spatial_action_size non_spatial_action_size")
 
 class DQNAgent(base_agent.BaseAgent):
     """A NN agent for starcraft."""
 
     model = None
 
-    def __init__(self):
+    def __init__(self, input, output):
         super(DQNAgent, self).__init__()
         self.model = get_neural_network()
         self.action_old = None
@@ -41,6 +43,10 @@ class DQNAgent(base_agent.BaseAgent):
         self.best_old_action_pos = [0, [0, 0]]
         self.best_action_pos = [0, [0, 0]]
         self.epsilon = _EPSILON_GREEDY
+        self.spatial_action_size2x16 = 16 * 16  # TODO Change if more than 1 spatial output
+        self.spatial_action_size = output.spatial_action_size
+        self.non_spatial_action_num = output.non_spatial_action_size
+        self.shrink = output.spatial_action_size / 16
 
     def get_random_action(self, obs):
         """return an available random action
@@ -48,17 +54,17 @@ class DQNAgent(base_agent.BaseAgent):
         """
         number_of_possible_action = 1  # _NO_OP
         if _MOVE_SCREEN in obs.observation["available_actions"]:
-            number_of_possible_action += 256
+            number_of_possible_action += self.spatial_action_size2x16
         if _SELECT_ARMY in obs.observation["available_actions"]:
-            number_of_possible_action += 1
+            number_of_possible_action += 1  # TODO Find a way to use self.non_spatial_action_num
         # get a random number to select an action (including _NO_OP)
         selected_action_id = numpy.random.randint(0, number_of_possible_action)
-        if _MOVE_SCREEN in obs.observation["available_actions"] and selected_action_id < 256:
+        if _MOVE_SCREEN in obs.observation["available_actions"] and selected_action_id < self.spatial_action_size2x16:
             return self.get_move_action(selected_action_id)
         else:
             # here two case: whether we have action id 256 or 257 or we have 0 or 1
             # in both case if _SELECT_ARMY is not available the following call handles it
-            return self.get_non_spacial_action(selected_action_id % 256)
+            return self.get_non_spacial_action(selected_action_id % self.spatial_action_size2x16)
 
     def get_move_action(self, linear_position):
         """return a pysc2 action and argument to do a move action at the pos given
@@ -66,9 +72,9 @@ class DQNAgent(base_agent.BaseAgent):
             """
         x_16 = (linear_position % 16)
         y_16 = (linear_position // 16)
-        x_64 = x_16 * 4
-        y_64 = y_16 * 4
-        action_args = [_NOT_QUEUED, [x_64, y_64]]
+        x_true = x_16 * self.shrink
+        y_true = y_16 * self.shrink
+        action_args = [_NOT_QUEUED, [x_true, y_true]]
         self.best_action_pos = [1, [x_16, y_16]]
         return _MOVE_SCREEN, action_args
 
@@ -92,7 +98,7 @@ class DQNAgent(base_agent.BaseAgent):
 
         state = [obs.observation["screen"][features.SCREEN_FEATURES.player_relative.index],
                  obs.observation["screen"][features.SCREEN_FEATURES.selected.index]]
-        formatted_state = numpy.zeros(shape=(1, 64, 64, 2), dtype=float)
+        formatted_state = numpy.zeros(shape=(1, self.spatial_action_size, self.spatial_action_size, 2), dtype=float)
         for formatted_row, state0_row, state1_row in zip(formatted_state[0], state[0], state[1]):
             for formatted_case, state0_case, state1_case in zip(formatted_row, state0_row, state1_row):
                 formatted_case[0] = state0_case
@@ -150,7 +156,8 @@ class DQNAgent(base_agent.BaseAgent):
         if self.action_old is not None and self.state_old is not None:
             # learn
             new_reward = self.predicted_reward_old + _ALPHA * \
-                         (obs.reward + _GAMMA * best_predicted_reward - self.predicted_reward_old)
+                                                     (
+                                                     obs.reward + _GAMMA * best_predicted_reward - self.predicted_reward_old)
             if self.best_old_action_pos[0] == 0:
                 self.action_old[0][0][self.best_old_action_pos[1]] = new_reward
             else:

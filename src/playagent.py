@@ -1,14 +1,10 @@
 """A random agent for starcraft."""
 import numpy
-
 from pysc2.agents import base_agent
 from pysc2.lib import actions
 from pysc2.lib import features
 
-from keras.models import Model, load_model, save_model
-from keras.layers import Conv2D, Input, Dense, Flatten, BatchNormalization
-
-from neuralmodel import get_neural_network
+from src.nnModels.neuralmodel import get_neural_network
 
 _PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
 _PLAYER_FRIENDLY = 1
