@@ -119,27 +119,32 @@ class DQNAgent(base_agent.BaseAgent):
                 position_vector = action[1][0]
                 max_coordinate = numpy.argmax(position_vector)
                 selected_action, action_args = self.get_move_action(max_coordinate)
-                predicted_reward = best_reward_spacial_action
+                current_predicted_reward = best_predicted_reward = best_reward_spacial_action
             else:
                 # select best action according to reward
                 best_action_id = numpy.argmax(action_vector)
-                predicted_reward = best_reward_non_spacial_action
+                current_predicted_reward = best_predicted_reward = best_reward_non_spacial_action
                 selected_action, action_args = self.get_none_spacial_action(best_action_id)
         # 1 - epsilon probability to choose a random action
         else:
             # compute best reward according to neural network (used for learning)
             if best_reward_non_spacial_action < best_reward_spacial_action \
                     and _MOVE_SCREEN in obs.observation["available_actions"]:
-                predicted_reward = best_reward_spacial_action
+                best_predicted_reward = best_reward_spacial_action
             else:
-                predicted_reward = best_reward_non_spacial_action
+                best_predicted_reward = best_reward_non_spacial_action
             selected_action, action_args = self.get_random_action(obs)
+            # get predicted reward of the random action
+            if self.best_action_pos[0] == 0:
+                current_predicted_reward = action[0][0][self.best_action_pos[1]]
+            else:
+                current_predicted_reward = action[1][0][self.best_action_pos[1][0]][self.best_action_pos[1][1]]
 
         # if we are not in the first step and so we have something to learn from our previous choice
         if self.action_old is not None and self.state_old is not None:
             # learn
             new_reward = self.predicted_reward_old + _ALPHA * \
-                         (obs.reward + _GAMMA * predicted_reward - self.predicted_reward_old)
+                         (obs.reward + _GAMMA * best_predicted_reward - self.predicted_reward_old)
             if self.best_old_action_pos[0] == 0:
                 self.action_old[0][0][self.best_old_action_pos[1]] = new_reward
             else:
@@ -154,7 +159,7 @@ class DQNAgent(base_agent.BaseAgent):
         self.action_old = action
         self.state_old = formatted_state
         self.best_old_action_pos = self.best_action_pos
-        self.predicted_reward_old = predicted_reward
+        self.predicted_reward_old = current_predicted_reward
 
         return actions.FunctionCall(selected_action, action_args)
 
