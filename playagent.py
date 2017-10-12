@@ -22,9 +22,6 @@ _NOT_QUEUED = [0]
 _SELECT_ALL = [0]
 
 _EPSILON_GREEDY = 1.0 # exploration vs exploitation criteria
-_GAMMA = 0.9 # discount factor
-_ALPHA = 0.5 # learning rate
-
 
 
 class PlayAgent(base_agent.BaseAgent):
@@ -35,14 +32,17 @@ class PlayAgent(base_agent.BaseAgent):
     def __init__(self):
         super(PlayAgent, self).__init__()
         self.model = get_neural_network()
-        self.number_of_run = 10
-        self.epsilon = _EPSILON_GREEDY
-        self.epsilon_step = 0.0000001
-        with open("config", mode='r') as config:
-            self.number_of_run = int(config.readline())
-            self.epsilon_step = int(config.readline()) / 100.0
-            self.epsilon = 0.0
-        self.step_by_epsilon = 240 * self.number_of_run
+        try:
+            with open("config", mode='r') as config:
+                self.number_of_run = int(config.readline())
+                self.epsilon_step = int(config.readline()) / 100.0
+                self.epsilon = 0.0
+                self.step_by_epsilon = 240 * self.number_of_run
+        except OSError:
+            self.number_of_run = 10
+            self.epsilon = _EPSILON_GREEDY
+            self.epsilon_step = 0.0
+            self.step_by_epsilon = -1
 
     def get_random_action(self, obs):
         """return an available random action
@@ -66,7 +66,7 @@ class PlayAgent(base_agent.BaseAgent):
     def get_move_action(linear_position):
         """return a pysc2 action and argument to do a move action at the pos given
             -linear_position : position of the move on a 16x16 grid, integer equal to y*16+x
-            """
+        """
         x_16 = (linear_position % 16)
         y_16 = (linear_position // 16)
         x_64 = x_16 * 4
@@ -103,12 +103,11 @@ class PlayAgent(base_agent.BaseAgent):
             # get reward prediction from neural network
             action = self.model.predict(formatted_state, batch_size=1)
 
-            if numpy.isnan(numpy.sum(action[0])) or numpy.isnan(numpy.sum(action[1])):
-                print("action contain NaN !")
-                if numpy.isnan(numpy.sum(formatted_state)):
-                    print("formatted_state contain NaN too !!!")
-                exit(1)
-
+            # if numpy.isnan(numpy.sum(action[0])) or numpy.isnan(numpy.sum(action[1])):
+            #     print("action contain NaN !")
+            #     if numpy.isnan(numpy.sum(formatted_state)):
+            #         print("formatted_state contain NaN too !!!")
+            #     exit(1)
 
             # compute best reward of the two main branch
             best_reward_spacial_action = numpy.max(action[1])
