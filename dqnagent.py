@@ -43,10 +43,10 @@ class DQNAgent(base_agent.BaseAgent):
         self.epsilon = _EPSILON_GREEDY
 
     def get_random_action(self, obs):
-        """return a available random action
+        """return an available random action
             -obs: the obs parameter given to the agent for the step call
         """
-        number_of_possible_action = 1
+        number_of_possible_action = 1  # _NO_OP
         if _MOVE_SCREEN in obs.observation["available_actions"]:
             number_of_possible_action += 256
         if _SELECT_ARMY in obs.observation["available_actions"]:
@@ -56,9 +56,9 @@ class DQNAgent(base_agent.BaseAgent):
         if _MOVE_SCREEN in obs.observation["available_actions"] and selected_action_id < 256:
             return self.get_move_action(selected_action_id)
         else:
-            # here two case, or we have action id 256 or 257 or we have 0 or 1
-            # in both case if _SELECT_ARMY is not available the following call handle it
-            return self.get_none_spacial_action(selected_action_id % 256)
+            # here two case: whether we have action id 256 or 257 or we have 0 or 1
+            # in both case if _SELECT_ARMY is not available the following call handles it
+            return self.get_non_spacial_action(selected_action_id % 256)
 
     def get_move_action(self, linear_position):
         """return a pysc2 action and argument to do a move action at the pos given
@@ -72,7 +72,7 @@ class DQNAgent(base_agent.BaseAgent):
         self.best_action_pos = [1, [x_16, y_16]]
         return _MOVE_SCREEN, action_args
 
-    def get_none_spacial_action(self, action_id):
+    def get_non_spacial_action(self, action_id):
         """return a pysc2 action coresponding to the given action id
             -action id: 0 -> NO_OP
                         1 -> Select all army
@@ -123,8 +123,8 @@ class DQNAgent(base_agent.BaseAgent):
             else:
                 # select best action according to reward
                 best_action_id = numpy.argmax(action_vector)
-                current_predicted_reward = best_predicted_reward = best_reward_non_spacial_action
-                selected_action, action_args = self.get_none_spacial_action(best_action_id)
+                current_predicted_reward = predicted_reward = best_reward_non_spacial_action
+                selected_action, action_args = self.get_non_spacial_action(best_action_id)
         # 1 - epsilon probability to choose a random action
         else:
             # compute best reward according to neural network (used for learning)
