@@ -1,8 +1,10 @@
 #Blacklist all
 /*
 
-#Whitelist some directories
-!src/**.py
+#Whitelist some directories...
+!src/
+#...except cache
+*__pycache__/
 
 #Whitelist some extensions
 
