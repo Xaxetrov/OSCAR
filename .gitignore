@@ -2,7 +2,7 @@
 /*
 
 #Whitelist some directories
-!src/
+!src/**.py
 
 #Whitelist some extensions
 
