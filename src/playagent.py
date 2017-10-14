@@ -107,7 +107,7 @@ class PlayAgent(base_agent.BaseAgent):
 
             # compute best reward of the two main branch
             best_reward_spacial_action = numpy.max(action[1])
-            best_reward_non_spacial_action = numpy.max(action[0])
+            best_reward_non_spacial_action = numpy.max(action[0][0][0:2])
 
             action_vector = action[0][0]
             # mask _SELECT_ARMY action if not available
@@ -115,6 +115,7 @@ class PlayAgent(base_agent.BaseAgent):
                 action_vector[1] = 0.0
                 # /!\ in this case the neural network will learn not to do this action -> side effect ?
 
+            # if best_reward_non_spacial_action < action_vector[2] \
             if best_reward_non_spacial_action < best_reward_spacial_action \
                     and _MOVE_SCREEN in obs.observation["available_actions"]:
                 # get the best position according to reward
@@ -123,7 +124,8 @@ class PlayAgent(base_agent.BaseAgent):
                 selected_action, action_args = self.get_move_action(max_coordinate)
             else:
                 # select best action according to reward
-                best_action_id = numpy.argmax(action_vector)
+                print(action_vector)
+                best_action_id = numpy.argmax(action_vector[0:2])
                 selected_action, action_args = self.get_non_spacial_action(best_action_id)
         else:
             selected_action, action_args = self.get_random_action(obs)

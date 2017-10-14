@@ -22,12 +22,13 @@ _NOT_QUEUED = [0]
 _SELECT_ALL = [0]
 
 """Learning constants"""
-_EPSILON_GREEDY = 0.9  # exploration vs exploitation criteria
-_GAMMA = 0.9  # discount factor
-_ALPHA = 0.5  # learning rate
+_EPSILON_GREEDY = 0.95  # exploitation vs exploration criteria
+_GAMMA = 0.5  # discount factor
+_ALPHA = 0.2  # learning rate
 
 InputStructure = namedtuple("InputStructure", "screen_size screen_number non_spatial_features")
 OutputStructure = namedtuple("OutputStructure", "spatial_action_size non_spatial_action_size")
+
 
 class DQNAgent(base_agent.BaseAgent):
     """A NN agent for starcraft."""
@@ -113,18 +114,18 @@ class DQNAgent(base_agent.BaseAgent):
         #         print("formatted_state contain NaN too !!!")
         #     exit(1)
 
+        action_vector = action[0][0][0:2]
+        # mask _SELECT_ARMY action if not available
+        if _SELECT_ARMY not in obs.observation["available_actions"]:
+            action_vector[1] = 0.0
+            # /!\ in this case the neural network will learn not to do this action -> side effect ?
+
         # compute best reward of the two main branch
         best_reward_spacial_action = numpy.max(action[1])
-        best_reward_non_spacial_action = numpy.max(action[0])
+        best_reward_non_spacial_action = numpy.max(action_vector)
 
         # epsilon greedy exploration, epsilon probability to use neural network prediction
         if numpy.random.uniform() < self.epsilon:
-            action_vector = action[0][0]
-            # mask _SELECT_ARMY action if not available
-            if _SELECT_ARMY not in obs.observation["available_actions"]:
-                action_vector[1] = 0.0
-                # /!\ in this case the neural network will learn not to do this action -> side effect ?
-
             if best_reward_non_spacial_action < best_reward_spacial_action \
                     and _MOVE_SCREEN in obs.observation["available_actions"]:
                 # get the best position according to reward
@@ -156,8 +157,8 @@ class DQNAgent(base_agent.BaseAgent):
         if self.action_old is not None and self.state_old is not None:
             # learn
             new_reward = self.predicted_reward_old + _ALPHA * \
-                                                     (
-                                                     obs.reward + _GAMMA * best_predicted_reward - self.predicted_reward_old)
+                         (obs.reward + _GAMMA * best_predicted_reward - self.predicted_reward_old)
+            # new_reward = min(max(new_reward, 0.0), 1.0)
             if self.best_old_action_pos[0] == 0:
                 self.action_old[0][0][self.best_old_action_pos[1]] = new_reward
             else:
