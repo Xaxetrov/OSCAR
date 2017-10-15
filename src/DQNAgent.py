@@ -36,7 +36,7 @@ class DQNAgent(base_agent.BaseAgent):
     model = None
 
     def __init__(self, input, output):
-        super(DQNAgent, self).__init__()
+        super().__init__()
         self.model = get_neural_network()
         self.action_old = None
         self.state_old = None
@@ -178,5 +178,5 @@ class DQNAgent(base_agent.BaseAgent):
         return actions.FunctionCall(selected_action, action_args)
 
     def reset(self):
-        super(DQNAgent, self).reset()
+        super().reset()
         save_model(self.model, "mineralshard.knn")

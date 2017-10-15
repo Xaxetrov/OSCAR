@@ -13,4 +13,4 @@ src/*/__pycache__/
 !LICENSE
 !README.md
 !.gitignore
-!mineralshard.knn
+#!mineralshard.knn
