@@ -1,5 +1,5 @@
-from oscar.Commander import Commander
-from oscar.TSPAgent import TSPAgent
+from oscar.agent.commander.Commander import Commander
+from oscar.agent.TSPAgent import TSPAgent
 
 
 class QueueCommander(Commander):
