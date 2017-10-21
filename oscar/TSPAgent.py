@@ -1,4 +1,4 @@
-from src.DQNAgent import DQNAgent, InputStructure, OutputStructure
+from oscar.DQNAgent import DQNAgent, InputStructure, OutputStructure
 
 
 class TSPAgent(DQNAgent):
