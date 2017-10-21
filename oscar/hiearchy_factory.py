@@ -1,14 +1,26 @@
 import json
 
 
-def build_hierarchy(configuration_filename):
+def build_hierarchy(configuration_filename: str):
+    """
+    Builds a hierarchy of agents from a json file
+    :param configuration_filename:
+    :return: the general subordinates ?
+    """
     with open(configuration_filename) as configuration_file:
         configuration = json.load(configuration_file)
+    configuration_file.close()
+    check_configuration(configuration)
 
 
-def check_structure(configuration):
+
+def check_configuration(configuration):
     valid = check_structure_acyclic(configuration["structure"])
-    check_agents_are_known()
+    if not valid:
+        raise CyclicStructureError("The loaded structure is cyclic")
+    valid = valid and check_agents_are_known(configuration)
+    if not valid:
+        raise UndefinedAgentError("An agent is declared in the structure but undefined")
     return valid
 
 
@@ -17,9 +29,9 @@ def check_structure_acyclic(structure):
     g must be represented as a dictionary mapping vertices to
     iterables of neighbouring vertices. For example:
 
-    >>> cyclic({1: (2,), 2: (3,), 3: (1,)})
+    >>> check_structure_acyclic({1: (2,), 2: (3,), 3: (1,)})
     True
-    >>> cyclic({1: (2,), 2: (3,), 3: (4,)})
+    >>> check_structure_acyclic({1: (2,), 2: (3,), 3: (4,)})
     False
 
     """
@@ -50,3 +62,10 @@ def check_agents_are_known(configuration):
             return False
     return True
 
+
+class CyclicStructureError(RuntimeError):
+    """The loaded structure is cyclic"""
+
+
+class UndefinedAgentError(RuntimeError):
+    """An agent is declared in the structure but undefined"""

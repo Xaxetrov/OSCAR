@@ -1,13 +1,8 @@
-import json
-
 from oscar.agent.commander.commander import Commander
+from oscar.hiearchy_factory import build_hierarchy
 
 
 class GeneralCommander(Commander):
-    def __init__(self):
-        super().__init__()
-
-    @classmethod
-    def __load_configuration_file(cls, filename):
-        with open(filename) as configuration_file:
-            configuration = json.load(configuration_file)
+    def __init__(self, configuration_filename="config/sample_configuration.json"):
+        build_hierarchy(configuration_filename)
+        super().__init__([])
