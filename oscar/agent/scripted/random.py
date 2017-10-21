@@ -2,7 +2,7 @@ from pysc2.agents import base_agent
 from pysc2.lib import actions
 from pysc2.lib import features
 
-from oscar.agent.commander.Commander import Commander
+from oscar.agent.commander.commander import Commander
 
 import random
 import sys
