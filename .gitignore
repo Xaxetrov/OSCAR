@@ -5,6 +5,7 @@
 !oscar/
 oscar/__pycache__/
 oscar/*/__pycache__/
+__pycache__/
 
 #Whitelist some extensions
 !*.py
