@@ -3,14 +3,17 @@
 
 #Whitelist some directories
 !oscar/
-*.pyc
+!config/
 
 #Whitelist some extensions
 !*.py
 !*.json
 
+#Blacklist again some extensions
+*.pyc
+*.knn
+
 #Whitelist some files
 !LICENSE
 !README.md
 !.gitignore
-#!mineralshard.knn
