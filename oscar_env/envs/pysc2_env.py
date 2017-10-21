@@ -1,6 +1,6 @@
 import gym
-from gym import error, spaces, utils
-from gym.utils import seeding
+# from gym import error, spaces, utils
+# from gym.utils import seeding
 
 from pysc2.env.sc2_env import SC2Env
 from pysc2.env import environment

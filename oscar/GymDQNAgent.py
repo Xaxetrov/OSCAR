@@ -33,7 +33,7 @@ print(model.summary())
 
 # Finally, we configure and compile our agent. You can use every built-in Keras optimizer and
 # even the metrics!
-memory = SequentialMemory(limit=50000, window_length=1)
+memory = SequentialMemory(limit=500, window_length=1)
 policy = BoltzmannQPolicy()
 dqn = DQNAgent(model=model,
                nb_actions=nb_actions,
@@ -47,7 +47,7 @@ dqn.compile(Adam(lr=1e-3), metrics=['mae'])
 # slows down training quite a lot. You can always safely abort the training prematurely using
 # Ctrl + C.
 dqn.fit(env,
-        nb_steps=1000,
+        nb_steps=500,
         visualize=False,
         verbose=1,
         action_repetition=10,

@@ -2,7 +2,10 @@ from pysc2.env.sc2_env import SC2Env
 from pysc2.lib import actions
 from pysc2.lib import features
 from gym import spaces
+import gflags as flags
+import sys
 import numpy as np
+import time
 
 from oscar_env.envs.pysc2_env import Pysc2Env
 
@@ -25,9 +28,9 @@ class Pysc2MineralshardEnv(Pysc2Env):
     # action_space = spaces.Dict({"non-spacial": spaces.Discrete(3),
     #                             "spacial": spaces.Discrete(16 * 16)}
     #                            )
-    action_space = spaces.Discrete(2 + 16 * 16)
+    action_space = spaces.Discrete(0 + 16 * 16)
     observation_space = spaces.Box(low=0, high=4, shape=(64, 64, 2))
-    reward_range = [0.0, np.inf]
+    reward_range = [0.0, float('Inf')]
 
     def __init__(self):
         self.pysc2_env = SC2Env(map_name='CollectMineralShards',
@@ -41,20 +44,22 @@ class Pysc2MineralshardEnv(Pysc2Env):
         super().__init__()
 
     def _step(self, action):
-        if _MOVE_SCREEN in self.last_obs.observation["available_actions"] \
-                and action > 1:
+        if _MOVE_SCREEN in self.last_obs.observation["available_actions"]:
+                # and action > 1:
                 # and action["non-spacial"] == 2:
                 sc2_action = self.get_move_action(action)
                 # sc2_action = self.get_move_action(action["spacial"])
             # print("move pos", action["spacial"])
-        elif action < 1:
-            # here two case: whether we have action id 256 or 257 or we have 0 or 1
-            # in both case if _SELECT_ARMY is not available the following call handles it
-            # sc2_action = self.get_non_spacial_action(action["non-spacial"])
-            sc2_action = self.get_non_spacial_action(action)
+        # elif action < 1:
+        #     # here two case: whether we have action id 256 or 257 or we have 0 or 1
+        #     # in both case if _SELECT_ARMY is not available the following call handles it
+        #     # sc2_action = self.get_non_spacial_action(action["non-spacial"])
+        #     sc2_action = self.get_non_spacial_action(action)
         else:
             # else set NO OP...
-            sc2_action = self.get_non_spacial_action(0)
+            # help for NN -> automated selection
+            sc2_action = self.get_non_spacial_action(1)
+        # print(sc2_action)
         formatted_action = actions.FunctionCall(sc2_action[0], sc2_action[1])
         # call mother class to run action in SC2
         full_obs, reward, done, debug_dic = super()._step([formatted_action])
@@ -80,10 +85,10 @@ class Pysc2MineralshardEnv(Pysc2Env):
         """return a pysc2 action and argument to do a move action at the pos given
             -linear_position : position of the move on a 16x16 grid, integer equal to y*16+x
             """
-        x_16 = (linear_position % 16)
-        y_16 = (linear_position // 16)
-        x_true = x_16 * 4
-        y_true = y_16 * 4
+        x_16 = (linear_position // 16)
+        y_16 = (linear_position % 16)
+        x_true = min(x_16 * 4, 63)
+        y_true = min(y_16 * 4, 63)
         action_args = [_NOT_QUEUED, [x_true, y_true]]
         return _MOVE_SCREEN, action_args
 
