@@ -10,6 +10,9 @@ def build_hierarchy(configuration_filename: str):
     with open(configuration_filename) as configuration_file:
         configuration = json.load(configuration_file)
     configuration_file.close()
+
+    # Convert structure ids to integers
+    configuration["structure"] = {int(k): [int(i) for i in v] for k, v in configuration["structure"].items()}
     check_configuration(configuration)
 
 
@@ -40,14 +43,14 @@ def check_structure_acyclic(structure):
 
     def visit(vertex):
         if vertex in visited:
-            return True
+            return False
         visited.add(vertex)
         path.add(vertex)
         for neighbour in structure.get(vertex, ()):
             if neighbour in path or visit(neighbour):
-                return False
+                return True
         path.remove(vertex)
-        return True
+        return False
 
     return not any(visit(v) for v in structure)
 
