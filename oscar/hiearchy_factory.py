@@ -15,6 +15,7 @@ def build_hierarchy(configuration_filename: str):
     configuration["structure"] = {int(k): [int(i) for i in v] for k, v in configuration["structure"].items()}
     check_configuration(configuration)
 
+    # TODO build the hierarchy : first agent is implicitly the general OR the general always calls the first agent
 
 
 def check_configuration(configuration):
@@ -64,6 +65,15 @@ def check_agents_are_known(configuration):
         if agent not in known_agents_id:
             return False
     return True
+
+
+def get_class(kls):
+    parts = kls.split('.')
+    class_module = ".".join(parts[:-1])
+    m = __import__(class_module)
+    for comp in parts[1:]:
+        m = getattr(m, comp)
+    return m
 
 
 class CyclicStructureError(RuntimeError):

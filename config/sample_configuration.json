@@ -16,11 +16,11 @@
     },
     {
       "id": 2,
-      "class_name": "oscar.agent.tsp_agent"
+      "class_name": "oscar.agent.collector2.CollectMyShards"
     },
     {
       "id": 3,
-      "class_name": "oscar.agent.random.RandomAgent"
+      "class_name": "oscar.agent.sleepy.NoOpAgent"
     }
   ]
 }
