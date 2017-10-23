@@ -7,7 +7,7 @@ import numpy as np
 import gym
 
 from keras.optimizers import Adam
-from keras.models import save_model
+from keras.models import save_model, load_model
 
 from rl.agents.dqn import DQNAgent
 from rl.policy import LinearAnnealedPolicy, BoltzmannQPolicy, EpsGreedyQPolicy
@@ -20,20 +20,23 @@ from oscar_env.envs import pysc2_mineralshard_env
 
 # flags are not used but prevent pysc2 from writing error log when looking for a flag
 FLAGS = flags.FLAGS
-FLAGS(sys.argv)
+FLAGS([""])
 
 WINDOW_LENGTH = 1
 ENV_NAME = 'pysc2-mineralshard-v0'
-
+DEFAULT_OUT_MODEL = 'Neuralnetwork/DenseMineralShard.knn'
+DEFAULT_TRAINING_STEP = 300000
+DEFAULT_MEMORY_SIZE = 40000
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--mode', choices=['train', 'test'], default='train')
 parser.add_argument('--env-name', type=str, default=ENV_NAME)
 parser.add_argument('--weights', type=str, default=None)
+parser.add_argument('--memory-size', type=int, default=DEFAULT_MEMORY_SIZE)
+parser.add_argument('--model', type=str, default=None)
+parser.add_argument('--outmodel', type=str, default=DEFAULT_OUT_MODEL)
+parser.add_argument('--trainstep', type=int, default=DEFAULT_TRAINING_STEP)
 args = parser.parse_args()
-
-mode = 'train'
-# mode = 'test'
 
 # Get the environment and extract the number of actions.
 env = gym.make(args.env_name)
@@ -44,12 +47,15 @@ nb_actions = env.action_space.n
 
 # Next, we build our model. We use the same model that was described by Mnih et al. (2015).
 
-model = get_neural_network()
+if args.model is None:
+    model = get_neural_network()
+else:
+    model = load_model(args.model)
 print(model.summary())
 
 # Finally, we configure and compile our agent. You can use every built-in Keras optimizer and
 # even the metrics!
-memory = SequentialMemory(limit=40000, # original example value was 1 000 000 but 80 000 take more than 5Go of RAM
+memory = SequentialMemory(limit=args.memory_size, # original example value was 1 000 000 but 80 000 take more than 5Go of RAM
                           window_length=WINDOW_LENGTH
                           )
 
@@ -89,7 +95,7 @@ dqn.compile(Adam(lr=.00025),
             metrics=['mae']
             )
 
-if mode == 'train':
+if args.mode == 'train':
     # Okay, now it's time to learn something! We capture the interrupt exception so that training
     # can be prematurely aborted. Notice that you can the built-in Keras callbacks!
     weights_filename = 'dqn_{}_weights.h5f'.format(args.env_name)
@@ -99,19 +105,19 @@ if mode == 'train':
     callbacks += [FileLogger(log_filename, interval=100)]
     dqn.fit(env,
             callbacks=callbacks,
-            nb_steps=340000,
+            nb_steps=args.trainstep,
             log_interval=10000,
             verbose=1
             )
 
     # After training is done, we save the final weights one more time.
     dqn.save_weights(weights_filename, overwrite=True)
-    save_model(dqn.model, "Neuralnetwork/DenseMineralShard.knn")
+    save_model(dqn.model, args.outmodel)
 
     # Finally, evaluate our algorithm for 10 episodes.
     dqn.test(env, nb_episodes=10, visualize=False)
     env.close()
-elif mode == 'test':
+elif args.mode == 'test':
     # weights_filename = 'dqn_{}_weights.h5f'.format(args.env_name)
     # if args.weights:
     #     weights_filename = args.weights
