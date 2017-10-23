@@ -37,7 +37,7 @@ class Pysc2MineralshardEnv(Pysc2Env):
                                 agent_race='T',
                                 screen_size_px=(64, 64),
                                 minimap_size_px=(64, 64),
-                                visualize=False,
+                                visualize=True,
                                 step_mul=8,
                                 game_steps_per_episode=None  # use map default
                                 )
@@ -89,7 +89,8 @@ class Pysc2MineralshardEnv(Pysc2Env):
         y_16 = (linear_position % 16)
         x_true = min(x_16 * 4, 63)
         y_true = min(y_16 * 4, 63)
-        action_args = [_NOT_QUEUED, [x_true, y_true]]
+        # x and y are not in the right order, else it doesn't work...
+        action_args = [_NOT_QUEUED, [y_true, x_true]]
         return _MOVE_SCREEN, action_args
 
     @staticmethod

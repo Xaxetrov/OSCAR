@@ -23,5 +23,5 @@ def get_neural_network():
         # set and compile model
         model = Model(inputs=sc_i, outputs=opf)
         model.compile(optimizer='adam',
-                      loss='mean_squared_error')
+                      loss='categorical_crossentropy')
     return model
