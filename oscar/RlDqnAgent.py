@@ -49,7 +49,7 @@ print(model.summary())
 
 # Finally, we configure and compile our agent. You can use every built-in Keras optimizer and
 # even the metrics!
-memory = SequentialMemory(limit=40000, # original example value was 1 000 000 but 80 000 take more than 5Go of RAM
+memory = SequentialMemory(limit=20000, # original example value was 1 000 000 but 80 000 take more than 5Go of RAM
                           window_length=WINDOW_LENGTH
                           )
 
