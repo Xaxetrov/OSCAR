@@ -1,5 +1,7 @@
 import json
 
+from oscar.agent.commander.commander import Commander
+
 
 def build_hierarchy(configuration_filename: str):
     """
@@ -11,11 +13,31 @@ def build_hierarchy(configuration_filename: str):
         configuration = json.load(configuration_file)
     configuration_file.close()
 
-    # Convert structure ids to integers
+    # Convert structure ids to integers (in place)
     configuration["structure"] = {int(k): [int(i) for i in v] for k, v in configuration["structure"].items()}
+
+    # Check configuration file
     check_configuration(configuration)
 
-    # TODO build the hierarchy : first agent is implicitly the general OR the general always calls the first agent
+    # Build family and return general's children
+    general_subordinates = build_children(configuration, 0)
+    return general_subordinates
+
+
+def build_children(configuration, id):
+    children_ids = configuration["structure"][id]
+    children = []
+    for child_id in children_ids:
+        child_info = next((agent for agent in configuration["agents"] if agent["id"] == child_id))
+        child_class = get_class(child_info["class_name"])
+        if issubclass(child_class, Commander):
+            little_children = build_children(configuration, child_id)
+            child = child_class(little_children)
+        else:
+            child = child_class()
+        children.append(child)
+    return children
+
 
 
 def check_configuration(configuration):

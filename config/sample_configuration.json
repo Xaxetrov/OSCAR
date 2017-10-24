@@ -2,7 +2,6 @@
   "structure": {
     "0": [1, 2],
     "1": [3, 2],
-    "2": [],
     "3": []
   },
   "agents": [
@@ -12,15 +11,15 @@
     },
     {
       "id": 1,
-      "class_name": "oscar.agent.queue_commander.QueueCommander"
+      "class_name": "oscar.agent.commander.queue_commander.QueueCommander"
     },
     {
       "id": 2,
-      "class_name": "oscar.agent.collector2.CollectMyShards"
+      "class_name": "oscar.agent.scripted.random.RandomAgent"
     },
     {
       "id": 3,
-      "class_name": "oscar.agent.sleepy.NoOpAgent"
+      "class_name": "oscar.agent.scripted.sleepy.NoOpAgent"
     }
   ]
 }

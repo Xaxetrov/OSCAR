@@ -59,3 +59,12 @@ class Commander(base_agent.BaseAgent):
         :return:
         """
         self._subordinates.remove(agent)
+
+    def __str__(self):
+        ret = "I am a {} and I have {} subordinates :\n".format(type(self).__name__, len(self._subordinates))
+        for subordinate in self._subordinates:
+            ret += str(subordinate)
+            if not issubclass(type(subordinate), Commander):
+                ret += "\n"
+        ret += "---\n"
+        return ret

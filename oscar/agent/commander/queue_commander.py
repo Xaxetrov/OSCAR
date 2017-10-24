@@ -4,10 +4,7 @@ from oscar.agent.nn.tsp_agent import TSPAgent
 
 class QueueCommander(Commander):
 
-    def __init__(self):
-        subordinates = []
-        agent_one = TSPAgent()
-        subordinates.append(agent_one)
+    def __init__(self, subordinates):
         super().__init__(subordinates)
         self.__next_agent = 0
 
