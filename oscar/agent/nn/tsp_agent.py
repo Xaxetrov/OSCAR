@@ -1,4 +1,4 @@
-from oscar.agent.nn.DQNAgent import DQNAgent, InputStructure, OutputStructure
+from oscar.agent.nn.dqn_agent import DQNAgent, InputStructure, OutputStructure
 
 
 class TSPAgent(DQNAgent):

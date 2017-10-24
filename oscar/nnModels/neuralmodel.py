@@ -4,7 +4,7 @@ from keras.layers import Conv2D, Input, Dense, Flatten, BatchNormalization
 
 def get_neural_network():
     try:
-        model = load_model("mineralshard.knn")
+        model = load_model("config/mineralshard.knn")
     except OSError:
         sc_i = Input(shape=(64, 64, 2))
         sc_l1 = Conv2D(8, 5, activation='relu', padding='same')(sc_i)

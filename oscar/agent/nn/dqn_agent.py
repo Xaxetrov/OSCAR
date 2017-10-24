@@ -179,4 +179,4 @@ class DQNAgent(base_agent.BaseAgent):
 
     def reset(self):
         super().reset()
-        save_model(self.model, "mineralshard.knn")
+        save_model(self.model, "config/mineralshard.knn")
