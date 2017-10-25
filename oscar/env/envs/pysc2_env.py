@@ -1,9 +1,12 @@
 import gym
-# from gym import error, spaces, utils
-# from gym.utils import seeding
+from absl import flags
 
 from pysc2.env.sc2_env import SC2Env
 from pysc2.env import environment
+
+# set empty argument to prevent pysc2 from crashing...
+FLAGS = flags.FLAGS
+FLAGS([""])
 
 
 class Pysc2Env(gym.Env):

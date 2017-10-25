@@ -2,12 +2,9 @@ from pysc2.env.sc2_env import SC2Env
 from pysc2.lib import actions
 from pysc2.lib import features
 from gym import spaces
-import gflags as flags
-import sys
 import numpy as np
-import time
 
-from oscar_env.envs.pysc2_env import Pysc2Env
+from oscar.env.envs.pysc2_env import Pysc2Env
 
 """API Constants"""
 _PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
