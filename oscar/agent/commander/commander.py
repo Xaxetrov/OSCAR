@@ -59,3 +59,17 @@ class Commander(base_agent.BaseAgent):
         :return:
         """
         self._subordinates.remove(agent)
+
+    def __str__(self):
+        return self.print_tree(1)
+
+    def print_tree(self, depth):
+        ret = "I am a {} and I have {} subordinates :\n".format(type(self).__name__,
+                                                                               len(self._subordinates))
+        for subordinate in self._subordinates:
+            ret += "\t" * depth
+            if issubclass(type(subordinate), Commander):
+                ret += subordinate.print_tree(depth + 1)
+            else:
+                ret += str(subordinate) + "\n"
+        return ret

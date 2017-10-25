@@ -22,6 +22,7 @@ class CollectMyShards(base_agent.BaseAgent):
     """An agent specifically for solving the CollectMineralShards map."""
 
     def __init__(self):
+        super().__init__()
         self.state = 0
         self.visited = []
         self.marines = []
