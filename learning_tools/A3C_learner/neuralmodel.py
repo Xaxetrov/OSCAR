@@ -14,6 +14,7 @@ def get_neural_network(input_shape, output_shape,
     current_neural_network_file = file_path
     try:
         model = load_model(current_neural_network_file)
+        print("old NN charged from", file_path)
     except OSError:
         # check output size
         for out_size in output_shape:
@@ -57,6 +58,7 @@ def get_neural_network(input_shape, output_shape,
         model = Model(inputs=sc_i, outputs=output_layers)
         model.compile(optimizer='adam',
                       loss=loss)
+        print("new NN generated, file", file_path, "not found")
     return model
 
 

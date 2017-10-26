@@ -4,7 +4,7 @@
 #Whitelist some directories
 !oscar/
 !config/
-!learning_tools/A3C_learner/
+!learning_tools/
 
 #Whitelist some extensions
 !*.py
