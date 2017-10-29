@@ -38,7 +38,7 @@ class Brain:
     @staticmethod
     def _build_model():
         model = get_neural_network(input_shape=(None,) + NUM_STATE,
-                                   output_shape=[256, 1])
+                                   output_shape=[NUM_ACTIONS, 1])
         # l_input = Input(batch_shape=(None,) + NUM_STATE)
         # l_flat = Flatten()(l_input)
         # l_dense = Dense(16, activation='relu')(l_flat)

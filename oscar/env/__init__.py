@@ -10,3 +10,7 @@ register(
     id='pysc2-mineralshard-v0',
     entry_point='oscar.env.envs:Pysc2MineralshardEnv',
 )
+register(
+    id='pysc2-mineralshard-v1',
+    entry_point='oscar.env.envs:Pysc2MineralshardEnv2',
+)

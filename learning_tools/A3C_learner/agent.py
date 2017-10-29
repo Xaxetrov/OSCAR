@@ -7,7 +7,7 @@ import numpy as np
 from learning_tools.A3C_learner.config import *
 
 brain = None  # brain is global in A3C
-NUM_ACTION = 0
+NUM_ACTIONS = 0
 frames = 0
 
 
@@ -32,14 +32,14 @@ class Agent:
         frames = frames + 1
 
         if random.random() < eps:
-            return random.randint(0, NUM_ACTION - 1)
+            return random.randint(0, NUM_ACTIONS - 1)
 
         else:
             s = np.array([s])
             p = brain.predict_p(s)[0]
 
             # a = np.argmax(p)
-            a = np.random.choice(NUM_ACTION, p=p)
+            a = np.random.choice(NUM_ACTIONS, p=p)
 
             return a
 
@@ -50,7 +50,7 @@ class Agent:
 
             return s, a, self.R, s_
 
-        a_cats = np.zeros(NUM_ACTION)  # turn action into one-hot representation
+        a_cats = np.zeros(NUM_ACTIONS)  # turn action into one-hot representation
         a_cats[a] = 1
 
         self.memory.append((s, a_cats, r, s_))
@@ -81,11 +81,11 @@ class Agent:
 class Environment(threading.Thread):
     stop_signal = False
 
-    def __init__(self, global_brain, num_action, render=False, eps_start=EPS_START, eps_end=EPS_STOP, eps_steps=EPS_STEPS):
+    def __init__(self, global_brain, num_actions, render=False, eps_start=EPS_START, eps_end=EPS_STOP, eps_steps=EPS_STEPS):
         threading.Thread.__init__(self)
-        global brain, NUM_ACTION
+        global brain, NUM_ACTIONS
         brain = global_brain
-        NUM_ACTION = num_action
+        NUM_ACTIONS = num_actions
 
         self.render = render
         self.env = gym.make(ENV)

@@ -1,9 +1,7 @@
 # constants
-ENV = 'pysc2-mineralshard-v0'
-# from oscar.env.envs.pysc2_mineralshard_env import Pysc2MineralshardEnv
-# ENV = Pysc2MineralshardEnv()
+ENV = 'pysc2-mineralshard-v1'
 
-RUN_TIME = 120
+RUN_TIME = 60 * 60
 THREADS = 4
 OPTIMIZERS = 2
 THREAD_DELAY = 0.0001
