@@ -30,7 +30,7 @@ class Pysc2MineralshardEnv2(Pysc2Env):
     # action_space = spaces.Dict({"non-spacial": spaces.Discrete(3),
     #                             "spacial": spaces.Discrete(16 * 16)}
     #                            )
-    action_space = spaces.Discrete(0 + 16 * 16 * 2)  # two 16*16 output: first move second selection
+    action_space = spaces.Discrete(0 + 16 * 16 * 2)  # two 16*16 output: first selection second move
     observation_space = spaces.Box(low=0, high=4, shape=(2 * OBS_LENGHT, 64, 64))
     reward_range = [0.0, float('Inf')]
 
@@ -139,3 +139,17 @@ class Pysc2MineralshardEnv2(Pysc2Env):
         for o in obs:
             self.obs_list.pop(0)
             self.obs_list.append(o)
+
+    def get_action_mask(self):
+        available_actions = self.last_obs.observation["available_actions"]
+
+        # mask everything
+        action_mask = np.zeros(shape=self.action_space.n, dtype=int)
+
+        # unmask available action
+        if _SELECT_RECT in available_actions:
+            action_mask[:256] = 1
+        if _MOVE_SCREEN in available_actions:
+            action_mask[256:] = 1
+
+        return action_mask

@@ -1,8 +1,8 @@
 # constants
 ENV = 'pysc2-mineralshard-v1'
 
-RUN_TIME = 60 * 60
-THREADS = 4
+RUN_TIME = 60
+THREADS = 3
 OPTIMIZERS = 2
 THREAD_DELAY = 0.0001
 

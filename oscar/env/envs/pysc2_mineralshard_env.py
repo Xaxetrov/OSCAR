@@ -115,3 +115,15 @@ class Pysc2MineralshardEnv(Pysc2Env):
         #         formatted_case[0] = pr_case
         #         formatted_case[1] = selected_case
         return formatted_obs
+
+    def get_action_mask(self):
+        available_actions = self.last_obs.observation["available_actions"]
+
+        # mask everything
+        action_mask = np.zeros(shape=self.action_space.n, dtype=int)
+
+        # unmask available action (unmask all here)
+        if _MOVE_SCREEN in available_actions:
+            action_mask[:] = 1
+
+        return action_mask

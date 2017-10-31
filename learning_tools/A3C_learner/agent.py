@@ -26,7 +26,7 @@ class Agent:
         else:
             return self.eps_start + frames * (self.eps_end - self.eps_start) / self.eps_steps  # linearly interpolate
 
-    def act(self, s):
+    def act(self, s, env):
         eps = self.get_epsilon()
         global frames
         frames = frames + 1
@@ -37,6 +37,14 @@ class Agent:
         else:
             s = np.array([s])
             p = brain.predict_p(s)[0]
+
+            # get mask for unavailable action
+            action_mask = env.get_action_mask()
+            # apply mask to action probability
+            p *= action_mask
+            # normalize (set sum back to 1.0)
+            p_sum = np.sum(p)
+            p /= p_sum
 
             # a = np.argmax(p)
             a = np.random.choice(NUM_ACTIONS, p=p)
@@ -100,7 +108,7 @@ class Environment(threading.Thread):
 
             if self.render: self.env.render()
 
-            a = self.agent.act(s)
+            a = self.agent.act(s, self.env)
             s_, r, done, info = self.env.step(a)
 
             if done:  # terminal state

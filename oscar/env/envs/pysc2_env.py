@@ -48,3 +48,6 @@ class Pysc2Env(gym.Env):
     def _seed(self, seed=None):
         # any way to set the seed of pysc2 ?
         pass
+
+    def get_action_mask(self):
+        pass
