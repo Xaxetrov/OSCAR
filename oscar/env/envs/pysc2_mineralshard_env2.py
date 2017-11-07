@@ -24,6 +24,7 @@ _NEW_SELECTION = [0]
 
 OBS_LENGHT = 2
 
+
 class Pysc2MineralshardEnv2(Pysc2Env):
     metadata = {'render.modes': ['human']}
 
@@ -91,6 +92,7 @@ class Pysc2MineralshardEnv2(Pysc2Env):
         y_16 = (linear_position % 16)
         x_64 = x_16 * 4
         y_64 = y_16 * 4
+        # print("Movement at x16:", x_16, "y16", y_16)
         # x and y are not in the right order, else it doesn't work...
         action_args = [_NOT_QUEUED, [y_64, x_64]]
         return _MOVE_SCREEN, action_args
@@ -104,6 +106,7 @@ class Pysc2MineralshardEnv2(Pysc2Env):
         y_16 = (linear_position % 16)
         x_64 = x_16 * 4
         y_64 = y_16 * 4
+        # print("selection at x16:", x_16, "y16", y_16)
         # x and y are not in the right order, else it doesn't work...
         action_args = [_NEW_SELECTION, [y_64, x_64], [y_64 + 3, x_64 + 3]]
         return _SELECT_RECT, action_args
@@ -153,3 +156,19 @@ class Pysc2MineralshardEnv2(Pysc2Env):
             action_mask[256:] = 1
 
         return action_mask
+
+    @staticmethod
+    def get_action_id_from_action(sc2_action, sc2_args):
+        if sc2_action == _SELECT_POINT and len(sc2_args) == 2:
+            y_64, x_64 = sc2_args[1]
+            x_16 = x_64 // 4
+            y_16 = y_64 // 4
+            return int(16 * x_16 + y_16)
+        elif sc2_action == _MOVE_SCREEN and len(sc2_args) == 2:
+            y_64, x_64 = sc2_args[1]
+            x_16 = x_64 // 4
+            y_16 = y_64 // 4
+            return int(16 * x_16 + y_16 + 256)
+        else:
+            print("unhandled action: ", sc2_action, sc2_args)
+            return None

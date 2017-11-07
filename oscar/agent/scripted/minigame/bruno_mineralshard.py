@@ -60,12 +60,12 @@ class CollectMineralShards(base_agent.BaseAgent):
                 self.getNewTarget(self.selected)
 
                 # Order selected unit to move to it
-                print("target (" + str(self.selected) + "): " + str(self.targets[self.selected]))
+                # print("target (" + str(self.selected) + "): " + str(self.targets[self.selected]))
                 return actions.FunctionCall(_MOVE_SCREEN, [_NOT_QUEUED, self.targets[self.selected]])
             else:
                 # Select other marine
                 self.selected = 1 - self.selected
-                print("selecting: " + str(self.selected))
+                # print("selecting: " + str(self.selected))
                 return actions.FunctionCall(_SELECT_POINT, [_SCREEN, self.positions[self.selected]])
 
         # If no entity is selected, select one
@@ -123,7 +123,7 @@ class CollectMineralShards(base_agent.BaseAgent):
         centroidCenter0 = numpy.mean(centroid0, 0)
         centroidCenter1 = numpy.mean(centroid1, 0)
 
-        if None in self.positions:
+        if self.positions[0] is None or self.positions[1] is None:
             self.positions = [centroidCenter0, centroidCenter1]
         else:
             d0 = numpy.linalg.norm(numpy.array(self.positions[0]) - numpy.array(centroidCenter0))
