@@ -4,7 +4,7 @@ import random
 import threading
 import numpy as np
 
-from learning_tools.A3C_learner.config import *
+from learning_tools.A3C_learner.constants import *
 
 brain = None  # brain is global in A3C
 NUM_ACTIONS = 0

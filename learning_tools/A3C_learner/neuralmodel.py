@@ -2,7 +2,7 @@ import math
 from keras.models import Model, load_model, save_model
 from keras.layers import Conv2D, Input, Dense, Flatten, BatchNormalization, Reshape, Activation, Permute
 
-from learning_tools.A3C_learner.config import *
+from learning_tools.A3C_learner.constants import *
 
 current_neural_network_file = "learning_tools/learning_nn/" + ENV + ".knn"
 

@@ -13,7 +13,7 @@ from learning_tools.A3C_learner.neuralmodel import save_neural_network
 from oscar.env import envs
 
 # constants
-from learning_tools.A3C_learner.config import *
+from learning_tools.A3C_learner.constants import *
 
 # set test env using meaning less value which will be over writen by future env deff
 env_test = Environment(global_brain=None, num_actions=0, render=True, eps_start=0., eps_end=0.)

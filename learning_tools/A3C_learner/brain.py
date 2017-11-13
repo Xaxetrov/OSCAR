@@ -6,7 +6,7 @@ from keras.models import *
 from keras.layers import *
 from keras import backend as K
 
-from learning_tools.A3C_learner.config import *
+from learning_tools.A3C_learner.constants import *
 from learning_tools.A3C_learner.neuralmodel import save_neural_network, get_neural_network
 
 NUM_STATE = None

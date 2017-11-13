@@ -4,7 +4,7 @@ from pysc2.agents import base_agent
 from pysc2.lib import actions
 from pysc2.lib import features
 
-from oscar.nnModels.neuralmodel import get_neural_network
+from learning_tools.A3C_learner.neuralmodel import get_neural_network
 
 _PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
 _PLAYER_FRIENDLY = 1
@@ -29,7 +29,7 @@ class PlayAgent(base_agent.BaseAgent):
         super(PlayAgent, self).__init__()
         self.model = get_neural_network()
         try:
-            with open("config", mode='r') as config:
+            with open("constants.py", mode='r') as config:
                 self.number_of_run = int(config.readline())
                 self.epsilon_step = int(config.readline()) / 100.0
                 self.epsilon = 0.0
