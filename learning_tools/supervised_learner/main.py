@@ -1,6 +1,7 @@
 
 from oscar.env import envs
-from oscar.agent.scripted.minigame.bruno_mineralshard import CollectMineralShards
+# from oscar.agent.scripted.minigame.bruno_mineralshard import CollectMineralShards
+from oscar.agent.scripted.minigame.deepmindAgents import CollectMineralShards
 from learning_tools.A3C_learner.neuralmodel import get_neural_network, save_neural_network
 from learning_tools.A3C_learner.config import ENV
 import gym
@@ -8,8 +9,8 @@ import numpy as np
 import time
 
 # ENV = 'pysc2-mineralshard-v1' set into the config file (of A3C learner)
-TRAINING_STEPS = 240*1000
-TEST_RUN = 10
+TRAINING_STEPS = 240*100
+TEST_RUN = 5
 
 RUN_NN_ACTION = True
 
@@ -50,8 +51,8 @@ try:
             # get his action
             action = model.predict(x=np.reshape(obs, (1, len(obs),) + obs[0].shape))
             # print("max", np.max(action[0]), "min", np.min(action[0]))
-            # action_id = np.argmax(action[0][0])
-            action_id = np.random.choice(output_shape, p=action[0][0])
+            action_id = np.argmax(action[0][0])
+            # action_id = np.random.choice(output_shape, p=action[0][0])
         else:
             # generate batch for training (on episode end only)
             action_batch.append(learning_action)
@@ -70,7 +71,7 @@ try:
                           y=[np.array(action_batch), np.zeros(len(action_batch))],
                           batch_size=len(action_batch),
                           verbose=0,
-                          epochs=3
+                          epochs=5
                           )
                 action_batch = []
                 obs_batch = []

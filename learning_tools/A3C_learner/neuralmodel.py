@@ -65,7 +65,10 @@ def get_neural_network(input_shape, output_shape,
         for i, size in enumerate(output_shape):
             if size == 1:
                 # this is value output, isn't it ?
-                value = Dense(1, activation='linear', name='value' + str(i))(d1)
+                value = Dense(1,
+                              activation='linear',
+                              name='value' + str(i)
+                              )(d1)
                 output_layers.append(value)
             elif size % 256 == 0:
                 number_of_output_layer = size // 256
@@ -74,9 +77,17 @@ def get_neural_network(input_shape, output_shape,
                                  9,
                                  strides=(2, 2),
                                  padding='same',
-                                 name='spacial_policy_' + str(i))(sc_l2)
-                out = Flatten(name='flatten_spacial_policy_' + str(i))(spacial)
-                out = Activation(activation='softmax')(out)
+                                 activation='softmax',
+                                 name='spacial_policy_' + str(i)
+                                 )(sc_l2)
+                out = Permute((3, 1, 2), name='permute_dimension_out_' + str(i))(spacial)
+                out = Reshape(target_shape=(number_of_output_layer, 256),
+                              name='reshape_out_' + str(i)
+                              )(out)
+                out = Flatten(name='flatten_spacial_policy_' + str(i))(out)
+                # out = Activation(activation='softmax',
+                #                  name='output_spacial_policy_' + str(i)
+                #                  )(out)
                 output_layers.append(out)
             elif size < 256:
                 # this must be a non spacial output action

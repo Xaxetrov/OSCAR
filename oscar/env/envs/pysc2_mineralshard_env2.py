@@ -75,6 +75,10 @@ class Pysc2MineralshardEnv2(Pysc2Env):
         while len(self.obs_list) <= OBS_LENGHT:
             for o in obs:
                 self.obs_list.append(o)
+        # select all marines at first step
+        formatted_action = actions.FunctionCall(_SELECT_ARMY, [_SELECT_ALL])
+        full_obs, _, _, _ = super()._step([formatted_action])
+        self.add_to_obs_list(self.format_observation(full_obs))
         return self.obs_list
 
     def _render(self, mode='human', close=False):
@@ -90,8 +94,8 @@ class Pysc2MineralshardEnv2(Pysc2Env):
             """
         x_16 = (linear_position // 16)
         y_16 = (linear_position % 16)
-        x_64 = x_16 * 4
-        y_64 = y_16 * 4
+        x_64 = x_16 * 4 + 2
+        y_64 = y_16 * 4 + 2
         # print("Movement at x16:", x_16, "y16", y_16)
         # x and y are not in the right order, else it doesn't work...
         action_args = [_NOT_QUEUED, [y_64, x_64]]
