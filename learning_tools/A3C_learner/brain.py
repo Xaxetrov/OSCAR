@@ -15,6 +15,9 @@ NONE_STATE = None
 
 
 class Brain:
+    """
+    The Brain class encapsulates the neural network, TensorFlow graph definition and related computation.
+    """
     train_queue = [[], [], [], [], []]  # s, a, r, s', s' terminal mask
     lock_queue = threading.Lock()
 
@@ -75,10 +78,22 @@ class Brain:
         return s_t, a_t, r_t, minimize
 
     def optimize(self):
+        """
+        It preprocesses data and run the minimize operation we defined earlier.
+        TensorFlow then computes the gradient and changes neural network’s weights.
+        :return:
+        """
+
+        """
+        First, we have to make sure that we have enough samples in the training queue.
+        This is required to get an ok quality approximation of the gradient and  allows for efficient batch computation.
+        If there are not enough samples, we simply yield to other threads to do their work.
+        """
         if len(self.train_queue[0]) < MIN_BATCH:
             time.sleep(0)  # yield
             return
 
+        """Then we extract all the samples from the queue in a synchronized manner."""
         with self.lock_queue:
             if len(self.train_queue[0]) < MIN_BATCH:  # more thread could have passed without lock
                 return  # we can't yield inside lock
@@ -86,6 +101,7 @@ class Brain:
             s, a, r, s_, s_mask = self.train_queue
             self.train_queue = [[], [], [], [], []]
 
+        """And process them into solid blocks of numpy arrays:"""
         s = np.array(s)
         a = np.vstack(a)
         r = np.vstack(r)
@@ -94,21 +110,44 @@ class Brain:
 
         if len(s) > 5 * MIN_BATCH: print("Optimizer alert! Minimizing batch of %d" % len(s))
 
+        """
+        The reward received from the training queue is only immediate, excluding the \gamma^n V(s_n) part,
+        so we have to add it. Fortunately, this can be efficiently done on GPU for all states in a batch in parallel.
+        """
         v = self.predict_v(s_)
         r = r + GAMMA_N * v * s_mask  # set v to 0 where s_ is terminal state
 
+        """Finally, we extract the placeholders, run the minimize operation and TensorFlow will do the rest."""
         # K.set_learning_phase(1)
         s_t, a_t, r_t, minimize = self.graph
         self.session.run(minimize, feed_dict={s_t: s, a_t: a, r_t: r})
         # K.set_learning_phase(0)
 
     def train_push(self, s, a, r, s_):
+        """
+        One of the responsibilities of the Brain class is to hold a training queue.
+        This queue consists of 5 arrays, one-hot encoded taken action a, discounted n-step return r,
+        landing state after n steps s_
+        :param s: starting state
+        :param a: one-hot encoded taken action
+        :param r: discounted n-step return
+        :param s_: landing state after n steps
+        and a terminal mask with values 1. or 0., indicating whether the s_ is None or not.
+        Terminal mask are useful to parallelize the computation.
+        The samples from agents are gathered in the training queue through train_push() method in a synchronized manner.
+        :return:
+        """
         with self.lock_queue:
             self.train_queue[0].append(s)
             self.train_queue[1].append(a)
             self.train_queue[2].append(r)
 
             if s_ is None:
+                """
+                Also a dummy NONE_STATE is used in case the s_ is None. This dummy state is valid,
+                so it can be processed by the neural network, but we don’t care about the result.
+                It’s only there to parallelize the computation.
+                """
                 self.train_queue[3].append(NONE_STATE)
                 self.train_queue[4].append(0.)
             else:
@@ -132,6 +171,9 @@ class Brain:
 
 
 class Optimizer(threading.Thread):
+    """
+    Optimizes the brain FOREVER (in separate threads)
+    """
     stop_signal = False
 
     def __init__(self, brain):
