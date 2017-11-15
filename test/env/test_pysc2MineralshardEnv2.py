@@ -2,6 +2,7 @@ import unittest
 from oscar.env.envs.pysc2_mineralshard_env2 import Pysc2MineralshardEnv2
 from pysc2.lib import actions
 
+
 class TestPysc2MineralshardEnv2(unittest.TestCase):
     def test_get_action_id_from_action(self):
         number_of_action = Pysc2MineralshardEnv2.action_space.n

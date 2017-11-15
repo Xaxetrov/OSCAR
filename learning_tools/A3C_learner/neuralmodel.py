@@ -87,7 +87,9 @@ def get_neural_network(input_shape, output_shape,
                                  activation='relu',
                                  name='spacial_policy_' + str(i)
                                  )(sc_l2)
-                out = Permute((3, 1, 2), name='permute_dimension_out_' + str(i))(spacial)
+                # set the layers as the first dimension
+                out = Permute((3, 2, 1), name='permute_dimension_out_' + str(i))(spacial)
+                # flatten the output
                 out = Reshape(target_shape=(-1,),
                               name='reshape_out_' + str(i)
                               )(out)

@@ -22,7 +22,7 @@ _SELECT_ALL = [0]
 _ADD_TO_SELECTION = [1]
 _NEW_SELECTION = [0]
 
-OBS_LENGHT = 2
+OBS_LENGTH = 2
 
 
 class Pysc2MineralshardEnv2(Pysc2Env):
@@ -32,7 +32,7 @@ class Pysc2MineralshardEnv2(Pysc2Env):
     #                             "spacial": spaces.Discrete(16 * 16)}
     #                            )
     action_space = spaces.Discrete(0 + 16 * 16 * 2)  # two 16*16 output: first selection second move
-    observation_space = spaces.Box(low=0, high=4, shape=(2 * OBS_LENGHT, 64, 64))
+    observation_space = spaces.Box(low=0, high=4, shape=(2 * OBS_LENGTH, 64, 64))
     reward_range = [0.0, float('Inf')]
 
     def __init__(self):
@@ -72,7 +72,7 @@ class Pysc2MineralshardEnv2(Pysc2Env):
         # format observation to be the one corresponding to observation_space
         obs = self.format_observation(full_obs)
         self.obs_list = []
-        while len(self.obs_list) <= OBS_LENGHT:
+        while len(self.obs_list) <= OBS_LENGTH:
             for o in obs:
                 self.obs_list.append(o)
         # select all marines at first step
@@ -94,7 +94,7 @@ class Pysc2MineralshardEnv2(Pysc2Env):
             """
         x_16 = (linear_position // 16)
         y_16 = (linear_position % 16)
-        x_64 = x_16 * 4 + 2
+        x_64 = x_16 * 4 + 2  # + 2 to center on the 64x64 grid after the 16x16->64x64 conversion
         y_64 = y_16 * 4 + 2
         # print("Movement at x16:", x_16, "y16", y_16)
         # x and y are not in the right order, else it doesn't work...
@@ -117,7 +117,7 @@ class Pysc2MineralshardEnv2(Pysc2Env):
 
     @staticmethod
     def get_non_spacial_action(action_id):
-        """return a pysc2 action coresponding to the given action id
+        """return a pysc2 action corresponding to the given action id
             -action id: 0 -> NO_OP
                         1 -> Select all army
         """
