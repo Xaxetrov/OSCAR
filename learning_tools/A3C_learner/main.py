@@ -15,11 +15,17 @@ from oscar.env import envs
 # constants
 from learning_tools.A3C_learner.constants import *
 
+"""
+Start by determining the shape of states and actions in a given environment.
+This allows for fast switching of environments simply by changing a single constant (at least for simple environments).
+"""
 # set test env using meaning less value which will be over writen by future env deff
 env_test = Environment(global_brain=None, num_actions=0, render=True, eps_start=0., eps_end=0.)
 NUM_STATE = env_test.env.observation_space.shape
 NUM_ACTIONS = env_test.env.action_space.n
 NONE_STATE = np.zeros(shape=NUM_STATE)
+
+"""Then create instances of Brain, Environment and Optimizer."""
 
 env_test.env.close()
 del env_test
@@ -32,6 +38,9 @@ brain.model.summary()
 env_list = [Environment(global_brain=brain, num_actions=NUM_ACTIONS) for i in range(THREADS)]
 opts = [Optimizer(brain=brain) for i in range(OPTIMIZERS)]
 
+"""
+Finally, it just starts the threads, wait given number of seconds, stops them and displays a trained agent to the user.
+"""
 for o in opts:
     o.start()
 

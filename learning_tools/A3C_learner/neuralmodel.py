@@ -10,6 +10,14 @@ current_neural_network_file = "learning_tools/learning_nn/" + ENV + ".knn"
 def get_neural_network(input_shape, output_shape,
                        file_path=current_neural_network_file,
                        loss='mean_squared_error'):
+    """
+    Constructs a NN model, either by loading it from a file or by creating it from scratch
+    :param input_shape: Shape of the input given to the NN
+    :param output_shape: Shape of the output retrieved from the NN
+    :param file_path: Path to the file that contains maybe
+    :param loss: a loss function or function_name
+    :return: the built neural_network model
+    """
     global current_neural_network_file
     current_neural_network_file = file_path
     try:
