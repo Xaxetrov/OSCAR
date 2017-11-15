@@ -27,7 +27,6 @@ def get_neural_network(input_shape, output_shape,
         # check output size
         for out_size in output_shape:
             assert type(out_size) == int
-        # assert len(output_shape) == 2
         # check input size
         print(input_shape)
         assert len(input_shape) > 3 and input_shape[-1] == 64 and input_shape[-2] == 64
