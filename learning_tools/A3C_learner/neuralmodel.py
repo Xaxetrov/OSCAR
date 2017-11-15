@@ -77,17 +77,18 @@ def get_neural_network(input_shape, output_shape,
                                  9,
                                  strides=(2, 2),
                                  padding='same',
-                                 activation='softmax',
+                                 activation='relu',
                                  name='spacial_policy_' + str(i)
                                  )(sc_l2)
                 out = Permute((3, 1, 2), name='permute_dimension_out_' + str(i))(spacial)
-                out = Reshape(target_shape=(number_of_output_layer, 256),
+                out = Reshape(target_shape=(-1,),
                               name='reshape_out_' + str(i)
                               )(out)
-                out = Flatten(name='flatten_spacial_policy_' + str(i))(out)
-                # out = Activation(activation='softmax',
-                #                  name='output_spacial_policy_' + str(i)
-                #                  )(out)
+                # out = Flatten(name='flatten_spacial_policy_' + str(i))(out)
+                # normalize the spacial action output layer
+                out = Activation(activation='softmax',
+                                 name='output_spacial_policy_' + str(i)
+                                 )(out)
                 output_layers.append(out)
             elif size < 256:
                 # this must be a non spacial output action

@@ -29,20 +29,20 @@ brain = Brain(num_actions=NUM_ACTIONS,
               none_state=NONE_STATE)  # brain is global in A3C
 brain.model.summary()
 
-envs = [Environment(global_brain=brain, num_actions=NUM_ACTIONS) for i in range(THREADS)]
+env_list = [Environment(global_brain=brain, num_actions=NUM_ACTIONS) for i in range(THREADS)]
 opts = [Optimizer(brain=brain) for i in range(OPTIMIZERS)]
 
 for o in opts:
     o.start()
 
-for e in envs:
+for e in env_list:
     e.start()
 
 time.sleep(RUN_TIME)
 
-for e in envs:
+for e in env_list:
     e.stop()
-for e in envs:
+for e in env_list:
     e.join()
 
 for o in opts:
@@ -52,10 +52,10 @@ for o in opts:
 
 print("Training finished")
 save_neural_network(brain.model)
-for e in envs:
+for e in env_list:
     e.env.close()
     del e
 
-del envs
+del env_list
 
 # env_test.run()
