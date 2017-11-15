@@ -5,6 +5,7 @@
 !oscar/
 !config/
 !learning_tools/
+!test/
 
 #Whitelist some extensions
 !*.py
