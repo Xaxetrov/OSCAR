@@ -1,6 +1,7 @@
 import math
 from keras.models import Model, load_model, save_model
-from keras.layers import Conv2D, Input, Dense, Flatten, BatchNormalization, Reshape, Activation, Permute
+from keras.layers import Conv2D, Input, Dense, Flatten, \
+    BatchNormalization, Reshape, Activation, Permute, MaxPooling2D
 
 from learning_tools.A3C_learner.constants import *
 
@@ -41,14 +42,16 @@ def get_neural_network(input_shape, output_shape,
         sc_ip = Permute((2, 3, 1),
                         name="PermuteDimensions"
                         )(sc_if)
-        sc_l1 = Conv2D(16,
+        # first screen layer, reduce it to 32x32 with 32 filters (layers)
+        sc_l1 = Conv2D(32,
                        5,
+                       strides=(2, 2),
                        activation='relu',
                        padding='same',
                        name='conv2d_layer1'
                        )(sc_ip)
         # sc_l1n = BatchNormalization(name='normalization1')(sc_l1)
-        # reduce screen to 32x32
+        # reduce screen to 16x16 with 8 filters
         sc_l2 = Conv2D(8,
                        5,
                        strides=(2, 2),
@@ -57,15 +60,13 @@ def get_neural_network(input_shape, output_shape,
                        name='conv2d_layer2'
                        )(sc_l1)
         # sc_l2n = BatchNormalization(name='normalization2')(sc_l2)
-        sc_f = Flatten(name='flatten_spacial')(sc_l2)
-        d1 = Dense(16,
+        # reduce action space before Dense layer (4x4)
+        sc_p = MaxPooling2D(pool_size=(4, 4))(sc_l2)
+        sc_f = Flatten(name='flatten_spacial')(sc_p)
+        d1 = Dense(8,
                    activation='relu',
                    name='first_layer_for_none_spacial'
                    )(sc_f)
-        # oa = Dense(2)(d1)
-        # output move selection at 16x16
-        # op = Conv2D(1, 9, strides=(2, 2), padding='same')(sc_l2n)
-        # set and compile model
 
         # generate output shapes
         output_layers = []
@@ -81,14 +82,14 @@ def get_neural_network(input_shape, output_shape,
                 number_of_output_layer = size // 256
                 # this is a spacial action with 16*16 output
                 spacial = Conv2D(number_of_output_layer,
-                                 9,
-                                 strides=(2, 2),
+                                 5,
+                                 # strides=(2, 2),
                                  padding='same',
                                  activation='relu',
                                  name='spacial_policy_' + str(i)
                                  )(sc_l2)
                 # set the layers as the first dimension
-                out = Permute((3, 2, 1), name='permute_dimension_out_' + str(i))(spacial)
+                out = Permute((3, 1, 2), name='permute_dimension_out_' + str(i))(spacial)
                 # flatten the output
                 out = Reshape(target_shape=(-1,),
                               name='reshape_out_' + str(i)
@@ -106,6 +107,7 @@ def get_neural_network(input_shape, output_shape,
                                     name='non_spacial_policy_' + str(i))(d1)
                 output_layers.append(non_spacial)
 
+        # set and compile model
         model = Model(inputs=sc_i,
                       outputs=output_layers)
         model.compile(optimizer='adam',

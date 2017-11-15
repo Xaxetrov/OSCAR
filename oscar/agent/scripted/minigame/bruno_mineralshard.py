@@ -52,7 +52,7 @@ class CollectMineralShards(base_agent.BaseAgent):
             # If selected unit has no target, provide it a new one.
             # Otherwise, select the other marine.
             if self.isSamePosition(oldPositions[self.selected], self.positions[self.selected]) or not self.targets[
-                self.selected] or not self.isMineralShard(self.targets[self.selected]):
+                    self.selected] or not self.isMineralShard(self.targets[self.selected]):
                 # update position using previous target position
                 if self.targets[self.selected]:
                     self.positions[self.selected] = self.targets[self.selected]
