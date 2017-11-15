@@ -1,6 +1,5 @@
 
 from oscar.env import envs
-# from oscar.agent.scripted.minigame.bruno_mineralshard import CollectMineralShards
 from oscar.agent.scripted.minigame.bruno_mineralshard import CollectMineralShards
 from learning_tools.A3C_learner.neuralmodel import get_neural_network, save_neural_network
 from learning_tools.A3C_learner.constants import ENV
@@ -8,9 +7,9 @@ import gym
 import numpy as np
 import time
 
-# ENV = 'pysc2-mineralshard-v1' set into the config file (of A3C learner)
-TRAINING_STEPS = 240*1
-TEST_RUN = 5
+# ENV = 'pysc2-mineralshard-v1' set into the constants file (of A3C learner)
+TRAINING_STEPS = 240*5
+TEST_RUN = 0
 
 RUN_NN_ACTION = True
 
@@ -22,6 +21,7 @@ input_shape = env.observation_space.shape
 
 model = get_neural_network(input_shape=(None,) + input_shape,
                            output_shape=[output_shape, 1])
+model.summary()
 
 action_batch = []
 obs_batch = []
@@ -33,7 +33,7 @@ obs = env.reset()
 print("learning for", TRAINING_STEPS, "steps")
 try:
     for i in range(TRAINING_STEPS):
-        time.sleep(0.5)
+        time.sleep(0.001)
         action = agent.step(env.last_obs)
 
         action_id = env.get_action_id_from_action(sc2_action=action.function,
@@ -41,7 +41,6 @@ try:
 
         learning_action = np.zeros(shape=output_shape)
         learning_action[action_id] = 1.0
-        print("training:", action_id)
         if RUN_NN_ACTION:
             # train NN
             model.fit(x=np.reshape(obs, (1, len(obs),) + obs[0].shape),
@@ -50,18 +49,36 @@ try:
                       epochs=1
                       )
             # get his action
-            action = model.predict(x=np.reshape(obs, (1, len(obs),) + obs[0].shape))
+            p = model.predict(x=np.reshape(obs, (1, len(obs),) + obs[0].shape))[0][0]
+            # get mask for unavailable action
+            action_mask = env.get_action_mask()
+            # apply mask to action probability
+            p *= action_mask
+            # normalize (set sum back to 1.0)
+            p_sum = np.sum(p)
+            p /= p_sum
             # print("max", np.max(action[0]), "min", np.min(action[0]))
-            action_id = np.argmax(action[0][0])
+            played_action_id = np.argmax(p)
             # action_id = np.random.choice(output_shape, p=action[0][0])
         else:
             # generate batch for training (on episode end only)
             action_batch.append(learning_action)
             obs_batch.append(obs)
+            played_action_id = action_id
 
-        print("selected:", action_id)
+        # print("action: train", action_id, "selected", played_action_id)
+        if played_action_id < 256:
+            action = env.get_select_action(played_action_id)
+        else:
+            action = env.get_move_action(played_action_id - 256)
+        print("played action:", action)
+        if action_id < 256:
+            action = env.get_select_action(action_id)
+        else:
+            action = env.get_move_action(action_id - 256)
+        print("trained action:", action)
 
-        obs, reward, done, _ = env.step(action_id)
+        obs, reward, done, _ = env.step(played_action_id)
 
         episode_reward += reward
 
@@ -74,7 +91,7 @@ try:
                           y=[np.array(action_batch), np.zeros(len(action_batch))],
                           batch_size=len(action_batch),
                           verbose=0,
-                          epochs=5
+                          epochs=10
                           )
                 action_batch = []
                 obs_batch = []
@@ -88,9 +105,16 @@ else:
     obs = env.reset()
     minigame_reward = 0
     for i in range(TEST_RUN * 240 + 1):
-        action = model.predict(x=np.array([obs]),
-                               batch_size=1)
-        action_id = np.argmax(action[0][0])
+        p = model.predict(x=np.array([obs]),
+                          batch_size=1)[0][0]
+        # get mask for unavailable action
+        action_mask = env.get_action_mask()
+        # apply mask to action probability
+        p *= action_mask
+        # normalize (set sum back to 1.0)
+        p_sum = np.sum(p)
+        p /= p_sum
+        action_id = np.argmax(p)
         obs, reward, done, _ = env.step(action_id)
         minigame_reward += reward
         if done:

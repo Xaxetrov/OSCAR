@@ -56,7 +56,13 @@ class Agent:
             p *= action_mask
             # normalize (set sum back to 1.0)
             p_sum = np.sum(p)
+            if p_sum == 0:
+                # no action are playable... return the first (and hope it will work)
+                return 0
             p /= p_sum
+
+            assert not np.isnan(np.max(p))
+            assert np.isfinite(p_sum)
 
             # a = np.argmax(p)
             a = np.random.choice(NUM_ACTIONS, p=p)
