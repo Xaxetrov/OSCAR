@@ -26,7 +26,8 @@ class Pysc2MineralshardEnv(Pysc2Env):
     #                             "spacial": spaces.Discrete(16 * 16)}
     #                            )
     action_space = spaces.Discrete(0 + 16 * 16)
-    observation_space = spaces.Box(low=0, high=4, shape=(64, 64, 2))
+    # observation_space = spaces.Box(low=0, high=4, shape=(64, 64, 2))
+    observation_space = spaces.Box(low=0, high=4, shape=(2, 64, 64))
     reward_range = [0.0, float('Inf')]
 
     def __init__(self):
