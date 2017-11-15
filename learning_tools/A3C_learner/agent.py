@@ -12,6 +12,10 @@ frames = 0
 
 
 class Agent:
+    """
+    An independent worker that runs in its own environment.
+    It runs steps forever (until it is stopped)
+    """
     def __init__(self, eps_start, eps_end, eps_steps):
         self.eps_start = eps_start
         self.eps_end = eps_end
@@ -170,6 +174,10 @@ class Environment(threading.Thread):
         print("Total R:", R)
 
     def run(self):
+        """
+        Run Forever !
+        :return:
+        """
         while not self.stop_signal:
             self.run_episode()
 

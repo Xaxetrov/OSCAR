@@ -40,16 +40,12 @@ class Brain:
 
     @staticmethod
     def _build_model():
+        """
+        Gets an NN model from a file or from scratch, then initializes the predict function
+        :return: a working NN model
+        """
         model = get_neural_network(input_shape=(None,) + NUM_STATE,
                                    output_shape=[NUM_ACTIONS, 1])
-        # l_input = Input(batch_shape=(None,) + NUM_STATE)
-        # l_flat = Flatten()(l_input)
-        # l_dense = Dense(16, activation='relu')(l_flat)
-        #
-        # out_actions = Dense(NUM_ACTIONS, activation='softmax')(l_dense)
-        # out_value = Dense(1, activation='linear')(l_dense)
-        #
-        # model = Model(inputs=[l_input], outputs=[out_actions, out_value])
         model._make_predict_function()  # have to initialize before threading
 
         return model
