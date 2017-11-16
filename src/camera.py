@@ -8,6 +8,8 @@ from pysc2.lib import actions
 from pysc2.lib import features
 
 _MOVE_CAMERA = actions.FUNCTIONS.move_camera.id
+_MINI_VISIBILITY = features.MINIMAP_FEATURES.visibility_map.index
+_MINI_CAMERA = features.MINIMAP_FEATURES.camera.index
 
 #############################
 # Simplifies camera operations.
@@ -34,8 +36,12 @@ class Camera():
         return self.calibration.minimapSize
 
     @property
-    def fieldOfViewSize(self):
-        return self.calibration.fieldOfViewSize
+    def fieldOfViewMap(self):
+        return self.calibration.fieldOfViewMap
+
+    @property
+    def fieldOfViewMinimap(self):
+        return self.calibration.fieldOfViewMinimap
 
     @property
     def moveRange(self):
@@ -52,7 +58,8 @@ class Calibration():
 
     def __init__(self):
         self._minimapSize = {'x': None, 'y': None}
-        self._fieldOfViewSize = {'x': None, 'y': None}
+        self._fieldOfViewMap = {'x': None, 'y': None}
+        self._fieldOfViewMinimap = {'x': None, 'y': None}
         self._moveRange = {'x': {'min': None, 'max': None}, 'y': {'min': None, 'max': None}}
         self._rangeObs = {'x': {'min': float('inf'), 'max': float('-inf')}, 'y': {'min': float('inf'), 'max': float('-inf')}}
         self._cameraObsOffset = {'x': None, 'y': None}
@@ -74,14 +81,16 @@ class Calibration():
             return
 
         self._minimapSize = data['minimapSize']
-        self._fieldOfViewSize = data['fieldOfViewSize']
+        self._fieldOfViewMap = data['fieldOfViewMap']
+        self._fieldOfViewMinimap = data['fieldOfViewMinimap']
         self._moveRange = data['moveRange']
         self._rangeObs = data['rangeObs']
         self._cameraObsOffset = data['cameraObsOffset']
 
     def export(self):
         data = {'minimapSize': self._minimapSize,
-            'fieldOfViewSize': self._fieldOfViewSize,
+            'fieldOfViewMap': self._fieldOfViewMap,
+            'fieldOfViewMinimap': self._fieldOfViewMinimap,
             'moveRange': self._moveRange,
             'rangeObs': self._rangeObs,
             'cameraObsOffset': self._cameraObsOffset}
@@ -96,8 +105,11 @@ class Calibration():
     def minimapSize(self):
         return self._minimapSize
     @property
-    def fieldOfViewSize(self):
-        return self._fieldOfViewSize
+    def fieldOfViewMap(self):
+        return self._fieldOfViewMap
+    @property
+    def fieldOfViewMinimap(self):
+        return self._fieldOfViewMinimap
     @property
     def moveRange(self):
         return self._moveRange
@@ -124,14 +136,18 @@ class Calibration():
         if not self._completed:
             minimap_y, minimap_x = obs.observation["minimap"][_MINI_CAMERA].nonzero()
 
-            if not self._fieldOfViewSize['x']:
+            if not self._fieldOfViewMap['x']:
+                self._fieldOfViewMap['x'] = len(obs.observation["screen"][0][0])
+                self._fieldOfViewMap['y'] = len(obs.observation["screen"][0])
+
+            if not self._fieldOfViewMinimap['x']:
                 for i in range(1, len(minimap_x)):
                     if (minimap_x[i] < minimap_x[i-1]):
-                        self._fieldOfViewSize['x'] = i
+                        self._fieldOfViewMinimap['x'] = i
                         break
                 for i in range(1, len(minimap_y)):
                     if (minimap_y[i] > minimap_y[i-1]):
-                        self._fieldOfViewSize['y'] = i
+                        self._fieldOfViewMinimap['y'] = i
                         break
 
             offset = {'x':  self._cameraPos['x'] - minimap_x[0], 'y':  self._cameraPos['y'] - minimap_y[0]}
