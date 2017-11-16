@@ -22,7 +22,7 @@ _SELECT_ALL = [0]
 _ADD_TO_SELECTION = [1]
 _NEW_SELECTION = [0]
 
-OBS_LENGTH = 2
+OBS_LENGTH = 4
 
 
 class Pysc2MineralshardEnv2(Pysc2Env):
@@ -72,9 +72,8 @@ class Pysc2MineralshardEnv2(Pysc2Env):
         # format observation to be the one corresponding to observation_space
         obs = self.format_observation(full_obs)
         self.obs_list = []
-        while len(self.obs_list) <= OBS_LENGTH:
-            for o in obs:
-                self.obs_list.append(o)
+        while len(self.obs_list) < OBS_LENGTH * len(obs):
+            self.obs_list += obs
         # select all marines at first step
         # formatted_action = actions.FunctionCall(_SELECT_ARMY, [_SELECT_ALL])
         # full_obs, _, _, _ = super()._step([formatted_action])
