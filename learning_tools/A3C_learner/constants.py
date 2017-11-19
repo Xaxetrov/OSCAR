@@ -1,5 +1,5 @@
 # constants
-ENV = 'pysc2-mineralshard-v1'
+ENV = 'pysc2-mineralshard-v0'
 
 RUN_TIME = 60
 THREADS = 1

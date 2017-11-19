@@ -40,7 +40,7 @@ class Pysc2MineralshardEnv2(Pysc2Env):
                                 agent_race='T',
                                 screen_size_px=(64, 64),
                                 minimap_size_px=(64, 64),
-                                visualize=True,
+                                visualize=False,
                                 step_mul=8,
                                 game_steps_per_episode=None  # use map default
                                 )
@@ -91,13 +91,13 @@ class Pysc2MineralshardEnv2(Pysc2Env):
         """return a pysc2 action and argument to do a move action at the pos given
             -linear_position : position of the move on a 16x16 grid, integer equal to y*16+x
             """
-        x_16 = (linear_position // 16)
-        y_16 = (linear_position % 16)
-        x_64 = x_16 * 4 + 2  # + 2 to center on the 64x64 grid after the 16x16->64x64 conversion
-        y_64 = y_16 * 4 + 2
+        x_16 = (linear_position % 16)
+        y_16 = (linear_position // 16)
+        x_64 = (x_16 * 4 + 2)  # + 2 to center on the 64x64 grid after the 16x16->64x64 conversion
+        y_64 = (y_16 * 4 + 2)
         # print("Movement at x16:", x_16, "y16", y_16)
         # x and y are not in the right order, else it doesn't work...
-        action_args = [_NOT_QUEUED, [y_64, x_64]]
+        action_args = [_NOT_QUEUED, [x_64, y_64]]
         return _MOVE_SCREEN, action_args
 
     @staticmethod

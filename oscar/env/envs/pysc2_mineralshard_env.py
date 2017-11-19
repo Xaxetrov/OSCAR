@@ -85,8 +85,8 @@ class Pysc2MineralshardEnv(Pysc2Env):
             """
         x_16 = (linear_position // 16)
         y_16 = (linear_position % 16)
-        x_true = min(x_16 * 4, 63)
-        y_true = min(y_16 * 4, 63)
+        x_true = x_16 * 4 + 2
+        y_true = y_16 * 4 + 2
         # x and y are not in the right order, else it doesn't work...
         action_args = [_NOT_QUEUED, [y_true, x_true]]
         return _MOVE_SCREEN, action_args
@@ -128,3 +128,14 @@ class Pysc2MineralshardEnv(Pysc2Env):
             action_mask[:] = 1
 
         return action_mask
+
+    @staticmethod
+    def get_action_id_from_action(sc2_action, sc2_args):
+        if sc2_action == _MOVE_SCREEN and len(sc2_args) == 2:
+            x_64, y_64 = sc2_args[1]
+            x_16 = x_64 // 4
+            y_16 = y_64 // 4
+            return int(16 * y_16 + x_16)
+        else:
+            print("unhandled action: ", sc2_action, sc2_args)
+            return None

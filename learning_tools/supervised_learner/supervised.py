@@ -1,7 +1,8 @@
 
 from oscar.env import envs
-# from oscar.agent.scripted.minigame.deepmindAgents import CollectMineralShards
-from oscar.agent.scripted.minigame.bruno_mineralshard import CollectMineralShards
+from oscar.agent.scripted.minigame.deepmindAgents import CollectMineralShards
+# from oscar.agent.scripted.minigame.bruno_mineralshard import CollectMineralShards
+# from oscar.agent.scripted.minigame.nicolas_mineralshard import CollectMineralShardsP
 from learning_tools.A3C_learner.neuralmodel import get_neural_network, save_neural_network
 from learning_tools.A3C_learner.constants import ENV
 import gym
@@ -9,10 +10,10 @@ import numpy as np
 import time
 
 # ENV = 'pysc2-mineralshard-v1' set into the constants file (of A3C learner)
-TRAINING_STEPS = 240 * 100
+TRAINING_STEPS = 240 * 20
 TEST_RUN = 5
 
-RUN_NN_ACTION = True
+RUN_NN_ACTION = False
 
 env = gym.make(ENV)
 agent = CollectMineralShards()
@@ -57,10 +58,12 @@ try:
             p *= action_mask
             # normalize (set sum back to 1.0)
             p_sum = np.sum(p)
-            p /= p_sum
-            # print("max", np.max(action[0]), "min", np.min(action[0]))
-            # played_action_id = np.argmax(p)
-            played_action_id = np.random.choice(len(p), p=p)
+            if p_sum != 0:
+                p /= p_sum
+                # played_action_id = np.random.choice(len(p), p=p)
+                played_action_id = np.argmax(p)
+            else:
+                played_action_id = 0
         else:
             # generate batch for training (on episode end only)
             action_batch.append(learning_action)
@@ -106,6 +109,7 @@ else:
     obs = env.reset()
     minigame_reward = 0
     for i in range(TEST_RUN * 240 + 1):
+        # time.sleep(0.2)
         p = model.predict(x=np.array([obs]),
                           batch_size=1)[0][0]
         # get mask for unavailable action
@@ -114,9 +118,12 @@ else:
         p *= action_mask
         # normalize (set sum back to 1.0)
         p_sum = np.sum(p)
-        p /= p_sum
-        # action_id = np.argmax(p)
-        action_id = np.random.choice(len(p), p=p)
+        if p_sum != 0:
+            p /= p_sum
+            action_id = np.argmax(p)
+            # action_id = np.random.choice(len(p), p=p)
+        else:
+            action_id = 0
         # if action_id < 256:
         #     action = env.get_select_action(action_id)
         # else:
