@@ -1,18 +1,15 @@
 import numpy as np
 import sys
 import time
-from random import randint
 
-from pysc2.agents import base_agent
 from pysc2.lib import actions
 from pysc2.lib import features
 
-from map_remembrance import MapRemembrance as Mem
+from location import Location
+from coordinatesHelper import CoordinatesHelper
+from explorationHelper import ExplorationHelper
 
 _PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
-_MINI_PLAYER_RELATIVE = features.MINIMAP_FEATURES.player_relative.index
-_MINI_VISIBILITY = features.MINIMAP_FEATURES.visibility_map.index
-_MINI_CAMERA = features.MINIMAP_FEATURES.camera.index
 _PLAYER_FRIENDLY = 1
 _PLAYER_NEUTRAL = 3  # beacon/minerals
 _PLAYER_HOSTILE = 4
@@ -28,15 +25,34 @@ _QUEUED = [1]
 _SELECT_ALL = [0]
 _SCREEN = [0]
 
+# States of the finite states automaton
+class States:
+    START = 0
+    EXPLORATION__MOVE_CAMERA_TO_NEW_TARGET = 1
+    EXPLORATION__MOVE_UNITS_TO_TARGET = 2
+    EXPLORATION__CENTER_CAMERA_ON_UNITS = 3
+    ATTACK__MOVE_UNITS_TO_CLOSEST_ENNEMY = 4
+    ATTACK__CENTER_CAMERA_ON_UNITS = 5
+
 class FindAndDefeatZerglings():
 
+    _NEW_TARGET_NB_TRY = 5
+
     def __init__(self):
-        self.memory = None
-        # empirically determined values (bug ?) 
-        # the observations of the camera are unconsistent with the action of the camera movement
-        # more, the x and y axis are inverted in the observation
-        self.cam_mov = {'min': {'x': 24, 'y':17}, 'max':{'x': 48, 'y': 47}}
-        self.camera_observation_offset = 12
+        self.coordinatesHelper = CoordinatesHelper()
+        self.explorationHelper = ExplorationHelper(self.coordinatesHelper)
+        self.state = States.START
+        self.target = None
+
+        self._locInMinimap = None
+        self._ennemies_x = None
+        self._ennemies_y = None
+        self._units_x = None
+        self._units_y = None
+        self._unitsMeanLoc = None
+        self._isUnitsMeanLocUpdated = False
+        self._isEnnemiesVisible = None
+        self._targetReached = None
 
     def setup(self, obs_spec, action_spec):
         pass
@@ -46,58 +62,135 @@ class FindAndDefeatZerglings():
 
     def step(self, obs):
         
-        if self.memory is None:
-            self.memory = Mem(obs.observation["minimap"][_MINI_PLAYER_RELATIVE].shape)
-                
-        self.memory.maj_informations(obs.observation["minimap"][_MINI_PLAYER_RELATIVE],
-                                     obs.observation["minimap"][_MINI_VISIBILITY])
-            
+        self._ennemies_x = None
+        self._ennemies_y = None
+        self._units_x = None
+        self._units_y = None
+        self._isUnitsMeanLocUpdated = False
+        self._isEnnemiesVisible = None
+        self._targetReached = None
+
         # if some entities are selected
         if _MOVE_SCREEN in obs.observation["available_actions"]:
+            self.state = self.getNextState(obs, self.state)
+            print("state: " + str(self.state))
+            time.sleep(0.2)
+            return self.getAction(obs, self.state)
             
-            # Find our units and targets
-            player_relative = obs.observation["screen"][_PLAYER_RELATIVE]
-            ennemies_y, ennemies_x = (player_relative == _PLAYER_HOSTILE).nonzero()
-            player_y, player_x = (player_relative == _PLAYER_FRIENDLY).nonzero()
-
-            # if no observations, move camera and marines
-            if not ennemies_y.any() or not player_y.any():
-                seen_ennemies = self.memory.get_most_recent_informations(0, _PLAYER_HOSTILE)[0]
-                if len(seen_ennemies) > 0:
-                    # definition of the camera informations
-                    cam_pos_x, cam_pos_y = obs.observation["minimap"][_MINI_CAMERA].nonzero()
-                    cam_pos = np.asarray([cam_pos_y.min(), cam_pos_x.min()])
-                    cam_size = np.asarray([cam_pos_y.max(), cam_pos_x.max()]) - cam_pos
-                    # correction of the offset induced by the unconsistency so it matches other observations
-                    cam_pos += self.camera_observation_offset
-                    
-                    # determination of the new camera position
-                    new_cam_pos = seen_ennemies[0] - cam_size/2
-                    new_cam_pos = np.asarray([min(max(new_cam_pos[0], self.cam_mov['max']['y']), self.cam_mov['min']['y']),
-                                              min(max(new_cam_pos[1], self.cam_mov['max']['x']), self.cam_mov['min']['x'])])
-                    dist = np.linalg.norm(cam_pos - new_cam_pos)
-                    print(dist)
-                    # move camera if it is not done, otherwise move marines
-                    if dist > 1:
-                        return actions.FunctionCall(_MOVE_CAMERA, [new_cam_pos])
-                    else:
-                        return actions.FunctionCall(_MOVE_SCREEN, [_NOT_QUEUED, [42, 42]])
-                    
-                return actions.FunctionCall(_NO_OP, [])
-
-            player = [int(player_x.mean()), int(player_y.mean())]
-            
-            # compute closest ennemy
-            closest, min_dist = None, None
-            for p in zip(ennemies_x, ennemies_y):
-                dist = np.linalg.norm(np.array(player) - np.array(p))
-                if not min_dist or dist < min_dist:
-                    closest, min_dist = p, dist
-
-            time.sleep(0.4)
-            return actions.FunctionCall(_ATTACK_SCREEN, [_NOT_QUEUED, closest])
-            
-        else:
+        elif _SELECT_ARMY in obs.observation["available_actions"]:
             return actions.FunctionCall(_SELECT_ARMY, [_SELECT_ALL])
 
-        
+        else:
+            return actions.FunctionCall(_NO_OP, [])
+     
+    def getNextState(self, obs, curState):
+        if curState == States.START:
+            if self.isEnnemyVisible(obs):
+                return States.ATTACK__MOVE_UNITS_TO_CLOSEST_ENNEMY
+            else:
+                return States.EXPLORATION__MOVE_CAMERA_TO_NEW_TARGET
+
+        elif curState == States.EXPLORATION__MOVE_CAMERA_TO_NEW_TARGET:
+            return States.EXPLORATION__MOVE_UNITS_TO_TARGET
+
+        elif curState == States.EXPLORATION__MOVE_UNITS_TO_TARGET:
+            return States.EXPLORATION__CENTER_CAMERA_ON_UNITS
+
+        elif curState == States.EXPLORATION__CENTER_CAMERA_ON_UNITS:
+            if self.isEnnemyVisible(obs):
+                return States.ATTACK__MOVE_UNITS_TO_CLOSEST_ENNEMY
+            else:
+                if self.isTargetReached(obs) or not self.isUnitsMoving(obs):
+                    return States.EXPLORATION__MOVE_CAMERA_TO_NEW_TARGET
+                else:
+                    return States.EXPLORATION__CENTER_CAMERA_ON_UNITS
+
+        elif curState == States.ATTACK__MOVE_UNITS_TO_CLOSEST_ENNEMY:
+            return States.ATTACK__CENTER_CAMERA_ON_UNITS
+
+        elif curState == States.ATTACK__CENTER_CAMERA_ON_UNITS:
+            if self.isEnnemyVisible(obs):
+                return States.ATTACK__MOVE_UNITS_TO_CLOSEST_ENNEMY
+            else:
+                return States.EXPLORATION__MOVE_CAMERA_TO_NEW_TARGET
+
+    def getAction(self, obs, state):
+        if state == States.EXPLORATION__MOVE_CAMERA_TO_NEW_TARGET:
+            self.target = self.explorationHelper.getNewTarget(obs, self.getLocInMinimap(obs), self._NEW_TARGET_NB_TRY)
+            return self.coordinatesHelper.getMoveCameraAction(self.target)
+
+        elif state == States.EXPLORATION__MOVE_UNITS_TO_TARGET:
+            return actions.FunctionCall(_ATTACK_SCREEN, [_NOT_QUEUED, self.coordinatesHelper.getScreenCenter().toArray()])
+
+        elif state == States.EXPLORATION__CENTER_CAMERA_ON_UNITS:
+            self._locInMinimap = self.getMinimapLocCenteredOnUnits(obs)
+            return self.coordinatesHelper.getMoveCameraAction(self._locInMinimap)
+
+        elif state == States.ATTACK__MOVE_UNITS_TO_CLOSEST_ENNEMY:
+            return actions.FunctionCall(_ATTACK_SCREEN, [_NOT_QUEUED, self.getClosestEnnemy(obs).toArray()])
+
+        elif state == States.ATTACK__CENTER_CAMERA_ON_UNITS:
+            self._locInMinimap = self.getMinimapLocCenteredOnUnits(obs)
+            return self.coordinatesHelper.getMoveCameraAction(self._locInMinimap)
+
+    def getLocInMinimap(self, obs):
+        if not self._locInMinimap:
+            self._locInMinimap = self.coordinatesHelper.getLocInMinimap(obs)
+        return self._locInMinimap
+
+    def getEnnemiesLocations(self, obs):
+        if self._ennemies_x is None or self._ennemies_y is None:
+            player_relative = obs.observation["screen"][_PLAYER_RELATIVE]
+            self._ennemies_y, self._ennemies_x = (player_relative == _PLAYER_HOSTILE).nonzero()
+        return self._ennemies_x, self._ennemies_y
+
+    def getUnitsLocations(self, obs):
+        if self._units_x is None or not self._units_y is None:
+            player_relative = obs.observation["screen"][_PLAYER_RELATIVE]
+            self._units_y, self._units_x = (player_relative == _PLAYER_FRIENDLY).nonzero()
+        return self._units_x, self._units_y
+
+    def getUnitsMeanLocation(self, obs):
+        if not self._isUnitsMeanLocUpdated:
+            units_x, units_y = self.getUnitsLocations(obs) 
+            if units_x.size > 0:
+                newLoc = Location(int(units_x.mean()), int(units_y.mean()))
+                if not self._unitsMeanLoc or not newLoc.equals(self._unitsMeanLoc):
+                    self._unitsMeanLoc = newLoc
+                    self._isUnitsMeanLocUpdated = True
+        return self._unitsMeanLoc;
+
+    def isUnitsMoving(self, obs):
+        self.getUnitsMeanLocation(obs)
+        return self._isUnitsMeanLocUpdated
+
+    def isEnnemyVisible(self, obs):
+        if self._isEnnemiesVisible is None:
+            ennemies_x, ennemies_y = self.getEnnemiesLocations(obs)
+            self._isEnnemiesVisible = ennemies_x.any()
+        return self._isEnnemiesVisible
+
+    def isTargetReached(self, obs):
+        _TARGET_REACHED_SQUARED_DISTANCE = 25
+        unitsMeanLoc = self.getUnitsMeanLocation(obs)
+        return (not self.target or \
+                    unitsMeanLoc.squarredDistance(self.target) < _TARGET_REACHED_SQUARED_DISTANCE)
+
+    def getClosestEnnemy(self, obs):
+        closest, min_dist = None, None
+        ennemies_x, ennemies_y = self.getEnnemiesLocations(obs)
+        unitsMeanLoc = self.getUnitsMeanLocation(obs)
+
+        for p in zip(ennemies_x, ennemies_y):
+            dist = np.linalg.norm(np.array(unitsMeanLoc.toArray()) - np.array(p))
+            if not min_dist or dist < min_dist:
+                closest, min_dist = p, dist
+        return Location(closest[0], closest[1])
+
+    def getMinimapLocCenteredOnUnits(self, obs):
+        unitsMeanLoc = self.getUnitsMeanLocation(obs)
+        move = unitsMeanLoc.difference(self.coordinatesHelper.getScreenCenter())
+        globalLoc = self.coordinatesHelper.minimapToGlobal(self.getLocInMinimap(obs))
+        centeredGlobalLoc = globalLoc.addition(move)
+        centeredMinimapLoc = self.coordinatesHelper.globalToMinimap(centeredGlobalLoc)
+        return self.coordinatesHelper.bound(centeredMinimapLoc)
