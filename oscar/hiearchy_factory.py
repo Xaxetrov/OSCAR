@@ -39,7 +39,6 @@ def build_children(configuration, id):
     return children
 
 
-
 def check_configuration(configuration):
     valid = check_structure_acyclic(configuration["structure"])
     if not valid:

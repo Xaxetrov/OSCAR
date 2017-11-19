@@ -27,7 +27,7 @@ class Commander(base_agent.BaseAgent):
 
     def step(self, obs):
         """
-        Does some work and choses a subordinate that will play
+        Does some work and choose a subordinate that will play
         :param obs: observations from the game
         :return: an action chosen by a subordinate
         """
