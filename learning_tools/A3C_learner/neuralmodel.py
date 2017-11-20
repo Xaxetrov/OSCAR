@@ -10,7 +10,7 @@ current_neural_network_file = "learning_tools/learning_nn/" + ENV + ".knn"
 
 def get_neural_network(input_shape, output_shape,
                        file_path=current_neural_network_file,
-                       loss='mean_squared_error'):
+                       loss=None): ######################################################## CHANGED
     """
     Constructs a NN model, either by loading it from a file or by creating it from scratch
     :param input_shape: Shape of the input given to the NN
@@ -31,6 +31,12 @@ def get_neural_network(input_shape, output_shape,
         # check input size
         print(input_shape)
         assert len(input_shape) > 3 and input_shape[-1] == 64 and input_shape[-2] == 64
+
+        ######################## ASSERTION ON LOSS SHAPE ########################################
+        assert loss is None or len(loss) == len(output_shape)
+        is_custom_loss = loss is not None
+        if not is_custom_loss:
+          loss = []
 
         sc_i = Input(batch_shape=input_shape,
                      name='input')
@@ -78,6 +84,9 @@ def get_neural_network(input_shape, output_shape,
                               name='value' + str(i)
                               )(d1)
                 output_layers.append(value)
+                ############################# ADD MSE  BY DEFAULT 
+                if not is_custom_loss:
+                    loss.append('mean_squared_error')
             elif size % 256 == 0:
                 number_of_output_layer = size // 256
                 # this is a spacial action with 16*16 output
@@ -100,12 +109,18 @@ def get_neural_network(input_shape, output_shape,
                                  name='output_spacial_policy_' + str(i)
                                  )(out)
                 output_layers.append(out)
+                ############################# ADD categorical crossentropy BY DEFAULT (due to softmax)
+                if not is_custom_loss:
+                    loss.append('categorical_crossentropy')
             elif size < 256:
                 # this must be a non spacial output action
                 non_spacial = Dense(size,
                                     activation='relu',
                                     name='non_spacial_policy_' + str(i))(d1)
                 output_layers.append(non_spacial)
+                ############################# ADD MSE  BY DEFAULT 
+                if not is_custom_loss:
+                    loss.append('mean_squared_error')
 
         # set and compile model
         model = Model(inputs=sc_i,
