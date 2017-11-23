@@ -1,46 +1,7 @@
 import numpy as np
 import random
 
-from pysc2.lib import actions
-from pysc2.lib import features
-
 from oscar.constants import *
-
-# Functions
-_BUILD_SUPPLY_DEPOT = actions.FUNCTIONS.Build_SupplyDepot_screen.id
-_NO_OP = actions.FUNCTIONS.no_op.id
-_SELECT_POINT = actions.FUNCTIONS.select_point.id
-_SELECT_IDLE_WORKER = actions.FUNCTIONS.select_idle_worker.id
-_HARVEST_GATHER_SCREEN = actions.FUNCTIONS.Harvest_Gather_screen.id
-_MOVE_SCREEN = actions.FUNCTIONS.Move_screen.id
-_SMART_SCREEN = actions.FUNCTIONS.Smart_screen.id
-
-# Features
-_PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
-_UNIT_TYPE = features.SCREEN_FEATURES.unit_type.index
-_HEIGHT_MAP = features.SCREEN_FEATURES.height_map.index
-_IDLE_WORKER_COUNT = 7
-_MINERALFIELD = 341
-_MINERALFIELD750 = 483
-_RICHMINERALFIELD = 146
-_RICHMINERALFIELD750 = 147
-_ALL_MINERALFIELD = (_MINERALFIELD, _MINERALFIELD750, _RICHMINERALFIELD, _RICHMINERALFIELD750)
-
-# Units ID
-_TERRAN_COMMAND_CENTER = 18
-_TERRAN_SCV = 45
-_MINERAL_FIELD_LIST = (341, 483, 146, 147)
-_VESPENE_GEYSER_LIST = (344, 342)
-
-# Parameters
-_PLAYER_SELF = 1
-_NOT_QUEUED = [False]
-_QUEUED = [True]
-_NEW_SELECTION = [0]
-
-# Others
-_MAX_COLLECTING_DISTANCE = SCREEN_RESOLUTION / 3
-_BUILDING_TILES_SIZE = SCREEN_RESOLUTION / 21
 
 
 def build(obs, building_tiles_size, building_id):
@@ -48,20 +9,23 @@ def build(obs, building_tiles_size, building_id):
 
     # Find a valid emplacement
     building_tiles_size += 2  # Handle the free space needed around the building.
-    building_size = int(building_tiles_size * _BUILDING_TILES_SIZE)
-    unit_type = obs.observation["screen"][_UNIT_TYPE]
-    height_map = obs.observation["screen"][_HEIGHT_MAP]
-    valid_location_center_list = _find_valid_building_location(unit_type, height_map, building_size)
+    building_cell_size = int(building_tiles_size * TILES_SIZE_IN_CELL)
+    unit_type = obs.observation["screen"][UNIT_TYPE]
+    height_map = obs.observation["screen"][HEIGHT_MAP]
+    valid_location_center_list = _find_valid_building_location(unit_type, height_map, building_cell_size)
     if not valid_location_center_list:
-        valid_location_center_list = _find_valid_building_location(unit_type, height_map, building_size,
+        print("precision")
+        valid_location_center_list = _find_valid_building_location(unit_type, height_map, building_cell_size,
                                                                    SCREEN_RESOLUTION / 20)
     if not valid_location_center_list:
         raise NoValidBuildingLocationError()
     building_location = random.choice(valid_location_center_list)
-    build_action = actions.FunctionCall(building_id, [_QUEUED, building_location])
+    print("building_location :", building_location)
+    build_action = actions.FunctionCall(building_id, [QUEUED, building_location])
     result_action_list.insert(0, build_action)
 
     # Send the scv to collect resources
+    result_action_list.insert(0, harvest_mineral(obs))
 
     return result_action_list
 
@@ -75,10 +39,8 @@ def _find_valid_building_location(unit_type_screen, height_map, building_size, s
     valid_center_location = []
     map_size = len(unit_type_screen)
     # Check if the cell i, j is a good location for the center of the building
-    i = half_building_size
-    while i < map_size - half_building_size:
-        j = half_building_size
-        while j < map_size - half_building_size:
+    for i in range(half_building_size, map_size - half_building_size, step):
+        for j in range(half_building_size, map_size - half_building_size, step):
             center_location_is_valid = True
             for k in range(-half_building_size, half_building_size):
                 if not center_location_is_valid:
@@ -89,17 +51,15 @@ def _find_valid_building_location(unit_type_screen, height_map, building_size, s
                         break
             if center_location_is_valid and _check_map_height_for_building(height_map, building_size, (i, j)):
                 valid_center_location.append((i, j))
-            j += step
-        i += step
     return valid_center_location
 
 
 def harvest_mineral(obs):
-    unit_type = obs.observation["screen"][_UNIT_TYPE]
-    mineral_y, mineral_x = np.isin(unit_type, _ALL_MINERALFIELD).nonzero()
+    unit_type = obs.observation["screen"][UNIT_TYPE]
+    mineral_y, mineral_x = np.isin(unit_type, ALL_MINERAL_FIELD).nonzero()
     random_index = np.random.randint(0, len(mineral_x))
     any_mineral = (mineral_x[random_index], mineral_y[random_index])
-    return actions.FunctionCall(_HARVEST_GATHER_SCREEN, [_NOT_QUEUED, any_mineral])
+    return actions.FunctionCall(HARVEST_GATHER_SCREEN, [NOT_QUEUED, any_mineral])
 
 
 def _check_map_height_for_building(height_map, building_size, potential_center_location):
@@ -124,25 +84,24 @@ def select_scv(obs):
     :param queued: Whether the action should be queued or not.
     :return: The action to execute to select a SCV.
     """
-    unit_type = obs.observation["screen"][_UNIT_TYPE]
-    scv_y, scv_x = (unit_type == _TERRAN_SCV).nonzero()
-    command_center_y, command_center_x = (unit_type == _TERRAN_COMMAND_CENTER).nonzero()
+    unit_type = obs.observation["screen"][UNIT_TYPE]
+    scv_y, scv_x = (unit_type == TERRAN_SCV).nonzero()
+    command_center_y, command_center_x = (unit_type == TERRAN_COMMAND_CENTER).nonzero()
     command_center = [int(command_center_x.mean()), int(command_center_y.mean())]
 
     # Select a SCV collecting mineral or vespene gas
-    resources_id_list = _MINERAL_FIELD_LIST + _VESPENE_GEYSER_LIST
+    resources_id_list = MINERAL_FIELD_LIST + VESPENE_GEYSER_LIST
     resources_y, resources_x = np.isin(unit_type, resources_id_list).nonzero()
     for scv in zip(scv_x, scv_y):
         for resource in zip(resources_x, resources_y):
             dist = np.linalg.norm(np.array(scv) - np.array(resource))
             dist += np.linalg.norm(np.array(scv) - np.array(command_center))
-            if dist < _MAX_COLLECTING_DISTANCE:
-                print("target select :", scv)
-                return actions.FunctionCall(_SELECT_POINT, [_NEW_SELECTION, scv])
+            if dist < MAX_COLLECTING_DISTANCE:
+                return actions.FunctionCall(SELECT_POINT, [NEW_SELECTION, scv])
 
     # Select an idle SCV
-    if obs.observation["player"][_IDLE_WORKER_COUNT] != 0:
-        return actions.FunctionCall(_SELECT_IDLE_WORKER, [_NEW_SELECTION])
+    if obs.observation["player"][IDLE_WORKER_COUNT] != 0:
+        return actions.FunctionCall(SELECT_IDLE_WORKER, [NEW_SELECTION])
 
     raise NoValidSCVError()
 
