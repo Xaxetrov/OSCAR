@@ -24,14 +24,51 @@ _VESPENE_GEYSER_LIST = (344, 342)
 
 # Parameters
 _PLAYER_SELF = 1
-_NOT_QUEUED = [0]
+_NOT_QUEUED = [False]
+_QUEUED = [True]
+_NEW_SELECTION = [0]
 
-#
+# Others
 _MAX_COLLECTING_DISTANCE = SCREEN_RESOLUTION / 3
+_BUILDING_TILES_SIZE = 4  # True with a resolution of 84, need to be updated to handle others resolutions.
 
 
-def build_barracks():
-    pass
+def build(obs, building_tiles_size):
+    result_action_list = [select_scv(obs)]
+
+    # Find a valid emplacement
+    building_tiles_size += 2  # Handle the free space needed around the building.
+    building_size = building_tiles_size * _BUILDING_TILES_SIZE
+    unit_type = obs.observation["screen"][_UNIT_TYPE]
+
+    return result_action_list
+
+
+def find_valid_building_location(unit_type_screen, building_size):
+    if building_size % 2 == 0:
+        building_size += 1  # A building has a unique center, so it needs an odd size.
+    half_building_size = building_size // 2  # Entire division, so it is round down.
+
+    valid_center_location = []
+    map_size = len(unit_type_screen)
+    # Check if the cell i, j is a good location for the center of the building
+    i = half_building_size
+    while i < map_size - half_building_size:
+        j = half_building_size
+        while j < map_size - half_building_size:
+            center_location_is_valid = True
+            for k in range(-half_building_size, half_building_size):
+                if not center_location_is_valid:
+                    break
+                for l in range(-half_building_size, half_building_size):
+                    if unit_type_screen[i + k][j + l] != 0:
+                        center_location_is_valid = False
+                        break
+            if center_location_is_valid:
+                valid_center_location.append((i, j))
+            j += 1
+        i += 1
+    return valid_center_location
 
 
 def select_scv(obs):
@@ -39,6 +76,8 @@ def select_scv(obs):
     Select a SCV, with priority order: first, try to select a SCV collecting resources (mineral or vespene gas).
     This will only try to select a SCV on screen. Then, if an idle SCV exist, select it (not necessarily on
     screen). If none of the previous actions works, raise a NoValidSCVError.
+    :param obs: Observations of the current step.
+    :param queued: Whether the action should be queued or not.
     :return: The action to execute to select a SCV.
     """
     unit_type = obs.observation["screen"][_UNIT_TYPE]
@@ -54,11 +93,12 @@ def select_scv(obs):
             dist = np.linalg.norm(np.array(scv) - np.array(resource))
             dist += np.linalg.norm(np.array(scv) - np.array(command_center))
             if dist < _MAX_COLLECTING_DISTANCE:
-                return actions.FunctionCall(_SELECT_POINT, [_NOT_QUEUED, scv])
+                print(scv)
+                return actions.FunctionCall(_SELECT_POINT, [_NEW_SELECTION, scv])
 
     # Select an idle SCV
     if obs.observation["player"][_IDLE_WORKER_COUNT] != 0:
-        return actions.FunctionCall(_SELECT_IDLE_WORKER, [])
+        return actions.FunctionCall(_SELECT_IDLE_WORKER, [_NOT_QUEUED])
 
     raise NoValidSCVError()
 
