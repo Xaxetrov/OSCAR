@@ -123,7 +123,7 @@ def select_scv(obs):
 
     # Select an idle SCV
     if obs.observation["player"][_IDLE_WORKER_COUNT] != 0:
-        return actions.FunctionCall(_SELECT_IDLE_WORKER, [0])  # TODO: wtf s the arg
+        return actions.FunctionCall(_SELECT_IDLE_WORKER, [_NEW_SELECTION])
 
     raise NoValidSCVError()
 
