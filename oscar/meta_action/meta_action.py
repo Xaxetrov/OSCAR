@@ -10,11 +10,19 @@ _BUILD_SUPPLY_DEPOT = actions.FUNCTIONS.Build_SupplyDepot_screen.id
 _NO_OP = actions.FUNCTIONS.no_op.id
 _SELECT_POINT = actions.FUNCTIONS.select_point.id
 _SELECT_IDLE_WORKER = actions.FUNCTIONS.select_idle_worker.id
+_HARVEST_GATHER_SCREEN = actions.FUNCTIONS.Harvest_Gather_screen.id
+_MOVE_SCREEN = actions.FUNCTIONS.Move_screen.id
+_SMART_SCREEN = actions.FUNCTIONS.Smart_screen.id
 
 # Features
 _PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
 _UNIT_TYPE = features.SCREEN_FEATURES.unit_type.index
 _IDLE_WORKER_COUNT = 7
+_MINERALFIELD = 341
+_MINERALFIELD750 = 483
+_RICHMINERALFIELD = 146
+_RICHMINERALFIELD750 = 147
+_ALL_MINERALFIELD = (_MINERALFIELD, _MINERALFIELD750, _RICHMINERALFIELD, _RICHMINERALFIELD750)
 
 # Units ID
 _TERRAN_COMMAND_CENTER = 18
@@ -69,6 +77,14 @@ def find_valid_building_location(unit_type_screen, building_size):
             j += 1
         i += 1
     return valid_center_location
+
+
+def harvest_mineral(obs):
+    unit_type = obs.observation["screen"][_UNIT_TYPE]
+    mineral_y, mineral_x = np.isin(unit_type, _ALL_MINERALFIELD).nonzero()
+    random_index = np.random.randint(0, len(mineral_x))
+    any_mineral = (mineral_x[random_index], mineral_y[random_index])
+    return actions.FunctionCall(_HARVEST_GATHER_SCREEN, [_NOT_QUEUED, any_mineral])
 
 
 def select_scv(obs):
