@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 from pysc2.lib import actions
 from pysc2.lib import features
@@ -14,6 +15,7 @@ _SELECT_IDLE_WORKER = actions.FUNCTIONS.select_idle_worker.id
 # Features
 _PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
 _UNIT_TYPE = features.SCREEN_FEATURES.unit_type.index
+_HEIGHT_MAP = features.SCREEN_FEATURES.height_map.index
 _IDLE_WORKER_COUNT = 7
 
 # Units ID
@@ -30,7 +32,7 @@ _NEW_SELECTION = [0]
 
 # Others
 _MAX_COLLECTING_DISTANCE = SCREEN_RESOLUTION / 3
-_BUILDING_TILES_SIZE = 4  # True with a resolution of 84, need to be updated to handle others resolutions.
+_BUILDING_TILES_SIZE = SCREEN_RESOLUTION / 21
 
 
 def build(obs, building_tiles_size):
@@ -38,13 +40,23 @@ def build(obs, building_tiles_size):
 
     # Find a valid emplacement
     building_tiles_size += 2  # Handle the free space needed around the building.
-    building_size = building_tiles_size * _BUILDING_TILES_SIZE
+    building_size = int(building_tiles_size * _BUILDING_TILES_SIZE)
     unit_type = obs.observation["screen"][_UNIT_TYPE]
+    height_map = obs.observation["screen"][_HEIGHT_MAP]
+    valid_location_center_list = _find_valid_building_location(unit_type, height_map, building_size)
+    if not valid_location_center_list:
+        valid_location_center_list = _find_valid_building_location(unit_type, height_map, building_size,
+                                                                  SCREEN_RESOLUTION / 20)
+    if not valid_location_center_list:
+        raise NoValidBuildingLocationError()
+    building_location = random.choice(valid_location_center_list)
+    print("building_location :", building_location)
 
     return result_action_list
 
 
-def find_valid_building_location(unit_type_screen, building_size):
+def _find_valid_building_location(unit_type_screen, height_map, building_size, step=SCREEN_RESOLUTION/5):
+    step = int(step)
     if building_size % 2 == 0:
         building_size += 1  # A building has a unique center, so it needs an odd size.
     half_building_size = building_size // 2  # Entire division, so it is round down.
@@ -64,11 +76,24 @@ def find_valid_building_location(unit_type_screen, building_size):
                     if unit_type_screen[i + k][j + l] != 0:
                         center_location_is_valid = False
                         break
-            if center_location_is_valid:
+            if center_location_is_valid and _check_map_height_for_building(height_map, building_size, (i, j)):
                 valid_center_location.append((i, j))
-            j += 1
-        i += 1
+            j += step
+        i += step
     return valid_center_location
+
+
+def _check_map_height_for_building(height_map, building_size, potential_center_location):
+    if building_size % 2:
+        building_size += 1
+    half_size_building = building_size // 2
+
+    center_row, center_col = potential_center_location
+    for i in range(center_row - half_size_building, center_row + half_size_building):
+        for j in range(center_col - half_size_building, center_col + half_size_building):
+            if height_map[i][j] != height_map[center_row][center_col]:
+                return False
+    return True
 
 
 def select_scv(obs):
@@ -93,7 +118,7 @@ def select_scv(obs):
             dist = np.linalg.norm(np.array(scv) - np.array(resource))
             dist += np.linalg.norm(np.array(scv) - np.array(command_center))
             if dist < _MAX_COLLECTING_DISTANCE:
-                print(scv)
+                print("target select :", scv)
                 return actions.FunctionCall(_SELECT_POINT, [_NEW_SELECTION, scv])
 
     # Select an idle SCV
@@ -106,4 +131,10 @@ def select_scv(obs):
 class NoValidSCVError(RuntimeError):
     """
     Raise when no valid scv can be selected according to defined rules.
+    """
+
+
+class NoValidBuildingLocationError(RuntimeError):
+    """
+    Raise when no valid location to build a building is found in the current screen
     """

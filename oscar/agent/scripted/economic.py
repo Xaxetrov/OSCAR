@@ -16,8 +16,8 @@ class Economic(base_agent.BaseAgent):
     def step(self, obs):
         time.sleep(0.02)
         if self.steps % 500 == 0:
-            print(find_valid_building_location(obs.observation["screen"][_UNIT_TYPE], 16))
-            print(self.steps)
+            build(obs, 2)
+            print("steps :", self.steps)
         self.steps += 1
         return actions.FunctionCall(_NO_OP, [])
         # try:
