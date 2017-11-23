@@ -35,7 +35,7 @@ _MAX_COLLECTING_DISTANCE = SCREEN_RESOLUTION / 3
 _BUILDING_TILES_SIZE = SCREEN_RESOLUTION / 21
 
 
-def build(obs, building_tiles_size):
+def build(obs, building_tiles_size, building_id):
     result_action_list = [select_scv(obs)]
 
     # Find a valid emplacement
@@ -46,11 +46,14 @@ def build(obs, building_tiles_size):
     valid_location_center_list = _find_valid_building_location(unit_type, height_map, building_size)
     if not valid_location_center_list:
         valid_location_center_list = _find_valid_building_location(unit_type, height_map, building_size,
-                                                                  SCREEN_RESOLUTION / 20)
+                                                                   SCREEN_RESOLUTION / 20)
     if not valid_location_center_list:
         raise NoValidBuildingLocationError()
     building_location = random.choice(valid_location_center_list)
-    print("building_location :", building_location)
+    build_action = actions.FunctionCall(building_id, [_QUEUED, building_location])
+    result_action_list.insert(0, build_action)
+
+    # Send the scv to collect resources
 
     return result_action_list
 
