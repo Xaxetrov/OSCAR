@@ -4,8 +4,8 @@ import random
 from oscar.constants import *
 
 
-def build(obs, building_tiles_size, building_id):
-    result_action_list = [select_scv(obs)]
+def build(obs, building_tiles_size, building_id, propagate_error=False):
+    result_action_list = select_scv(obs)
 
     # Find a valid emplacement
     building_tiles_size += 2  # Handle the free space needed around the building.
@@ -22,10 +22,16 @@ def build(obs, building_tiles_size, building_id):
     building_location = random.choice(valid_location_center_list)
     print("building_location :", building_location)
     build_action = actions.FunctionCall(building_id, [QUEUED, building_location])
-    result_action_list.insert(0, build_action)
+    result_action_list.append(build_action)
 
-    # Send the scv to collect resources
-    result_action_list.insert(0, harvest_mineral(obs))
+    # Send the scv back to collect resources
+    try:
+        result_action_list += harvest_mineral(obs)
+    except NoMineralError:
+        # If propagate_error is False, the SCV will be idle at the end of the build action.
+        # Another agent will need to sent it back to work.
+        if propagate_error:
+            raise
 
     return result_action_list
 
@@ -54,14 +60,6 @@ def _find_valid_building_location(unit_type_screen, height_map, building_size, s
     return valid_center_location
 
 
-def harvest_mineral(obs):
-    unit_type = obs.observation["screen"][UNIT_TYPE]
-    mineral_y, mineral_x = np.isin(unit_type, ALL_MINERAL_FIELD).nonzero()
-    random_index = np.random.randint(0, len(mineral_x))
-    any_mineral = (mineral_x[random_index], mineral_y[random_index])
-    return actions.FunctionCall(HARVEST_GATHER_SCREEN, [NOT_QUEUED, any_mineral])
-
-
 def _check_map_height_for_building(height_map, building_size, potential_center_location):
     if building_size % 2:
         building_size += 1
@@ -73,6 +71,17 @@ def _check_map_height_for_building(height_map, building_size, potential_center_l
             if height_map[i][j] != height_map[center_row][center_col]:
                 return False
     return True
+
+
+def harvest_mineral(obs, queued=True):
+    unit_type = obs.observation["screen"][UNIT_TYPE]
+    mineral_y, mineral_x = np.isin(unit_type, ALL_MINERAL_FIELD).nonzero()
+    if not mineral_x:
+        raise NoMineralError()
+    
+    random_index = np.random.randint(0, len(mineral_x))
+    any_mineral = (mineral_x[random_index], mineral_y[random_index])
+    return [actions.FunctionCall(HARVEST_GATHER_SCREEN, [QUEUED if queued else NOT_QUEUED, any_mineral])]
 
 
 def select_scv(obs):
@@ -97,22 +106,34 @@ def select_scv(obs):
             dist = np.linalg.norm(np.array(scv) - np.array(resource))
             dist += np.linalg.norm(np.array(scv) - np.array(command_center))
             if dist < MAX_COLLECTING_DISTANCE:
-                return actions.FunctionCall(SELECT_POINT, [NEW_SELECTION, scv])
+                return [actions.FunctionCall(SELECT_POINT, [NEW_SELECTION, scv])]
 
     # Select an idle SCV
     if obs.observation["player"][IDLE_WORKER_COUNT] != 0:
-        return actions.FunctionCall(SELECT_IDLE_WORKER, [NEW_SELECTION])
+        return [actions.FunctionCall(SELECT_IDLE_WORKER, [NEW_SELECTION])]
 
     raise NoValidSCVError()
 
 
-class NoValidSCVError(RuntimeError):
+class ActionError(RuntimeError):
+    """
+    Raise when something went wrong when doing an action.
+    """
+
+
+class NoValidSCVError(ActionError):
     """
     Raise when no valid scv can be selected according to defined rules.
     """
 
 
-class NoValidBuildingLocationError(RuntimeError):
+class NoValidBuildingLocationError(ActionError):
     """
-    Raise when no valid location to build a building is found in the current screen
+    Raise when no valid location to build a building is found in the current screen.
+    """
+
+
+class NoMineralError(ActionError):
+    """
+    Raise when no mineral is on the screen whereas a SCV need to go mining.
     """

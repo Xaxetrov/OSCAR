@@ -12,8 +12,8 @@ class Economic(base_agent.BaseAgent):
     def step(self, obs):
         if obs.observation["player"][1] >= 100 and len(self.actions_list) == 0:
             self.actions_list = build(obs, 2, BUILD_SUPPLY_DEPOT)
-            return self.actions_list.pop()
+            return self.actions_list.pop(0)
         if self.actions_list:
-            return self.actions_list.pop()
+            return self.actions_list.pop(0)
         return actions.FunctionCall(NO_OP, [])
 
