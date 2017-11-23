@@ -1,8 +1,8 @@
 
 from oscar.env import envs
-# from oscar.agent.scripted.minigame.deepmindAgents import CollectMineralShards
+from oscar.agent.scripted.minigame.deepmindAgents import CollectMineralShards
 # from oscar.agent.scripted.minigame.bruno_mineralshard import CollectMineralShards
-from oscar.agent.scripted.minigame.nicolas_mineralshard import CollectMineralShardsP
+# from oscar.agent.scripted.minigame.nicolas_mineralshard import CollectMineralShardsP
 from learning_tools.A3C_learner.neuralmodel import get_neural_network, save_neural_network
 from learning_tools.A3C_learner.constants import ENV
 import gym
@@ -10,13 +10,13 @@ import numpy as np
 import time
 
 # ENV = 'pysc2-mineralshard-v1' set into the constants file (of A3C learner)
-TRAINING_STEPS = 240 * 20
-TEST_RUN = 10
+TRAINING_STEPS = 240 * 30
+TEST_RUN = 5
 
 RUN_NN_ACTION = False
 
 env = gym.make(ENV)
-agent = CollectMineralShardsP()
+agent = CollectMineralShards()
 
 output_shape = env.action_space.n
 input_shape = env.observation_space.shape

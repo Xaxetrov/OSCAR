@@ -1,7 +1,7 @@
 import math
 from keras.models import Model, load_model, save_model
 from keras.layers import Conv2D, Input, Dense, Flatten, \
-    BatchNormalization, Reshape, Activation, Permute, MaxPooling2D
+    BatchNormalization, Reshape, Activation, Permute, MaxPooling2D, Concatenate
 
 from learning_tools.A3C_learner.constants import *
 
@@ -90,21 +90,35 @@ def get_neural_network(input_shape, output_shape,
             elif size % 256 == 0:
                 number_of_output_layer = size // 256
                 # this is a spacial action with 16*16 output
-                spacial = Conv2D(number_of_output_layer,
-                                 5,
-                                 # strides=(2, 2),
-                                 padding='same',
-                                 activation='relu',
-                                 name='spacial_policy_' + str(i)
-                                 )(sc_l2)
+                spacial_action_conv2d_list = []
+                for a in range(0, number_of_output_layer):
+                    layer = Conv2D(1,
+                                   5,
+                                   # strides=(2, 2),
+                                   padding='same',
+                                   activation='relu',
+                                   name='spacial_policy_' + str(a) + "_" + str(i)
+                                   )(sc_l2)
+                    layer = Flatten(name='flatten_spacial_policy_' + str(a) + "_" + str(i)
+                                    )(layer)
+                    spacial_action_conv2d_list.append(layer)
+                # spacial = Conv2D(number_of_output_layer,
+                #                  5,
+                #                  # strides=(2, 2),
+                #                  padding='same',
+                #                  activation='relu',
+                #                  name='spacial_policy_' + str(i)
+                #                  )(sc_l2)
                 # set the layers as the first dimension
-                out = Permute((3, 1, 2), name='permute_dimension_out_' + str(i))(spacial)
+                # out = Permute((3, 1, 2), name='permute_dimension_out_' + str(i))(spacial)
                 # flatten the output
-                out = Reshape(target_shape=(-1,),
-                              name='reshape_out_' + str(i)
-                              )(out)
+                # out = Reshape(target_shape=(-1,),
+                #               name='reshape_out_' + str(i)
+                #               )(out)
                 # out = Flatten(name='flatten_spacial_policy_' + str(i))(out)
                 # normalize the spacial action output layer
+                out = Concatenate(name="spacial_concat_" + str(i)
+                                  )(spacial_action_conv2d_list)
                 out = Activation(activation='softmax',
                                  name='output_spacial_policy_' + str(i)
                                  )(out)

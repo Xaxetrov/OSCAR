@@ -75,9 +75,9 @@ class Pysc2MineralshardEnv2(Pysc2Env):
         while len(self.obs_list) < OBS_LENGTH * len(obs):
             self.obs_list += obs
         # select all marines at first step
-        # formatted_action = actions.FunctionCall(_SELECT_ARMY, [_SELECT_ALL])
-        # full_obs, _, _, _ = super()._step([formatted_action])
-        # self.add_to_obs_list(self.format_observation(full_obs))
+        formatted_action = actions.FunctionCall(_SELECT_ARMY, [_SELECT_ALL])
+        full_obs, _, _, _ = super()._step([formatted_action])
+        self.add_to_obs_list(self.format_observation(full_obs))
         return self.obs_list
 
     def _render(self, mode='human', close=False):
