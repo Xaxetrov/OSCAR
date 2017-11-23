@@ -98,7 +98,7 @@ def select_scv(obs):
 
     # Select an idle SCV
     if obs.observation["player"][_IDLE_WORKER_COUNT] != 0:
-        return actions.FunctionCall(_SELECT_IDLE_WORKER, [_NOT_QUEUED])
+        return actions.FunctionCall(_SELECT_IDLE_WORKER, [0])  # TODO: wtf s the arg
 
     raise NoValidSCVError()
 
