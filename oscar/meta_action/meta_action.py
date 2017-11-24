@@ -8,7 +8,7 @@ def build(obs, building_tiles_size, building_id, propagate_error=False):
     result_action_list = select_scv(obs)
 
     # Find a valid emplacement
-    building_tiles_size += 2  # Handle the free space needed around the building.
+    building_tiles_size += 0  # Handle the free space needed around the building.
     building_cell_size = int(building_tiles_size * TILES_SIZE_IN_CELL)
     unit_type = obs.observation["screen"][UNIT_TYPE]
     height_map = obs.observation["screen"][HEIGHT_MAP]
@@ -19,8 +19,9 @@ def build(obs, building_tiles_size, building_id, propagate_error=False):
                                                                    SCREEN_RESOLUTION / 20)
     if not valid_location_center_list:
         raise NoValidBuildingLocationError()
+    # building_location = random.choice(valid_location_center_list)
     building_location = random.choice(valid_location_center_list)
-    print("building_location :", building_location)
+    building_location = (building_location[1], building_location[0])
     build_action = actions.FunctionCall(building_id, [QUEUED, building_location])
     result_action_list.append(build_action)
 
@@ -76,7 +77,7 @@ def _check_map_height_for_building(height_map, building_size, potential_center_l
 def harvest_mineral(obs, queued=True):
     unit_type = obs.observation["screen"][UNIT_TYPE]
     mineral_y, mineral_x = np.isin(unit_type, ALL_MINERAL_FIELD).nonzero()
-    if not mineral_x:
+    if len(mineral_x) == 0:
         raise NoMineralError()
     
     random_index = np.random.randint(0, len(mineral_x))
@@ -96,6 +97,9 @@ def select_scv(obs):
     unit_type = obs.observation["screen"][UNIT_TYPE]
     scv_y, scv_x = (unit_type == TERRAN_SCV).nonzero()
     command_center_y, command_center_x = (unit_type == TERRAN_COMMAND_CENTER).nonzero()
+    if len(command_center_x) == 0:
+        return select_idle_scv(obs)
+
     command_center = [int(command_center_x.mean()), int(command_center_y.mean())]
 
     # Select a SCV collecting mineral or vespene gas
@@ -108,10 +112,14 @@ def select_scv(obs):
             if dist < MAX_COLLECTING_DISTANCE:
                 return [actions.FunctionCall(SELECT_POINT, [NEW_SELECTION, scv])]
 
+    return select_idle_scv(obs)
+    raise NoValidSCVError()
+
+
+def select_idle_scv(obs):
     # Select an idle SCV
     if obs.observation["player"][IDLE_WORKER_COUNT] != 0:
         return [actions.FunctionCall(SELECT_IDLE_WORKER, [NEW_SELECTION])]
-
     raise NoValidSCVError()
 
 

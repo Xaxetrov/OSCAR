@@ -5,6 +5,7 @@ SCREEN_RESOLUTION = 84
 
 # Functions
 BUILD_SUPPLY_DEPOT = actions.FUNCTIONS.Build_SupplyDepot_screen.id
+BUILD_BARRACKS = actions.FUNCTIONS.Build_Barracks_screen.id
 NO_OP = actions.FUNCTIONS.no_op.id
 SELECT_POINT = actions.FUNCTIONS.select_point.id
 SELECT_IDLE_WORKER = actions.FUNCTIONS.select_idle_worker.id
@@ -16,6 +17,7 @@ SMART_SCREEN = actions.FUNCTIONS.Smart_screen.id
 PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
 UNIT_TYPE = features.SCREEN_FEATURES.unit_type.index
 HEIGHT_MAP = features.SCREEN_FEATURES.height_map.index
+PLAYER_MINERAL_QUANTITY = 1
 IDLE_WORKER_COUNT = 7
 MINERAL_FIELD = 341
 MINERAL_FIELD_750 = 483
