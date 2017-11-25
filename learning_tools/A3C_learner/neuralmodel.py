@@ -56,7 +56,7 @@ def get_neural_network(input_shape, output_shape,
                        padding='same',
                        name='conv2d_layer1'
                        )(sc_ir)
-        sc_l1 = BatchNormalization(name='normalization1')(sc_l1)
+        # sc_l1 = BatchNormalization(name='normalization1')(sc_l1)
         # reduce screen to 16x16 with 8 filters
         sc_l2 = Conv2D(8,
                        5,
@@ -65,7 +65,7 @@ def get_neural_network(input_shape, output_shape,
                        padding='same',
                        name='conv2d_layer2'
                        )(sc_l1)
-        sc_l2 = BatchNormalization(name='normalization2')(sc_l2)
+        # sc_l2 = BatchNormalization(name='normalization2')(sc_l2)
         # reduce action space before Dense layer (4x4)
         sc_p = MaxPooling2D(pool_size=(4, 4))(sc_l2)
         sc_f = Flatten(name='flatten_spacial')(sc_p)

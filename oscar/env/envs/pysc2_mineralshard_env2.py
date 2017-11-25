@@ -57,7 +57,7 @@ class Pysc2MineralshardEnv2(Pysc2Env):
             sc2_action = self.get_select_action(action - 256)
         else:
             # else set NO OP...
-            print("WARNING: action", action, "is a valid action")
+            # print("WARNING: action", action, "is not a valid action")
             sc2_action = self.get_non_spacial_action(0)
         formatted_action = actions.FunctionCall(sc2_action[0], sc2_action[1])
         # call mother class to run action in SC2

@@ -10,7 +10,7 @@ import numpy as np
 import time
 
 # ENV = 'pysc2-mineralshard-v1' set into the constants file (of A3C learner)
-TRAINING_STEPS = 240 * 30
+TRAINING_STEPS = 240 * 30 * 0
 TEST_RUN = 10
 
 RUN_NN_ACTION = False

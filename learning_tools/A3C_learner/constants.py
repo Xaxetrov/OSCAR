@@ -1,8 +1,8 @@
 # constants
 ENV = 'pysc2-mineralshard-v1'
 
-RUN_TIME = 60
-THREADS = 1
+RUN_TIME = 60 * 5
+THREADS = 3
 OPTIMIZERS = 1
 THREAD_DELAY = 0.0001
 
@@ -15,7 +15,7 @@ EPS_START = 0.5
 EPS_STOP = .15
 EPS_STEPS = 75000
 
-MIN_BATCH = 64
+MIN_BATCH = 32
 LEARNING_RATE = 5e-3
 
 LOSS_V = .5			# v loss coefficient
