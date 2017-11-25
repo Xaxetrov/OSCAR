@@ -3,7 +3,7 @@ from pysc2.agents import base_agent
 from pysc2.lib import actions
 from pysc2.lib import features
 
-from oscar.meta_action.meta_action import *
+from oscar.meta_action.train_unit import *
 
 # Features
 _UNIT_TYPE = features.SCREEN_FEATURES.unit_type.index

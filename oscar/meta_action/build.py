@@ -1,6 +1,5 @@
-import numpy as np
-import random
-
+from oscar.meta_action.move import *
+from oscar.meta_action.select import *
 from oscar.constants import *
 
 
@@ -19,16 +18,15 @@ def build(obs, building_tiles_size, building_id, propagate_error=False):
                                                                    SCREEN_RESOLUTION / 20)
     if not valid_location_center_list:
         raise NoValidBuildingLocationError()
-    # building_location = random.choice(valid_location_center_list)
     building_location = random.choice(valid_location_center_list)
     building_location = (building_location[1], building_location[0])
-    build_action = actions.FunctionCall(building_id, [QUEUED, building_location])
+    build_action = actions.FunctionCall(building_id, [NOT_QUEUED, building_location])
     result_action_list.append(build_action)
 
     # Send the scv back to collect resources
     try:
         result_action_list += harvest_mineral(obs)
-    except NoMineralError:
+    except NoUnitError:
         # If propagate_error is False, the SCV will be idle at the end of the build action.
         # Another agent will need to sent it back to work.
         if propagate_error:
@@ -72,76 +70,3 @@ def _check_map_height_for_building(height_map, building_size, potential_center_l
             if height_map[i][j] != height_map[center_row][center_col]:
                 return False
     return True
-
-
-def harvest_mineral(obs, queued=True):
-    unit_type = obs.observation["screen"][UNIT_TYPE]
-    mineral_y, mineral_x = np.isin(unit_type, ALL_MINERAL_FIELD).nonzero()
-    if len(mineral_x) == 0:
-        raise NoMineralError()
-    
-    random_index = np.random.randint(0, len(mineral_x))
-    any_mineral = (mineral_x[random_index], mineral_y[random_index])
-    return [actions.FunctionCall(HARVEST_GATHER_SCREEN, [QUEUED if queued else NOT_QUEUED, any_mineral])]
-
-
-def select_scv(obs):
-    """
-    Select a SCV, with priority order: first, try to select a SCV collecting resources (mineral or vespene gas).
-    This will only try to select a SCV on screen. Then, if an idle SCV exist, select it (not necessarily on
-    screen). If none of the previous actions works, raise a NoValidSCVError.
-    :param obs: Observations of the current step.
-    :param queued: Whether the action should be queued or not.
-    :return: The action to execute to select a SCV.
-    """
-    unit_type = obs.observation["screen"][UNIT_TYPE]
-    scv_y, scv_x = (unit_type == TERRAN_SCV).nonzero()
-    command_center_y, command_center_x = (unit_type == TERRAN_COMMAND_CENTER).nonzero()
-    if len(command_center_x) == 0:
-        return select_idle_scv(obs)
-
-    command_center = [int(command_center_x.mean()), int(command_center_y.mean())]
-
-    # Select a SCV collecting mineral or vespene gas
-    resources_id_list = MINERAL_FIELD_LIST + VESPENE_GEYSER_LIST
-    resources_y, resources_x = np.isin(unit_type, resources_id_list).nonzero()
-    for scv in zip(scv_x, scv_y):
-        for resource in zip(resources_x, resources_y):
-            dist = np.linalg.norm(np.array(scv) - np.array(resource))
-            dist += np.linalg.norm(np.array(scv) - np.array(command_center))
-            if dist < MAX_COLLECTING_DISTANCE:
-                return [actions.FunctionCall(SELECT_POINT, [NEW_SELECTION, scv])]
-
-    return select_idle_scv(obs)
-    raise NoValidSCVError()
-
-
-def select_idle_scv(obs):
-    # Select an idle SCV
-    if obs.observation["player"][IDLE_WORKER_COUNT] != 0:
-        return [actions.FunctionCall(SELECT_IDLE_WORKER, [NEW_SELECTION])]
-    raise NoValidSCVError()
-
-
-class ActionError(RuntimeError):
-    """
-    Raise when something went wrong when doing an action.
-    """
-
-
-class NoValidSCVError(ActionError):
-    """
-    Raise when no valid scv can be selected according to defined rules.
-    """
-
-
-class NoValidBuildingLocationError(ActionError):
-    """
-    Raise when no valid location to build a building is found in the current screen.
-    """
-
-
-class NoMineralError(ActionError):
-    """
-    Raise when no mineral is on the screen whereas a SCV need to go mining.
-    """

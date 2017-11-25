@@ -1,6 +1,6 @@
 from pysc2.agents import base_agent
 
-from oscar.meta_action.meta_action import *
+from oscar.meta_action import *
 
 
 class Economic(base_agent.BaseAgent):
