@@ -26,7 +26,6 @@ class Pysc2MineralshardEnv(Pysc2Env):
     #                             "spacial": spaces.Discrete(16 * 16)}
     #                            )
     action_space = spaces.Discrete(0 + 16 * 16)
-    # observation_space = spaces.Box(low=0, high=4, shape=(64, 64, 2))
     observation_space = spaces.Box(low=0, high=4, shape=(2, 64, 64))
     reward_range = [0.0, float('Inf')]
 
@@ -35,7 +34,7 @@ class Pysc2MineralshardEnv(Pysc2Env):
                                 agent_race='T',
                                 screen_size_px=(64, 64),
                                 minimap_size_px=(64, 64),
-                                visualize=False,
+                                visualize=True,
                                 step_mul=8,
                                 game_steps_per_episode=None  # use map default
                                 )

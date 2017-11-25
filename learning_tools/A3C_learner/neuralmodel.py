@@ -117,8 +117,11 @@ def get_neural_network(input_shape, output_shape,
                 #               )(out)
                 # out = Flatten(name='flatten_spacial_policy_' + str(i))(out)
                 # normalize the spacial action output layer
-                out = Concatenate(name="spacial_concat_" + str(i)
-                                  )(spacial_action_conv2d_list)
+                if len(spacial_action_conv2d_list) > 1:
+                    out = Concatenate(name="spacial_concat_" + str(i)
+                                      )(spacial_action_conv2d_list)
+                else:
+                    out = spacial_action_conv2d_list[0]
                 out = Activation(activation='softmax',
                                  name='output_spacial_policy_' + str(i)
                                  )(out)

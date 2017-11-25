@@ -43,7 +43,7 @@ class CollectMineralShards(base_agent.BaseAgent):
             return actions.FunctionCall(_SELECT_POINT, [_NEW_SELECTION, [player_x[0], player_y[0]]])
 
 
-MOVE_REPEAT = 2
+MOVE_REPEAT = 1
 
 
 class CollectMineralShardsP(base_agent.BaseAgent):
