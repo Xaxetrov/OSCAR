@@ -42,8 +42,11 @@ def find_random_center(unit_type_map, unit_x, unit_y):
         returned_index = random.randint(0, len(unit_x))
         selected_coordinate_x = unit_x[returned_index]
         selected_coordinate_y = unit_y[returned_index]
-        proximity_unit_type_array = unit_type_map[selected_coordinate_x - 1:selected_coordinate_x + 2,
-                                                  selected_coordinate_y - 1:selected_coordinate_y + 2]
+
+        lower_slice_x = max(selected_coordinate_x - 1, 0)
+        lower_slice_y = max(selected_coordinate_y - 1, 0)
+        proximity_unit_type_array = unit_type_map[lower_slice_x:selected_coordinate_x + 2,
+                                                  lower_slice_y:selected_coordinate_y + 2]
         if np.min(proximity_unit_type_array) == np.max(proximity_unit_type_array):
             break
 
