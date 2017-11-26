@@ -17,19 +17,18 @@ def select_scv(obs):
 
     resources_id = ALL_MINERAL_FIELD + ALL_VESPENE_GEYSER
     try:
-        resources_x, resources_y = find_position(obs, resources_id, select_method="all", player_relative=PLAYER_NEUTRAL)
+        resource = find_position(obs, resources_id, select_method="mean", player_relative=PLAYER_NEUTRAL)
     except NoUnitError:
         return select_idle_scv(obs)
 
     best_scv = None
     best_distance = None
     for scv in zip(scv_x, scv_y):
-        for resource in zip(resources_x, resources_y):
-            distance = np.linalg.norm(np.array(scv) - np.array(resource))
-            distance += np.linalg.norm(np.array(scv) - np.array(command_center))
-            if distance < MAX_COLLECTING_DISTANCE and (best_scv is None or distance < best_distance):
-                best_scv = scv
-                best_distance = distance
+        distance = np.linalg.norm(np.array(scv) - np.array(resource))
+        distance += np.linalg.norm(np.array(scv) - np.array(command_center))
+        if distance < MAX_COLLECTING_DISTANCE and (best_scv is None or distance < best_distance):
+            best_scv = scv
+            best_distance = distance
     if best_scv is not None:
         return [actions.FunctionCall(SELECT_POINT, [NEW_SELECTION, best_scv])]
 
