@@ -1,12 +1,12 @@
-from pysc2.agents import base_agent
 from pysc2.lib import actions
 
 import random
 
 
-class RandomAgent(base_agent.BaseAgent):
+# TODO: As RandomAgent is no more call directly by pysc2, action_spec is undefined.
+class RandomAgent():
     def __init__(self):
-        super().__init__()
+        pass
 
     def step(self, obs):
         output = []
@@ -14,7 +14,7 @@ class RandomAgent(base_agent.BaseAgent):
         args = self.action_spec.functions[selected_action_id].args
         for arg in args:
             output.append([random.randint(0, size - 1) for size in arg.sizes])
-        return actions.FunctionCall(selected_action_id, output)
+        return ([actions.FunctionCall(selected_action_id, output)], None, None)
 
 
 

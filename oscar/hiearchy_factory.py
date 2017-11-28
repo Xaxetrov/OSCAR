@@ -1,6 +1,6 @@
 import json
 
-from oscar.agent.commander.commander import Commander
+from oscar.agent.commander.base_commander import BaseCommander
 
 
 def build_hierarchy(configuration_filename: str):
@@ -11,42 +11,58 @@ def build_hierarchy(configuration_filename: str):
     """
     with open(configuration_filename) as configuration_file:
         configuration = json.load(configuration_file)
-    configuration_file.close()
 
     # Convert structure ids to integers (in place)
     configuration["structure"] = {int(k): [int(i) for i in v] for k, v in configuration["structure"].items()}
-
-    # Check configuration file
     check_configuration(configuration)
 
     # Build family and return general's children
-    general_subordinates = build_children(configuration, 0)
-    return general_subordinates
+    general_subordinate = build_agent(configuration, 0)
+    return general_subordinate
 
 
-def build_children(configuration, id):
-    children_ids = configuration["structure"][id]
+def build_agent(configuration, agent_id):
+    agent_info = get_agent_information(configuration["agents"], agent_id)
+    agent_class = get_class(agent_info["class_name"])
+
+    try:
+        children_ids = configuration["structure"][agent_id]
+    except KeyError:
+        children_ids = []
+    if len(children_ids) == 0:
+        return agent_class()
+
     children = []
     for child_id in children_ids:
-        child_info = next((agent for agent in configuration["agents"] if agent["id"] == child_id))
-        child_class = get_class(child_info["class_name"])
-        if issubclass(child_class, Commander):
-            little_children = build_children(configuration, child_id)
-            child = child_class(little_children)
-        else:
-            child = child_class()
-        children.append(child)
-    return children
+        children.append(build_agent(configuration, child_id))
+    return agent_class(children)
+
+    # children = []
+    # for child_id in children_ids:
+    #     child_info = get_agent_information(configuration["agents"], child_id)
+    #     child_class = get_class(child_info["class_name"])
+    #     if issubclass(child_class, BaseCommander):
+    #         little_children = build_agent(configuration, child_id)
+    #         child = child_class(little_children)
+    #     else:
+    #         child = child_class()
+    #     children.append(child)
+    # return children
+
+
+def get_agent_information(agent_information, agent_id):
+    for agent in agent_information:
+        if agent["id"] == agent_id:
+            return agent
+    raise ValueError("Agent of id {0} is not in agent_information".format(agent_id))
 
 
 def check_configuration(configuration):
-    valid = check_structure_acyclic(configuration["structure"])
-    if not valid:
+    if not check_structure_acyclic(configuration["structure"]):
         raise CyclicStructureError("The loaded structure is cyclic")
-    valid = valid and check_agents_are_known(configuration)
-    if not valid:
+    if not check_agents_are_known(configuration):
         raise UndefinedAgentError("An agent is declared in the structure but undefined")
-    return valid
+    return True
 
 
 def check_structure_acyclic(structure):

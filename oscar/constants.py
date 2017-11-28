@@ -14,8 +14,8 @@ HARVEST_GATHER_SCREEN = actions.FUNCTIONS.Harvest_Gather_screen.id
 MOVE_SCREEN = actions.FUNCTIONS.Move_screen.id
 SMART_SCREEN = actions.FUNCTIONS.Smart_screen.id
 TRAIN_SCV_QUICK = actions.FUNCTIONS.Train_SCV_quick.id
+TRAIN_MARINE_QUICK = actions.FUNCTIONS.Train_Marine_quick.id
 MOVE_CAMERA = actions.FUNCTIONS.move_camera.id
-MOVE_SCREEN = actions.FUNCTIONS.Move_screen.id
 NO_OP = actions.FUNCTIONS.no_op.id
 
 # Features
@@ -34,6 +34,7 @@ MINI_CAMERA = features.MINIMAP_FEATURES.camera.index
 
 # Units ID
 TERRAN_COMMAND_CENTER = 18
+TERRAN_BARRACKS_ID = 21
 TERRAN_SCV = 45
 MINERAL_FIELD = 341
 MINERAL_FIELD_750 = 483

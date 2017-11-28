@@ -1,9 +1,7 @@
-import random
-
-from pysc2.agents import base_agent
+from abc import ABC, abstractmethod
 
 
-class Commander(base_agent.BaseAgent):
+class BaseCommander(ABC):
     """
     A base class for commander agents.
     These are specialized agents that capable of delegating tasks to subordinates
@@ -16,33 +14,14 @@ class Commander(base_agent.BaseAgent):
         super().__init__()
         self._subordinates = subordinates
 
-    def setup(self, obs_spec, action_spec):
-        """
-        Setups itself and all subordinates
-        :return:
-        """
-        super().setup(obs_spec, action_spec)
-        for subordinate in self._subordinates:
-            subordinate.setup(obs_spec, action_spec)
-
     def step(self, obs):
         """
         Does some work and choose a subordinate that will play
         :param obs: observations from the game
         :return: an action chosen by a subordinate
         """
-        super().step(obs)
-        playing_subordinate = random.choice(self._subordinates)
+        playing_subordinate = self.choose_subordinate()
         return playing_subordinate.step(obs)
-
-    def reset(self):
-        """
-        Resets itself and all subordinates
-        :return:
-        """
-        super().reset()
-        for subordinate in self._subordinates:
-            subordinate.reset()
 
     def add_subordinate(self, agent):
         """
@@ -60,16 +39,23 @@ class Commander(base_agent.BaseAgent):
         """
         self._subordinates.remove(agent)
 
+    @abstractmethod
+    def choose_subordinate(self):
+        """
+        Choose a subordinate among the list of subordinates, and make it play.
+        :return: A subordinate among the list of subordinates.
+        """
+
     def __str__(self):
-        return self.print_tree(1)
+        return self.print_tree(0)
 
     def print_tree(self, depth):
-        ret = "I am a {} and I have {} subordinates :\n".format(type(self).__name__,
-                                                                               len(self._subordinates))
+        depth += 1
+        ret = "I am a {} and I have {} subordinates :\n".format(type(self).__name__, len(self._subordinates))
         for subordinate in self._subordinates:
             ret += "\t" * depth
-            if issubclass(type(subordinate), Commander):
+            try:
                 ret += subordinate.print_tree(depth + 1)
-            else:
+            except AttributeError:
                 ret += str(subordinate) + "\n"
         return ret

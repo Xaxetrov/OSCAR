@@ -1,15 +1,13 @@
-from oscar.agent.commander.commander import Commander
-from oscar.agent.nn.tsp_agent import TSPAgent
+from oscar.agent.commander.base_commander import BaseCommander
 
 
-class QueueCommander(Commander):
+class QueueCommander(BaseCommander):
 
     def __init__(self, subordinates):
         super().__init__(subordinates)
         self.__next_agent = 0
 
-    def step(self, obs):
-        super().step(obs)
+    def choose_subordinate(self):
         playing_subordinate = self._subordinates[self.__next_agent]
         self.__next_agent = (self.__next_agent + 1) % len(self._subordinates)
-        return playing_subordinate.step(obs)
+        return playing_subordinate
