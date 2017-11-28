@@ -1,8 +1,5 @@
 import json
 
-from oscar.agent.commander.base_commander import BaseCommander
-
-
 def build_hierarchy(configuration_filename: str):
     """
     Builds a hierarchy of agents from a json file
@@ -22,6 +19,13 @@ def build_hierarchy(configuration_filename: str):
 
 
 def build_agent(configuration, agent_id):
+    """
+    Builds an agent from a configuration.
+    Recursive function : builds the children before the agent itself
+    :param configuration:
+    :param agent_id: The id of the agent in the "structure" and "agents" part of the configuration
+    :return: the built agent
+    """
     agent_info = get_agent_information(configuration["agents"], agent_id)
     agent_class = get_class(agent_info["class_name"])
 
@@ -58,6 +62,11 @@ def get_agent_information(agent_information, agent_id):
 
 
 def check_configuration(configuration):
+    """
+    runs various integrity tests on a given structured configuration
+    :param configuration:
+    :return: if all checks are passed
+    """
     if not check_structure_acyclic(configuration["structure"]):
         raise CyclicStructureError("The loaded structure is cyclic")
     if not check_agents_are_known(configuration):
@@ -94,6 +103,11 @@ def check_structure_acyclic(structure):
 
 
 def check_agents_are_known(configuration):
+    """
+    Check if all keys of the configuration "structure" are defined in the "agents" section
+    :param configuration: the object group to look at
+    :return: if all agents are well defined
+    """
     known_agents = configuration["agents"]
     known_agents_id = [agent["id"] for agent in known_agents]
 
@@ -105,6 +119,11 @@ def check_agents_are_known(configuration):
 
 
 def get_class(kls):
+    """
+    returns the class corresponding to a string
+    :param kls: the given string pointing to the class from the working directory
+    :return: the class as an object
+    """
     parts = kls.split('.')
     class_module = ".".join(parts[:-1])
     m = __import__(class_module)
