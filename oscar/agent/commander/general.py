@@ -14,6 +14,7 @@ class General(base_agent.BaseAgent):
         self._action_list = []
         self._callback = None
         self._callback_params = []
+        # TODO: call super ?
 
     def step(self, obs):
         if len(self._action_list) != 0:

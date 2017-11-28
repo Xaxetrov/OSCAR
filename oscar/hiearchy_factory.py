@@ -1,5 +1,6 @@
 import json
 
+
 def build_hierarchy(configuration_filename: str):
     """
     Builds a hierarchy of agents from a json file
@@ -40,22 +41,18 @@ def build_agent(configuration, agent_id):
     for child_id in children_ids:
         children.append(build_agent(configuration, child_id))
     return agent_class(children)
-
-    # children = []
-    # for child_id in children_ids:
-    #     child_info = get_agent_information(configuration["agents"], child_id)
-    #     child_class = get_class(child_info["class_name"])
-    #     if issubclass(child_class, BaseCommander):
-    #         little_children = build_agent(configuration, child_id)
-    #         child = child_class(little_children)
-    #     else:
-    #         child = child_class()
-    #     children.append(child)
-    # return children
+    # TODO: during the instantiation ids are not treated as unique. Problem if agent X is subordinate of 2 commanders
+    # Idea : maintain a structure with all already instantiated agents to do the check
 
 
-def get_agent_information(agent_information, agent_id):
-    for agent in agent_information:
+def get_agent_information(agents, agent_id):
+    """
+    Finds an agent in a list of agents, by id
+    :param agents: the list to look into
+    :param agent_id: the id to look for
+    :return: the agent (if found)
+    """
+    for agent in agents:
         if agent["id"] == agent_id:
             return agent
     raise ValueError("Agent of id {0} is not in agent_information".format(agent_id))
