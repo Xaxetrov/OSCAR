@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 
+from agent.custom_agent import CustomAgent
 
-class BaseCommander(ABC):
+
+class BaseCommander(CustomAgent):
     """
     A base class for commander agents.
     These are specialized agents that capable of delegating tasks to subordinates
@@ -13,6 +15,8 @@ class BaseCommander(ABC):
         """
         super().__init__()
         self._subordinates = subordinates
+        self._locked_choice = False
+        self._playing_subordinate = None
 
     def step(self, obs):
         """
@@ -20,8 +24,12 @@ class BaseCommander(ABC):
         :param obs: observations from the game
         :return: an action chosen by a subordinate
         """
-        playing_subordinate = self.choose_subordinate()
-        return playing_subordinate.step(obs)
+
+        if not self._locked_choice:
+            self._playing_subordinate = self.choose_subordinate()
+        play = self._playing_subordinate.step(obs)
+        self._locked_choice = play["locked_choice"]
+        return play
 
     def add_subordinate(self, agent):
         """
@@ -45,6 +53,15 @@ class BaseCommander(ABC):
         Choose a subordinate among the list of subordinates, and make it play.
         :return: A subordinate among the list of subordinates.
         """
+
+    def unlock_choice(self):
+        if self._locked_choice:
+            self._locked_choice = False
+            try:
+                self._playing_subordinate.unlock_choice()
+            # Method does not exist = not a commander
+            except AttributeError:
+                pass
 
     def __str__(self):
         return self.print_tree(0)

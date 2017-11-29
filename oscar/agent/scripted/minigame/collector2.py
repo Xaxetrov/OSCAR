@@ -1,6 +1,6 @@
 import numpy
 
-from pysc2.agents import base_agent
+from oscar.agent.custom_agent import CustomAgent
 from pysc2.lib import actions
 from pysc2.lib import features
 
@@ -18,7 +18,7 @@ _QUEUED = [1]
 _SELECT_ALL = [0]
 
 
-class CollectMyShards(base_agent.BaseAgent):
+class CollectMyShards(CustomAgent):
     """An agent specifically for solving the CollectMineralShards map."""
 
     def __init__(self):
