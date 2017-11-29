@@ -20,7 +20,18 @@ class General(base_agent.BaseAgent):
         if len(self._action_list) != 0:
             return self._check_and_return_action(obs)
 
-        (self._action_list, self._callback, self._callback_params) = self._child.step(obs)
+        child_return = self._child.step(obs)
+        self._action_list = child_return[0]
+        try:
+            self._callback = child_return[1]
+        except IndexError:
+            self._callback = None
+
+        try:
+            self._callback_params = child_return[2]
+        except IndexError:
+            self._callback_params = []
+
         return self._check_and_return_action(obs)
 
     def _check_and_return_action(self, obs):

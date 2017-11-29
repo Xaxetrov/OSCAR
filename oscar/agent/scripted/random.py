@@ -14,7 +14,7 @@ class RandomAgent():
         args = self.action_spec.functions[selected_action_id].args
         for arg in args:
             output.append([random.randint(0, size - 1) for size in arg.sizes])
-        return ([actions.FunctionCall(selected_action_id, output)], None, None)
+        return ([actions.FunctionCall(selected_action_id, output)], )
 
 
 

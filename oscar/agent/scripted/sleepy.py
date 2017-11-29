@@ -6,7 +6,7 @@ class NoOpAgent():
         pass
 
     def step(self, _):
-        return ([actions.FunctionCall(NO_OP, [])], None, None)
+        return ([actions.FunctionCall(NO_OP, [])], )
 
 
 
