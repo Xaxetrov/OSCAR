@@ -30,6 +30,7 @@ def build_agent(configuration, instantiated, agent_id):
     :param agent_id: The id of the agent in the "structure" and "agents" part of the configuration
     :return: the built agent
     """
+    # TODO: Add arguments to agents
     agent_info = get_agent_information(configuration["agents"], agent_id)
     agent_class = get_class(agent_info["class_name"])
 

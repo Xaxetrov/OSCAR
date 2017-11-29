@@ -70,23 +70,23 @@ class CollectMyShards(CustomAgent):
             # To do when mind job is done
             self.state = 1
             self.marine_selected[0] = True
-            return actions.FunctionCall(_SELECT_POINT, [[0], self.marines[0]])
+            return [actions.FunctionCall(_SELECT_POINT, [[0], self.marines[0]])]
 
         # Queuing calls
         elif self.state == 1:
             for marine_idx, marine in enumerate(self.marines):
                 if self.visited[marine_idx]:
                     to_queue = self.visited[marine_idx].pop(0)
-                    return actions.FunctionCall(_MOVE_SCREEN, [_QUEUED, to_queue])
+                    return [actions.FunctionCall(_MOVE_SCREEN, [_QUEUED, to_queue])]
                 elif self.marine_selected[marine_idx]:
                     self.marine_selected[marine_idx] = False
                     try:
                         self.marine_selected[marine_idx + 1] = True
                     except IndexError:
                         self.state = 2
-                        return actions.FunctionCall(_NO_OP, [])
+                        return [actions.FunctionCall(_NO_OP, [])]
                     else:
-                        return actions.FunctionCall(_SELECT_POINT, [[0], self.marines[marine_idx + 1]])
+                        return [actions.FunctionCall(_SELECT_POINT, [[0], self.marines[marine_idx + 1]])]
 
 
         # Done wait for new points
@@ -96,5 +96,5 @@ class CollectMyShards(CustomAgent):
             neutral_y, neutral_x = (player_relative == _PLAYER_NEUTRAL).nonzero()
             if len(neutral_y) == 20:
                 self.state = 0
-                return self.step(obs)
-            return actions.FunctionCall(_NO_OP, [])
+                return [self.step(obs)]
+            return [actions.FunctionCall(_NO_OP, [])]
