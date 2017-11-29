@@ -14,12 +14,15 @@ def build_hierarchy(configuration_filename: str):
     configuration["structure"] = {int(k): [int(i) for i in v] for k, v in configuration["structure"].items()}
     check_configuration(configuration)
 
+    # Create a maintained set of instantiated agents
+    instantiated = {}
+
     # Build family and return general's children
-    general_subordinate = build_agent(configuration, 0)
+    general_subordinate = build_agent(configuration, instantiated, 0)
     return general_subordinate
 
 
-def build_agent(configuration, agent_id):
+def build_agent(configuration, instantiated, agent_id):
     """
     Builds an agent from a configuration.
     Recursive function : builds the children before the agent itself
@@ -30,19 +33,23 @@ def build_agent(configuration, agent_id):
     agent_info = get_agent_information(configuration["agents"], agent_id)
     agent_class = get_class(agent_info["class_name"])
 
+    # First check if the agent (and its children) has already been instantiated by another commander
+    if agent_id in instantiated:
+        return instantiated[agent_id]
+
     try:
         children_ids = configuration["structure"][agent_id]
     except KeyError:
         children_ids = []
     if len(children_ids) == 0:
-        return agent_class()
-
-    children = []
-    for child_id in children_ids:
-        children.append(build_agent(configuration, child_id))
-    return agent_class(children)
-    # TODO: during the instantiation ids are not treated as unique. Problem if agent X is subordinate of 2 commanders
-    # Idea : maintain a structure with all already instantiated agents to do the check
+        agent = agent_class()
+    else:
+        children = []
+        for child_id in children_ids:
+            children.append(build_agent(configuration, instantiated, child_id))
+        agent = agent_class(children)
+        instantiated[agent_id] = agent
+    return agent
 
 
 def get_agent_information(agents, agent_id):

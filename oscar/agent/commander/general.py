@@ -9,12 +9,12 @@ DEFAULT_CONFIGURATION = "config/economic.json"
 
 class General(base_agent.BaseAgent):
     def __init__(self, configuration_filename=DEFAULT_CONFIGURATION):
+        super().__init__()
         self._child = build_hierarchy(configuration_filename)
         print(self, flush=True)
         self._action_list = []
         self._callback = None
         self._callback_params = []
-        # TODO: call super ?
 
     def step(self, obs):
         if len(self._action_list) != 0:
