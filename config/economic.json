@@ -4,7 +4,10 @@
   "agents": [
     {
       "id": 0,
-      "class_name": "oscar.agent.scripted.economic.Economic"
+      "class_name": "oscar.agent.scripted.economic.Economic",
+      "arguments": {
+        "message": "You are beautiful"
+      }
     }
   ]
 }

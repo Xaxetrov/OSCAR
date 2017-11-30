@@ -3,9 +3,10 @@ from oscar.meta_action import *
 
 
 class Economic(CustomAgent):
-    def __init__(self):
+    def __init__(self, message="I hate you"):
         self.supply_depot_built = False
         self.barracks_built = False
+        self._message = message
         super().__init__()
 
     def set_supply_depot_built(self):
@@ -38,3 +39,6 @@ class Economic(CustomAgent):
         play["actions"] = meta_action
         return play
 
+    def print_tree(self, depth):
+        return "I am a {} and my depth is {}. I have a message to tell you : {}".format(type(self).__name__, depth
+                                                                                        , self._message)
