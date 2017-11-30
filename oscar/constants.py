@@ -5,9 +5,9 @@ from pysc2.lib import features
 BUILD_SUPPLY_DEPOT = actions.FUNCTIONS.Build_SupplyDepot_screen.id
 BUILD_BARRACKS = actions.FUNCTIONS.Build_Barracks_screen.id
 SELECT_POINT = actions.FUNCTIONS.select_point.id
+SELECT_RECT = actions.FUNCTIONS.select_rect.id
 SELECT_IDLE_WORKER = actions.FUNCTIONS.select_idle_worker.id
 SELECT_ARMY = actions.FUNCTIONS.select_army.id
-SELECT_ALL = [0]
 ATTACK_SCREEN = actions.FUNCTIONS.Attack_screen.id
 ATTACK_MINIMAP = actions.FUNCTIONS.Attack_minimap.id
 HARVEST_GATHER_SCREEN = actions.FUNCTIONS.Harvest_Gather_screen.id
@@ -20,17 +20,20 @@ NO_OP = actions.FUNCTIONS.no_op.id
 
 # Features
 PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
-PLAYER_FRIENDLY = 1
+PLAYER_SELF = 1
 PLAYER_NEUTRAL = 3  # beacon/minerals
 PLAYER_HOSTILE = 4
 UNIT_TYPE = features.SCREEN_FEATURES.unit_type.index
 HEIGHT_MAP = features.SCREEN_FEATURES.height_map.index
-PLAYER_MINERAL_QUANTITY = 1
-IDLE_WORKER_COUNT = 7
 
 # Layers
+MINI_HEIGHT_MAP = features.MINIMAP_FEATURES.height_map.index
 MINI_VISIBILITY = features.MINIMAP_FEATURES.visibility_map.index
+MINI_CREEP = features.MINIMAP_FEATURES.creep.index
 MINI_CAMERA = features.MINIMAP_FEATURES.camera.index
+MINI_PLAYER_ID = features.MINIMAP_FEATURES.player_id.index
+MINI_PLAYER_RELATIVE = features.MINIMAP_FEATURES.player_relative.index
+MINI_SELECTED = features.MINIMAP_FEATURES.selected.index
 
 # Units ID
 TERRAN_COMMAND_CENTER = 18
@@ -51,13 +54,26 @@ EXPLORED_CELL = 1
 VISIBLE_CELL = 2
 
 # Parameters
-PLAYER_SELF = 1
-PLAYER_NEUTRAL = 3
 NOT_QUEUED = [False]
 QUEUED = [True]
 NEW_SELECTION = [0]
+SELECT_ALL = [0]
 
 # Others
 SCREEN_RESOLUTION = 84
 MAX_COLLECTING_DISTANCE = SCREEN_RESOLUTION / 3
 TILES_SIZE_IN_CELL = SCREEN_RESOLUTION / 21
+
+# Observation index
+# 'player' indexes
+PLAYER_ID = 0
+MINERALS = 1
+VESPENE = 2
+FOOD_USED = 3
+FOOD_CAP = 4
+FOOD_USED_BY_ARMY = 5
+FOOD_USED_BY_WORKERS = 6
+IDLE_WORKER_COUNT = 7
+ARMY_COUNT = 8
+WARP_GATE_COUNT = 9
+LARVA_COUNT = 10

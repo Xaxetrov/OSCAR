@@ -13,3 +13,7 @@ register(
     id='pysc2-mineralshard-v1',
     entry_point='oscar.env.envs:Pysc2MineralshardEnv2',
 )
+register(
+    id='pysc2-collect-meta-v0',
+    entry_point='oscar.env.envs:Pysc2CollectMetaEnv',
+)

@@ -129,7 +129,7 @@ class Find_and_defeat_zerglings():
     def _get_units_locations(self, obs):
         if self._units_x is None or not self._units_y is None:
             player_relative = obs.observation["screen"][PLAYER_RELATIVE]
-            self._units_y, self._units_x = (player_relative == PLAYER_FRIENDLY).nonzero()
+            self._units_y, self._units_x = (player_relative == PLAYER_SELF).nonzero()
         return self._units_x, self._units_y
 
     def _get_units_mean_location(self, obs):

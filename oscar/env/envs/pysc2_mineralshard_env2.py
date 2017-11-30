@@ -3,6 +3,7 @@ from pysc2.lib import actions
 from pysc2.lib import features
 from gym import spaces
 import numpy as np
+import copy
 
 from oscar.env.envs.pysc2_env import Pysc2Env
 
@@ -31,7 +32,7 @@ class Pysc2MineralshardEnv2(Pysc2Env):
     # action_space = spaces.Dict({"non-spacial": spaces.Discrete(3),
     #                             "spacial": spaces.Discrete(16 * 16)}
     #                            )
-    action_space = spaces.Discrete(0 + 16 * 16 * 2)  # two 16*16 output: first selection second move
+    action_space = spaces.Discrete(0 + 16 * 16 * 2)  # two 16*16 output: first move second selection
     observation_space = spaces.Box(low=0, high=4, shape=(2 * OBS_LENGTH, 64, 64))
     reward_range = [0.0, float('Inf')]
 
@@ -49,13 +50,14 @@ class Pysc2MineralshardEnv2(Pysc2Env):
 
     def _step(self, action):
         if _MOVE_SCREEN in self.last_obs.observation["available_actions"] \
-                and action >= 256:
-            sc2_action = self.get_move_action(action - 256)
-        elif action < 256:
+                and action < 256:
+            sc2_action = self.get_move_action(action)
+        elif action >= 256:
             # do a spacial selection
-            sc2_action = self.get_select_action(action)
+            sc2_action = self.get_select_action(action - 256)
         else:
             # else set NO OP...
+            # print("WARNING: action", action, "is not a valid action")
             sc2_action = self.get_non_spacial_action(0)
         formatted_action = actions.FunctionCall(sc2_action[0], sc2_action[1])
         # call mother class to run action in SC2
@@ -64,7 +66,7 @@ class Pysc2MineralshardEnv2(Pysc2Env):
         obs = self.format_observation(full_obs)
         # update obs list
         self.add_to_obs_list(obs)
-        return self.obs_list, reward, done, debug_dic
+        return np.array(self.obs_list, dtype=int, copy=True), reward, done, debug_dic
 
     def _reset(self):
         # call mother class to reset env
@@ -78,7 +80,7 @@ class Pysc2MineralshardEnv2(Pysc2Env):
         # formatted_action = actions.FunctionCall(_SELECT_ARMY, [_SELECT_ALL])
         # full_obs, _, _, _ = super()._step([formatted_action])
         # self.add_to_obs_list(self.format_observation(full_obs))
-        return self.obs_list
+        return np.array(self.obs_list, dtype=int, copy=True)
 
     def _render(self, mode='human', close=False):
         super()._render(mode, close)
@@ -93,8 +95,8 @@ class Pysc2MineralshardEnv2(Pysc2Env):
             """
         x_16 = (linear_position % 16)
         y_16 = (linear_position // 16)
-        x_64 = (x_16 * 4 + 2)  # + 2 to center on the 64x64 grid after the 16x16->64x64 conversion
-        y_64 = (y_16 * 4 + 2)
+        x_64 = x_16 * 4 + 2  # + 2 to center on the 64x64 grid after the 16x16->64x64 conversion
+        y_64 = y_16 * 4 + 2
         # print("Movement at x16:", x_16, "y16", y_16)
         # x and y are not in the right order, else it doesn't work...
         action_args = [_NOT_QUEUED, [x_64, y_64]]
@@ -132,12 +134,8 @@ class Pysc2MineralshardEnv2(Pysc2Env):
     def format_observation(obs):
         player_relative = obs.observation["screen"][features.SCREEN_FEATURES.player_relative.index]
         selected = obs.observation["screen"][features.SCREEN_FEATURES.selected.index]
-        formatted_obs = [player_relative, selected]
-        # formatted_obs = np.zeros(shape=(64, 64, 2))
-        # for formatted_row, pr_row, selected_row in zip(formatted_obs, player_relative, selected):
-        #     for formatted_case, pr_case, selected_case in zip(formatted_row, pr_row, selected_row):
-        #         formatted_case[0] = pr_case
-        #         formatted_case[1] = selected_case
+        formatted_obs = [player_relative,
+                         selected]
         return formatted_obs
 
     def add_to_obs_list(self, obs):
@@ -154,9 +152,9 @@ class Pysc2MineralshardEnv2(Pysc2Env):
 
         # unmask available action
         if _SELECT_RECT in available_actions:
-            action_mask[:256] = 1
-        if _MOVE_SCREEN in available_actions:
             action_mask[256:] = 1
+        if _MOVE_SCREEN in available_actions:
+            action_mask[:256] = 1
 
         return action_mask
 
@@ -166,12 +164,12 @@ class Pysc2MineralshardEnv2(Pysc2Env):
             y_64, x_64 = sc2_args[1]
             x_16 = x_64 // 4
             y_16 = y_64 // 4
-            return int(16 * x_16 + y_16)
-        elif sc2_action == _MOVE_SCREEN and len(sc2_args) == 2:
-            y_64, x_64 = sc2_args[1]
-            x_16 = x_64 // 4
-            y_16 = y_64 // 4
             return int(16 * x_16 + y_16 + 256)
+        elif sc2_action == _MOVE_SCREEN and len(sc2_args) == 2:
+                x_64, y_64 = sc2_args[1]
+                x_16 = x_64 // 4
+                y_16 = y_64 // 4
+                return int(16 * y_16 + x_16)
         else:
             print("unhandled action: ", sc2_action, sc2_args)
             return None
