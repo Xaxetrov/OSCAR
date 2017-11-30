@@ -15,12 +15,13 @@ OBS_LENGTH = 4
 class Pysc2CollectMetaEnv(Pysc2Env):
     metadata = {'render.modes': ['human']}
 
-    action_space = spaces.Discrete(3)  # two 16*16 output: first move second selection
+    action_space = spaces.Discrete(9)  # two 16*16 output: first move second selection
     observation_space = spaces.Box(low=0, high=float('Inf'), shape=(2 * OBS_LENGTH + 4, 64, 64))
     reward_range = [0.0, float('Inf')]
 
     def __init__(self):
-        self.pysc2_env = SC2Env(map_name='CollectMineralsAndGas',
+        self.pysc2_env = SC2Env(  # map_name='CollectMineralsAndGas',
+                                map_name='Simple64',
                                 agent_race='T',
                                 screen_size_px=(64, 64),
                                 minimap_size_px=(64, 64),
@@ -30,6 +31,8 @@ class Pysc2CollectMetaEnv(Pysc2Env):
                                 )
         self.obs_list = deque()
         self.action_list = deque()
+        self.total_reward = 0
+        self.step_reward = 0
         super().__init__()
 
     def _step(self, action):
@@ -46,9 +49,11 @@ class Pysc2CollectMetaEnv(Pysc2Env):
             if len(self.action_list) == 0 or done:
                 self.action_list = deque()
                 break
-        return self.get_return_obs(full_obs), reward, done, debug_dic
+        self.update_reward()
+        return self.get_return_obs(full_obs), self.step_reward, done, debug_dic
 
     def _reset(self):
+        self.total_reward = 0
         # call mother class to reset env
         full_obs = super()._reset()
         # format observation to be the one corresponding to observation_space
@@ -65,16 +70,40 @@ class Pysc2CollectMetaEnv(Pysc2Env):
         Methods used for the translation of Gym's action to pysc2's action
     """
     def get_meta_action(self, action_id):
-        if action_id == 1:
-            return meta_action.build(self.last_obs,
-                                     building_tiles_size=2,
-                                     building_id=BUILD_SUPPLY_DEPOT)
-        elif action_id == 2:
-            return meta_action.build(self.last_obs,
-                                     building_tiles_size=3,
-                                     building_id=BUILD_BARRACKS)
-        else:  # action_id == 0 or error previously
-            return [actions.FunctionCall(NO_OP, [])]
+        try:
+            if action_id == 1:  # build supply
+                return meta_action.build(self.last_obs,
+                                         building_tiles_size=2,
+                                         building_id=BUILD_SUPPLY_DEPOT)
+            elif action_id == 2:  # build Barracks
+                return meta_action.build(self.last_obs,
+                                         building_tiles_size=3,
+                                         building_id=BUILD_BARRACKS)
+            elif action_id == 3:  # select IDLE SCV
+                pass
+                # return meta_action.select_idle_scv(self.last_obs)
+            elif action_id == 4:  # harvest mineral
+                return meta_action.harvest_mineral(self.last_obs, queued=True)
+            elif action_id == 5:  # train Marines
+                return meta_action.train_unit(self.last_obs,
+                                              building_id=TERRAN_BARRACKS_ID,
+                                              action_train_id=TRAIN_MARINE_QUICK)
+            elif action_id == 6:  # train SCV
+                return meta_action.train_unit(self.last_obs,
+                                              building_id=TERRAN_COMMAND_CENTER,
+                                              action_train_id=TRAIN_SCV_QUICK)
+            elif action_id == 7:  # select army
+                return [actions.FunctionCall(SELECT_ARMY, [SELECT_ALL])]
+            elif action_id == 8:  # attack !
+                return meta_action.attack_minimap(self.last_obs, queued=False)
+        except meta_action.NoValidSCVError:
+            pass
+        except meta_action.NoValidBuildingLocationError:
+            pass
+        except meta_action.NoUnitError:
+            pass
+
+        return [actions.FunctionCall(NO_OP, [])]
 
     def get_return_obs(self, currant_obs):
         formatted_obs = self.format_observation(currant_obs)
@@ -102,9 +131,20 @@ class Pysc2CollectMetaEnv(Pysc2Env):
             self.obs_list.append(o)
 
     def get_action_mask(self):
-        return np.ones(shape=(3,))
+        return np.ones(shape=(self.action_space.n,))
         # raise NotImplementedError("action mask is not implemented for meta action")
 
     @staticmethod
     def get_action_id_from_action(sc2_action, sc2_args):
         raise NotImplementedError("conversion from sc2 action to env action is not implemented for meta action")
+
+    def update_reward(self):
+        new_total_reward = 0
+        new_total_reward += self.last_obs.observation['score_cumulative'][5]
+        new_total_reward += self.last_obs.observation['score_cumulative'][6]
+        self.step_reward = new_total_reward - self.total_reward
+        self.total_reward = new_total_reward
+
+
+
+

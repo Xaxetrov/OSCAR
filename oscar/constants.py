@@ -27,8 +27,13 @@ UNIT_TYPE = features.SCREEN_FEATURES.unit_type.index
 HEIGHT_MAP = features.SCREEN_FEATURES.height_map.index
 
 # Layers
+MINI_HEIGHT_MAP = features.MINIMAP_FEATURES.height_map.index
 MINI_VISIBILITY = features.MINIMAP_FEATURES.visibility_map.index
+MINI_CREEP = features.MINIMAP_FEATURES.creep.index
 MINI_CAMERA = features.MINIMAP_FEATURES.camera.index
+MINI_PLAYER_ID = features.MINIMAP_FEATURES.player_id.index
+MINI_PLAYER_RELATIVE = features.MINIMAP_FEATURES.player_relative.index
+MINI_SELECTED = features.MINIMAP_FEATURES.selected.index
 
 # Units ID
 TERRAN_COMMAND_CENTER = 18

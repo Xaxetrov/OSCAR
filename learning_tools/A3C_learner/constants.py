@@ -3,7 +3,7 @@ ENV = 'pysc2-collect-meta-v0'
 
 RUN_TIME = 60 * 5
 THREADS = 1
-OPTIMIZERS = 0
+OPTIMIZERS = 1
 THREAD_DELAY = 0.0001
 
 GAMMA = 0.99
