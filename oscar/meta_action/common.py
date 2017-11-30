@@ -25,7 +25,7 @@ def find_position(obs, unit_type_id, select_method="random_center", player_relat
     if select_method == "random_center":
         return find_random_center(unit_type_map, unit_x, unit_y)
     elif select_method == "random":
-        returned_index = random.randint(0, len(unit_x))
+        returned_index = random.randint(0, len(unit_x) - 1)
         return (unit_x[returned_index], unit_y[returned_index])
     elif select_method == "mean":
         return (int(unit_x.mean()), int(unit_y.mean()))

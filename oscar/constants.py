@@ -8,19 +8,31 @@ SELECT_POINT = actions.FUNCTIONS.select_point.id
 SELECT_RECT = actions.FUNCTIONS.select_rect.id
 SELECT_IDLE_WORKER = actions.FUNCTIONS.select_idle_worker.id
 SELECT_ARMY = actions.FUNCTIONS.select_army.id
+ATTACK_SCREEN = actions.FUNCTIONS.Attack_screen.id
+ATTACK_MINIMAP = actions.FUNCTIONS.Attack_minimap.id
 HARVEST_GATHER_SCREEN = actions.FUNCTIONS.Harvest_Gather_screen.id
 MOVE_SCREEN = actions.FUNCTIONS.Move_screen.id
 SMART_SCREEN = actions.FUNCTIONS.Smart_screen.id
 TRAIN_SCV_QUICK = actions.FUNCTIONS.Train_SCV_quick.id
+TRAIN_MARINE_QUICK = actions.FUNCTIONS.Train_Marine_quick.id
+MOVE_CAMERA = actions.FUNCTIONS.move_camera.id
 NO_OP = actions.FUNCTIONS.no_op.id
 
 # Features
 PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
+PLAYER_SELF = 1
+PLAYER_NEUTRAL = 3  # beacon/minerals
+PLAYER_HOSTILE = 4
 UNIT_TYPE = features.SCREEN_FEATURES.unit_type.index
 HEIGHT_MAP = features.SCREEN_FEATURES.height_map.index
 
+# Layers
+MINI_VISIBILITY = features.MINIMAP_FEATURES.visibility_map.index
+MINI_CAMERA = features.MINIMAP_FEATURES.camera.index
+
 # Units ID
 TERRAN_COMMAND_CENTER = 18
+TERRAN_BARRACKS_ID = 21
 TERRAN_SCV = 45
 MINERAL_FIELD = 341
 MINERAL_FIELD_750 = 483
@@ -31,9 +43,12 @@ VESPENE_GEYSER = 342
 RICH_VESPENE_GEYSER = 344
 ALL_VESPENE_GEYSER = (VESPENE_GEYSER, RICH_VESPENE_GEYSER)
 
+# Exploration
+UNEXPLORED_CELL = 0
+EXPLORED_CELL = 1
+VISIBLE_CELL = 2
+
 # Parameters
-PLAYER_SELF = 1
-PLAYER_NEUTRAL = 3
 NOT_QUEUED = [False]
 QUEUED = [True]
 NEW_SELECTION = [0]

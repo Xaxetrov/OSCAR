@@ -1,16 +1,10 @@
-from pysc2.agents import base_agent
-from pysc2.lib import actions
-
-_NO_OP = actions.FUNCTIONS.no_op.id
+from oscar.constants import *
 
 
-class NoOpAgent(base_agent.BaseAgent):
+class NoOpAgent():
     def __init__(self):
-        super().__init__()
+        pass
 
-    def step(self, obs):
-        return actions.FunctionCall(_NO_OP, [])
-
-
-
+    def step(self, _):
+        return ([actions.FunctionCall(NO_OP, [])], )
 

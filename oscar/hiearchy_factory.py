@@ -1,7 +1,5 @@
 import json
 
-from oscar.agent.commander.commander import Commander
-
 
 def build_hierarchy(configuration_filename: str):
     """
@@ -11,42 +9,73 @@ def build_hierarchy(configuration_filename: str):
     """
     with open(configuration_filename) as configuration_file:
         configuration = json.load(configuration_file)
-    configuration_file.close()
 
     # Convert structure ids to integers (in place)
     configuration["structure"] = {int(k): [int(i) for i in v] for k, v in configuration["structure"].items()}
-
-    # Check configuration file
     check_configuration(configuration)
 
+    # Create a maintained set of instantiated agents
+    instantiated = {}
+
     # Build family and return general's children
-    general_subordinates = build_children(configuration, 0)
-    return general_subordinates
+    general_subordinate = build_agent(configuration, instantiated, 0)
+    return general_subordinate
 
 
-def build_children(configuration, id):
-    children_ids = configuration["structure"][id]
-    children = []
-    for child_id in children_ids:
-        child_info = next((agent for agent in configuration["agents"] if agent["id"] == child_id))
-        child_class = get_class(child_info["class_name"])
-        if issubclass(child_class, Commander):
-            little_children = build_children(configuration, child_id)
-            child = child_class(little_children)
-        else:
-            child = child_class()
-        children.append(child)
-    return children
+def build_agent(configuration, instantiated, agent_id):
+    """
+    Builds an agent from a configuration.
+    Recursive function : builds the children before the agent itself
+    :param agent_id: The id of the agent in the "structure" and "agents" part of the configuration
+    :return: the built agent
+    """
+    # TODO: Add arguments to agents
+    agent_info = get_agent_information(configuration["agents"], agent_id)
+    agent_class = get_class(agent_info["class_name"])
+
+    # First check if the agent (and its children) has already been instantiated by another commander
+    if agent_id in instantiated:
+        return instantiated[agent_id]
+
+    try:
+        children_ids = configuration["structure"][agent_id]
+    except KeyError:
+        children_ids = []
+    if len(children_ids) == 0:
+        agent = agent_class()
+    else:
+        children = []
+        for child_id in children_ids:
+            children.append(build_agent(configuration, instantiated, child_id))
+        agent = agent_class(children)
+        instantiated[agent_id] = agent
+    return agent
+
+
+def get_agent_information(agents, agent_id):
+    """
+    Finds an agent in a list of agents, by id
+    :param agents: the list to look into
+    :param agent_id: the id to look for
+    :return: the agent (if found)
+    """
+    for agent in agents:
+        if agent["id"] == agent_id:
+            return agent
+    raise ValueError("Agent of id {0} is not in agent_information".format(agent_id))
 
 
 def check_configuration(configuration):
-    valid = check_structure_acyclic(configuration["structure"])
-    if not valid:
+    """
+    runs various integrity tests on a given structured configuration
+    :param configuration:
+    :return: if all checks are passed
+    """
+    if not check_structure_acyclic(configuration["structure"]):
         raise CyclicStructureError("The loaded structure is cyclic")
-    valid = valid and check_agents_are_known(configuration)
-    if not valid:
+    if not check_agents_are_known(configuration):
         raise UndefinedAgentError("An agent is declared in the structure but undefined")
-    return valid
+    return True
 
 
 def check_structure_acyclic(structure):
@@ -78,6 +107,11 @@ def check_structure_acyclic(structure):
 
 
 def check_agents_are_known(configuration):
+    """
+    Check if all keys of the configuration "structure" are defined in the "agents" section
+    :param configuration: the object group to look at
+    :return: if all agents are well defined
+    """
     known_agents = configuration["agents"]
     known_agents_id = [agent["id"] for agent in known_agents]
 
@@ -89,6 +123,11 @@ def check_agents_are_known(configuration):
 
 
 def get_class(kls):
+    """
+    returns the class corresponding to a string
+    :param kls: the given string pointing to the class from the working directory
+    :return: the class as an object
+    """
     parts = kls.split('.')
     class_module = ".".join(parts[:-1])
     m = __import__(class_module)

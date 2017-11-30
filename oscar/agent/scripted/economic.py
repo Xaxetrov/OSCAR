@@ -1,35 +1,40 @@
-from pysc2.agents import base_agent
-
+from oscar.agent.custom_agent import CustomAgent
 from oscar.meta_action import *
 
 
-class Economic(base_agent.BaseAgent):
+class Economic(CustomAgent):
     def __init__(self):
-        self.actions_list = []
         self.supply_depot_built = False
-        self.noop_mode = False
+        self.barracks_built = False
         super().__init__()
 
+    def set_supply_depot_built(self):
+        print("supply depot")
+        self.supply_depot_built = True
+
+    def set_barracks_built(self):
+        print("barracks")
+        self.barracks_built = True
+
     def step(self, obs):
-        if self.noop_mode:
-            return actions.FunctionCall(NO_OP, [])
+        play = {}
 
-        if len(self.actions_list) != 0:
-            return self.actions_list.pop(0)
+        if not self.supply_depot_built:
+            meta_action = build(obs, 2, BUILD_SUPPLY_DEPOT)
+            play["actions"] = meta_action
+            play["success_callback"] = self.set_supply_depot_built
+            return play
 
-        if obs.observation["player"][MINERALS] >= 100 and not self.supply_depot_built:
-            self.actions_list = build(obs, 2, BUILD_SUPPLY_DEPOT)
-            self.supply_depot_built = True
-            return self.actions_list.pop(0)
+        if not self.barracks_built:
+            meta_action = build(obs, 3, BUILD_BARRACKS)
+            play["actions"] = meta_action
+            play["success_callback"] = self.set_barracks_built
+            return play
 
-        if obs.observation["player"][MINERALS] >= 400 and self.supply_depot_built:
-            try:
-                self.actions_list = build(obs, 3, BUILD_BARRACKS)
-            except NoValidBuildingLocationError:
-                print("activate no op mode")
-                self.noop_mode = True
-                return actions.FunctionCall(NO_OP, [])
-            return self.actions_list.pop(0)
-
-        return actions.FunctionCall(NO_OP, [])
+        try:
+            meta_action = train_unit(obs, TERRAN_BARRACKS_ID, TRAIN_MARINE_QUICK)
+        except NoUnitError:
+            meta_action = [actions.FunctionCall(NO_OP, [])]
+        play["actions"] = meta_action
+        return play
 
