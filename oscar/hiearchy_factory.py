@@ -29,26 +29,28 @@ def build_agent(configuration, instantiated, agent_id):
     :param agent_id: The id of the agent in the "structure" and "agents" part of the configuration
     :return: the built agent
     """
-    # TODO: Add arguments to agents
     agent_info = get_agent_information(configuration["agents"], agent_id)
     agent_class = get_class(agent_info["class_name"])
+    agent_arguments = agent_info["arguments"]
 
     # First check if the agent (and its children) has already been instantiated by another commander
     if agent_id in instantiated:
         return instantiated[agent_id]
 
+    # Generate children
     try:
         children_ids = configuration["structure"][agent_id]
     except KeyError:
         children_ids = []
-    if len(children_ids) == 0:
-        agent = agent_class()
-    else:
+    if len(children_ids) != 0:
         children = []
         for child_id in children_ids:
             children.append(build_agent(configuration, instantiated, child_id))
-        agent = agent_class(children)
-        instantiated[agent_id] = agent
+        agent_arguments["subordinate"] = children
+
+    # Create the thing
+    agent = agent_class(**agent_arguments)
+    instantiated[agent_id] = agent
     return agent
 
 
