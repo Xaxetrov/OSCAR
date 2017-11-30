@@ -26,7 +26,6 @@ def build_agent(configuration, instantiated, agent_id):
     """
     Builds an agent from a configuration.
     Recursive function : builds the children before the agent itself
-    :param configuration:
     :param agent_id: The id of the agent in the "structure" and "agents" part of the configuration
     :return: the built agent
     """

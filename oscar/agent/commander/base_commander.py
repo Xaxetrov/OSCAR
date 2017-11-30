@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
-from agent.custom_agent import CustomAgent
+from oscar.agent.custom_agent import CustomAgent
 
 
-class BaseCommander(CustomAgent):
+class BaseCommander(ABC, CustomAgent):
     """
     A base class for commander agents.
     These are specialized agents that capable of delegating tasks to subordinates
@@ -28,7 +28,10 @@ class BaseCommander(CustomAgent):
         if not self._locked_choice:
             self._playing_subordinate = self.choose_subordinate()
         play = self._playing_subordinate.step(obs)
-        self._locked_choice = play["locked_choice"]
+        try:
+            self._locked_choice = play["locked_choice"]
+        except KeyError:
+            self._locked_choice = False
         return play
 
     def add_subordinate(self, agent):
@@ -62,6 +65,11 @@ class BaseCommander(CustomAgent):
             # Method does not exist = not a commander
             except AttributeError:
                 pass
+
+    def setup(self, obs_spec, action_spec):
+        super().setup(obs_spec, action_spec())
+        for subordinate in self._subordinates:
+            subordinate.setup(obs_spec, action_spec)
 
     def __str__(self):
         return self.print_tree(0)

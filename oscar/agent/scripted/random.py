@@ -1,10 +1,11 @@
 from pysc2.lib import actions
-
 import random
+
+from oscar.agent.custom_agent import CustomAgent
 
 
 # TODO: As RandomAgent is no more call directly by pysc2, action_spec is undefined.
-class RandomAgent():
+class RandomAgent(CustomAgent):
     def __init__(self):
         pass
 

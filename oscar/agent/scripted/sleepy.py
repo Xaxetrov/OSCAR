@@ -8,6 +8,3 @@ class NoOpAgent():
     def step(self, _):
         return ([actions.FunctionCall(NO_OP, [])], )
 
-
-
-

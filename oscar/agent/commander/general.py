@@ -1,22 +1,21 @@
-from pysc2.agents import base_agent
 from pysc2.lib import actions
+from pysc2.agents.base_agent import BaseAgent
 
-from agent.custom_agent import CustomAgent
 from oscar.hiearchy_factory import build_hierarchy
 from oscar.constants import NO_OP
 
 DEFAULT_CONFIGURATION = "config/economic.json"
 
 
-class General(CustomAgent):
+class General(BaseAgent):
     def __init__(self, configuration_filename=DEFAULT_CONFIGURATION):
         super().__init__()
         self._child = build_hierarchy(configuration_filename)
-        print(self, flush=True)
+        print(self)
         self._action_list = []
-        self.failure_callback = None
-        self.success_callback = None
-        self._failed = False
+        self._failure_callback = None
+        self._success_callback = None
+        self._success = False
 
     def step(self, obs):
         if len(self._action_list) != 0:
@@ -24,22 +23,28 @@ class General(CustomAgent):
 
         # Empty list
         # Callback depending on last success / failure
-        if self._failed and callable(self.failure_callback):
-            self.failure_callback()
-        elif callable(self.success_callback):
-            self.success_callback()
+        if self._success:
+            if callable(self._success_callback):
+                self._success_callback()
+        else:
+            if callable(self._failure_callback):
+                self._failure_callback()
+            try:
+                self._child.unlock_choice()
+            except AttributeError:
+                pass
         # TODO: How to pass arguments then ?
 
         child_return = self._child.step(obs)
-        self._action_list = child_return['actions']
+        self._action_list = child_return["actions"]
         try:
-            self.success_callback = child_return['success_callback']
-        except IndexError:
-            self.success_callback = None
+            self._success_callback = child_return["success_callback"]
+        except KeyError:
+            self._success_callback = None
         try:
-            self.failure_callback = child_return['failure_callback']
-        except IndexError:
-            self.failure_callback = None
+            self._failure_callback = child_return["failure_callback"]
+        except KeyError:
+            self._failure_callback = None
 
         return self._check_and_return_action(obs)
 
@@ -53,12 +58,16 @@ class General(CustomAgent):
         :return: The first action of the action list if it is valid, else NO_OP
         """
         if self._action_list[0].function in obs.observation["available_actions"]:
-            self._failed = False
+            self._success = True
             return self._action_list.pop(0)
         else:
             self._action_list = []
-            self._failed = True
+            self._success = False
             return actions.FunctionCall(NO_OP, [])
+
+    def setup(self, obs_spec, action_spec):
+        super().setup(obs_spec, action_spec)
+        self._child.setup(obs_spec, action_spec)
 
     def __str__(self):
         try:
