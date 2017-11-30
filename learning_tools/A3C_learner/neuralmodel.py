@@ -1,20 +1,21 @@
 import math
 from keras.models import Model, load_model, save_model
 from keras.layers import Conv2D, Input, Dense, Flatten, \
-    BatchNormalization, Reshape, Activation, Permute, MaxPooling2D, Concatenate
+    BatchNormalization, Reshape, Activation, Permute, MaxPooling2D, \
+    Concatenate, InputLayer
 
 from learning_tools.A3C_learner.constants import *
 
 current_neural_network_file = "learning_tools/learning_nn/" + ENV + ".knn"
 
 
-def get_neural_network(input_shape, output_shape,
+def get_neural_network(input_shape, output_shape_list,
                        file_path=current_neural_network_file,
-                       loss=None): ######################################################## CHANGED
+                       loss=None):
     """
     Constructs a NN model, either by loading it from a file or by creating it from scratch
     :param input_shape: Shape of the input given to the NN
-    :param output_shape: Shape of the output retrieved from the NN
+    :param output_shape_list: Shape of the output retrieved from the NN
     :param file_path: Path to the file that contains maybe
     :param loss: a loss function or function_name
     :return: the built neural_network model
@@ -26,20 +27,22 @@ def get_neural_network(input_shape, output_shape,
         print("old NN charged from", file_path)
     except OSError:
         # check output size
-        for out_size in output_shape:
+        for out_size in output_shape_list:
             assert type(out_size) == int
         # check input size
-        print(input_shape)
-        assert len(input_shape) > 3 and input_shape[-1] == 64 and input_shape[-2] == 64
+        assert len(input_shape) > 2 and input_shape[-1] == 64 and input_shape[-2] == 64
 
-        ######################## ASSERTION ON LOSS SHAPE ########################################
-        assert loss is None or len(loss) == len(output_shape)
+        assert loss is None or len(loss) == len(output_shape_list)
         is_custom_loss = loss is not None
         if not is_custom_loss:
-          loss = []
+            loss = []
 
-        sc_i = Input(batch_shape=input_shape,
-                     name='input')
+        input_layer_list = []
+
+        # ========== Main screen input ============
+        # sc_i = Input(batch_shape=input_shape,
+        sc_i = Input(shape=input_shape,
+                     name='input_screen')
         # keep only the three last dimensions
         sc_ir = Reshape(target_shape=(input_shape[-3], input_shape[-2], input_shape[-1]),
                         name='InputReshape'
@@ -66,6 +69,7 @@ def get_neural_network(input_shape, output_shape,
                        name='conv2d_layer2'
                        )(sc_l1)
         # sc_l2 = BatchNormalization(name='normalization2')(sc_l2)
+
         # reduce action space before Dense layer (4x4)
         sc_p = MaxPooling2D(pool_size=(4, 4))(sc_l2)
         sc_f = Flatten(name='flatten_spacial')(sc_p)
@@ -76,7 +80,7 @@ def get_neural_network(input_shape, output_shape,
 
         # generate output shapes
         output_layers = []
-        for i, size in enumerate(output_shape):
+        for i, size in enumerate(output_shape_list):
             if size == 1:
                 # this is value output, isn't it ?
                 value = Dense(1,
@@ -84,7 +88,6 @@ def get_neural_network(input_shape, output_shape,
                               name='value' + str(i)
                               )(d1)
                 output_layers.append(value)
-                ############################# ADD MSE  BY DEFAULT 
                 if not is_custom_loss:
                     loss.append('mean_squared_error')
             elif size % 256 == 0:
@@ -126,7 +129,6 @@ def get_neural_network(input_shape, output_shape,
                                  name='output_spacial_policy_' + str(i)
                                  )(out)
                 output_layers.append(out)
-                ############################# ADD categorical crossentropy BY DEFAULT (due to softmax)
                 if not is_custom_loss:
                     loss.append('categorical_crossentropy')
             elif size < 256:
@@ -135,7 +137,6 @@ def get_neural_network(input_shape, output_shape,
                                     activation='relu',
                                     name='non_spacial_policy_' + str(i))(d1)
                 output_layers.append(non_spacial)
-                ############################# ADD MSE  BY DEFAULT 
                 if not is_custom_loss:
                     loss.append('mean_squared_error')
 

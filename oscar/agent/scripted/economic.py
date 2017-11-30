@@ -17,12 +17,12 @@ class Economic(base_agent.BaseAgent):
         if len(self.actions_list) != 0:
             return self.actions_list.pop(0)
 
-        if obs.observation["player"][PLAYER_MINERAL_QUANTITY] >= 100 and not self.supply_depot_built:
+        if obs.observation["player"][MINERALS] >= 100 and not self.supply_depot_built:
             self.actions_list = build(obs, 2, BUILD_SUPPLY_DEPOT)
             self.supply_depot_built = True
             return self.actions_list.pop(0)
 
-        if obs.observation["player"][PLAYER_MINERAL_QUANTITY] >= 400 and self.supply_depot_built:
+        if obs.observation["player"][MINERALS] >= 400 and self.supply_depot_built:
             try:
                 self.actions_list = build(obs, 3, BUILD_BARRACKS)
             except NoValidBuildingLocationError:

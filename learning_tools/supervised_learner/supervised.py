@@ -10,8 +10,8 @@ import numpy as np
 import time
 
 # ENV = 'pysc2-mineralshard-v1' set into the constants file (of A3C learner)
-TRAINING_STEPS = 240 * 30 * 0
-TEST_RUN = 10
+TRAINING_STEPS = 240 * 2
+TEST_RUN = 1
 
 RUN_NN_ACTION = False
 
@@ -21,8 +21,8 @@ agent = CollectMineralShardsP()
 output_shape = env.action_space.n
 input_shape = env.observation_space.shape
 
-model = get_neural_network(input_shape=(None,) + input_shape,
-                           output_shape=[output_shape, 1])
+model = get_neural_network(input_shape=input_shape,
+                           output_shape_list=[output_shape, 1])
 model.summary()
 
 action_batch = []
