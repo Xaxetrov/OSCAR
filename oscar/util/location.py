@@ -10,13 +10,13 @@ class Location():
         self.x = _x
         self.y = _y
 
-    def squarredDistance(self, other):
+    def squarred_distance(self, other):
     	return (self.x-other.x)*(self.x-other.x) + (self.y-other.y)*(self.y-other.y)
 
     def distance(self, other):
-    	return math.sqrt(self.squarredDistance(other));
+    	return math.sqrt(self.squarred_distance(other));
 
-    def toArray(self):
+    def to_array(self):
     	return [self.x, self.y]
 
     def equals(self, other):
