@@ -122,13 +122,13 @@ class Find_and_defeat_zerglings():
 
     def _get_ennemies_locations(self, obs):
         if self._ennemies_x is None or self._ennemies_y is None:
-            player_relative = obs.observation["screen"][PLAYER_RELATIVE]
+            player_relative = obs.observation["screen"][SCREEN_PLAYER_RELATIVE]
             self._ennemies_y, self._ennemies_x = (player_relative == PLAYER_HOSTILE).nonzero()
         return self._ennemies_x, self._ennemies_y
 
     def _get_units_locations(self, obs):
         if self._units_x is None or not self._units_y is None:
-            player_relative = obs.observation["screen"][PLAYER_RELATIVE]
+            player_relative = obs.observation["screen"][SCREEN_PLAYER_RELATIVE]
             self._units_y, self._units_x = (player_relative == PLAYER_SELF).nonzero()
         return self._units_x, self._units_y
 

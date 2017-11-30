@@ -37,8 +37,6 @@ def get_neural_network(input_shape, output_shape_list,
         if not is_custom_loss:
             loss = []
 
-        input_layer_list = []
-
         # ========== Main screen input ============
         # sc_i = Input(batch_shape=input_shape,
         sc_i = Input(shape=input_shape,
@@ -51,8 +49,8 @@ def get_neural_network(input_shape, output_shape_list,
         sc_ir = Permute((2, 3, 1),
                         name="PermuteDimensions"
                         )(sc_ir)
-        # first screen layer, reduce it to 32x32 with 32 filters (layers)
-        sc_l1 = Conv2D(32,
+        # first screen layer, reduce it to 32x32 with 8 filters (layers)
+        sc_l1 = Conv2D(8,
                        5,
                        strides=(2, 2),
                        activation='relu',
@@ -60,8 +58,8 @@ def get_neural_network(input_shape, output_shape_list,
                        name='conv2d_layer1'
                        )(sc_ir)
         # sc_l1 = BatchNormalization(name='normalization1')(sc_l1)
-        # reduce screen to 16x16 with 8 filters
-        sc_l2 = Conv2D(8,
+        # reduce screen to 16x16 with 16 filters
+        sc_l2 = Conv2D(16,
                        5,
                        strides=(2, 2),
                        activation='relu',
@@ -73,7 +71,7 @@ def get_neural_network(input_shape, output_shape_list,
         # reduce action space before Dense layer (4x4)
         sc_p = MaxPooling2D(pool_size=(4, 4))(sc_l2)
         sc_f = Flatten(name='flatten_spacial')(sc_p)
-        d1 = Dense(8,
+        d1 = Dense(32,
                    activation='relu',
                    name='first_layer_for_none_spacial'
                    )(sc_f)

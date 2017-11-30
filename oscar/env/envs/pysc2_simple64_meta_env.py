@@ -12,11 +12,11 @@ from oscar import meta_action
 OBS_LENGTH = 4
 
 
-class Pysc2CollectMetaEnv(Pysc2Env):
+class Pysc2Simple64MetaEnv(Pysc2Env):
     metadata = {'render.modes': ['human']}
 
     action_space = spaces.Discrete(9)  # two 16*16 output: first move second selection
-    observation_space = spaces.Box(low=0, high=float('Inf'), shape=(2 * OBS_LENGTH + 4, 64, 64))
+    observation_space = spaces.Box(low=0, high=float('Inf'), shape=(3 * OBS_LENGTH + 4, 64, 64))
     reward_range = [0.0, float('Inf')]
 
     def __init__(self):
@@ -25,8 +25,8 @@ class Pysc2CollectMetaEnv(Pysc2Env):
                                 agent_race='T',
                                 screen_size_px=(64, 64),
                                 minimap_size_px=(64, 64),
-                                visualize=True,
-                                step_mul=8,
+                                visualize=False,
+                                step_mul=16,
                                 game_steps_per_episode=None  # use map default
                                 )
         self.obs_list = deque()
@@ -40,7 +40,6 @@ class Pysc2CollectMetaEnv(Pysc2Env):
 
         while True:
             formatted_action = self.action_list.popleft()
-            # TODO check if action is available action
             if formatted_action.function not in self.last_obs.observation["available_actions"]:
                 self.action_list = deque()
                 formatted_action = actions.FunctionCall(NO_OP, [])
@@ -118,10 +117,11 @@ class Pysc2CollectMetaEnv(Pysc2Env):
 
     @staticmethod
     def format_observation(obs):
-        player_relative = obs.observation["screen"][features.SCREEN_FEATURES.player_relative.index]
-        selected = obs.observation["screen"][features.SCREEN_FEATURES.selected.index]
+        unit_type = obs.observation["screen"][SCREEN_UNIT_TYPE]
+        player_relative = obs.observation["screen"][SCREEN_PLAYER_RELATIVE]
+        selected = obs.observation["screen"][SCREEN_SELECTED]
         formatted_obs = [player_relative,
-                         selected]
+                         selected, unit_type]
         return formatted_obs
 
     def add_to_obs_list(self, obs):
