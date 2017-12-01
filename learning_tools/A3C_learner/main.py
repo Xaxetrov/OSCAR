@@ -62,10 +62,14 @@ try:
     for e in env_list:
         e.join()
 
+    print("env closed")
+
     for o in opts:
         o.stop()
     for o in opts:
         o.join()
+
+    print("optimizer closed")
 except RuntimeError:
     print("Thread stoping cancelled, saving NN and close")
 except KeyboardInterrupt:

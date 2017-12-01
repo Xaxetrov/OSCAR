@@ -1,8 +1,8 @@
 # constants
-ENV = 'pysc2-simple64-meta-v0'
+ENV = 'pysc2-simple64-meta-per-v0'
 
-RUN_TIME = 60 * 60 * 5
-THREADS = 3
+RUN_TIME = 60 * 5
+THREADS = 1
 OPTIMIZERS = 1
 THREAD_DELAY = 0.0001
 

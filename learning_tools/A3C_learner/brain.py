@@ -104,7 +104,8 @@ class Brain:
         s_ = np.array(s_)
         s_mask = np.vstack(s_mask)
 
-        if len(s) > 5 * MIN_BATCH: print("Optimizer alert! Minimizing batch of %d" % len(s))
+        if len(s) > 5 * MIN_BATCH:
+            print("Optimizer alert! Minimizing batch of %d" % len(s))
 
         """
         The reward received from the training queue is only immediate, excluding the \gamma^n V(s_n) part,
