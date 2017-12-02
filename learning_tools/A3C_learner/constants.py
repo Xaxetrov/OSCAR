@@ -1,7 +1,7 @@
 # constants
 ENV = 'pysc2-simple64-meta-per-v0'
 
-RUN_TIME = 60 * 5
+RUN_TIME = 60 * 10
 THREADS = 1
 OPTIMIZERS = 1
 THREAD_DELAY = 0.0001
@@ -11,7 +11,7 @@ GAMMA = 0.99
 N_STEP_RETURN = 8
 GAMMA_N = GAMMA ** N_STEP_RETURN
 
-EPS_START = 0.5
+EPS_START = 0.4
 EPS_STOP = .15
 EPS_STEPS = 75000
 

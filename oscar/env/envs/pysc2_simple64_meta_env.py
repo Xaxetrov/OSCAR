@@ -32,6 +32,7 @@ class Pysc2Simple64MetaEnv(Pysc2Env):
         self.obs_list = deque()
         self.action_list = deque()
         self.total_reward = 0
+        self.last_army_count = 0
         self.step_reward = 0
         super().__init__()
 
@@ -41,12 +42,12 @@ class Pysc2Simple64MetaEnv(Pysc2Env):
         while True:
             formatted_action = self.action_list.popleft()
             if formatted_action.function not in self.last_obs.observation["available_actions"]:
-                self.action_list = deque()
+                self.action_list.clear()
                 formatted_action = actions.FunctionCall(NO_OP, [])
             # call mother class to run action in SC2
             full_obs, reward, done, debug_dic = super()._step([formatted_action])
             if len(self.action_list) == 0 or done:
-                self.action_list = deque()
+                self.action_list.clear()
                 break
         self.update_reward()
         return self.get_return_obs(full_obs), self.step_reward, done, debug_dic
@@ -144,6 +145,9 @@ class Pysc2Simple64MetaEnv(Pysc2Env):
         new_total_reward += self.last_obs.observation['score_cumulative'][6]
         self.step_reward = new_total_reward - self.total_reward
         self.total_reward = new_total_reward
+        army_count = self.last_obs.observation['player'][ARMY_COUNT]
+        self.step_reward += max(0, army_count - self.last_army_count)
+        self.last_army_count = army_count
 
 
 
