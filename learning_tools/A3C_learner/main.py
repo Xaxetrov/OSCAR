@@ -54,6 +54,9 @@ except RuntimeError:
 except KeyboardInterrupt:
     print("trainning cancelled")
 
+save_neural_network(brain.model)
+print("model saved (in case of env close fail)")
+
 try:
     print("Training time spend")
 

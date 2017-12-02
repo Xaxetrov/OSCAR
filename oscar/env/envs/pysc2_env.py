@@ -26,11 +26,12 @@ class Pysc2Env(gym.Env):
     def _step(self, action):
         """
         move the environment forward of one step
-        :param action: a pysc2 action
+        :param action: a pysc2 action (a list of one pysc2 function call)
         :return: tuple of pysc2 full observation structure, the reward for the step, if is the last
             step or not and a dict to debug information (empty)
         """
-        # Pysc2 can take a list of action ( https://github.com/deepmind/pysc2/blob/7a04e74effc88d3e2fe0e4562c99a18d06a099b2/pysc2/env/sc2_env.py#L247 )
+        # Pysc2 can take a list of action :
+        # ( https://github.com/deepmind/pysc2/blob/7a04e74effc88d3e2fe0e4562c99a18d06a099b2/pysc2/env/sc2_env.py#L247 )
         self.last_obs = self.pysc2_env.step(action)[0]
         done = self.last_obs.step_type == environment.StepType.LAST
         return self.last_obs, self.last_obs.reward, done, {}
