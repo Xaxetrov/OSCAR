@@ -1,0 +1,38 @@
+{
+  "structure": {
+    "0": [1, 2]
+  },
+  "agents": [
+    {
+      "id": 0,
+      "class_name": "oscar.agent.commander.not_blind_queue_commander.NotBlindQueueCommander",
+      "arguments": {
+      }
+    },
+    {
+      "id": 1,
+      "class_name": "oscar.agent.scripted.economic.Economic",
+      "arguments": {
+        "message": "You are beautiful"
+      }
+    },
+    {
+      "id": 2,
+      "class_name": "oscar.agent.scripted.scout.Scout",
+      "arguments": {
+        "message": "You are the beautifulest"
+      }
+    }
+  ],
+  "shared": [
+    {
+      "name": "ennemies",
+      "class_name": "oscar.shared.map_remembrance.MapRemembrance",
+      "arguments": {
+        "size": [64, 64]
+      },
+      "shared_with": [0, 2]
+    }
+  ]
+}
+

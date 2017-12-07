@@ -4,7 +4,7 @@ from pysc2.agents.base_agent import BaseAgent
 from oscar.hiearchy_factory import build_hierarchy
 from oscar.constants import NO_OP
 
-DEFAULT_CONFIGURATION = "config/economic.json"
+DEFAULT_CONFIGURATION = "config/eco_and_scout.json"
 
 
 class General(BaseAgent):

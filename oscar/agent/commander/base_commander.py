@@ -67,7 +67,7 @@ class BaseCommander(ABC, CustomAgent):
                 pass
 
     def setup(self, obs_spec, action_spec):
-        super().setup(obs_spec, action_spec())
+        super().setup(obs_spec, action_spec)
         for subordinate in self._subordinates:
             subordinate.setup(obs_spec, action_spec)
 

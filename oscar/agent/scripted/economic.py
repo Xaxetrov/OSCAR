@@ -19,12 +19,11 @@ class Economic(CustomAgent):
 
     def step(self, obs):
         play = {}
-
-        if not self.supply_depot_built:
-            meta_action = build(obs, 2, BUILD_SUPPLY_DEPOT)
-            play["actions"] = meta_action
-            play["success_callback"] = self.set_supply_depot_built
-            return play
+        """if not self.supply_depot_built:
+                    meta_action = build(obs, 2, BUILD_SUPPLY_DEPOT)
+                    play["actions"] = meta_action
+                    play["success_callback"] = self.set_supply_depot_built
+                    return play
 
         if not self.barracks_built:
             meta_action = build(obs, 3, BUILD_BARRACKS)
@@ -34,8 +33,10 @@ class Economic(CustomAgent):
 
         try:
             meta_action = train_unit(obs, TERRAN_BARRACKS_ID, TRAIN_MARINE_QUICK)
-        except NoUnitError:
-            meta_action = [actions.FunctionCall(NO_OP, [])]
+        except NoUnitError:"""
+
+        meta_action = [actions.FunctionCall(NO_OP, [])]
+
         play["actions"] = meta_action
         return play
 

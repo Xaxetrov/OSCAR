@@ -21,5 +21,15 @@
       "id": 3,
       "class_name": "oscar.agent.scripted.sleepy.NoOpAgent"
     }
+  ],
+  "shared": [
+    {
+      "name": "minimap",
+      "class_name": "oscar.shared.map_remembrance.MapRemembrance",
+      "arguments": {
+        "size": [64, 64]
+      },
+      "shared_with": [0, 1]
+    }
   ]
 }

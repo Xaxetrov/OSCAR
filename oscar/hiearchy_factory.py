@@ -17,15 +17,25 @@ def build_hierarchy(configuration_filename: str):
     # Create a maintained set of instantiated agents
     instantiated = {}
 
+    # build shared objects to be associated with agents later
+    shared_objects = build_shared_list(configuration)
+
     # Build family and return general's children
-    general_subordinate = build_agent(configuration, instantiated, 0)
+    general_subordinate = build_agent(configuration, instantiated, shared_objects, 0)
     return general_subordinate
 
+# ----------------------------------------------------------------------------------------------- #
+# ----------------------------------------BUILD AGENT-------------------------------------------- #
+# ----------------------------------------------------------------------------------------------- #
 
-def build_agent(configuration, instantiated, agent_id):
+
+def build_agent(configuration, instantiated, shared_objects, agent_id):
     """
     Builds an agent from a configuration.
     Recursive function : builds the children before the agent itself
+    :param configuration: the configuration file
+    :param instantiated: a maintained set of instanciated agents
+    :param shared_objects: a list of objects potentially shared among some agents
     :param agent_id: The id of the agent in the "structure" and "agents" part of the configuration
     :return: the built agent
     """
@@ -45,12 +55,19 @@ def build_agent(configuration, instantiated, agent_id):
     if len(children_ids) != 0:
         children = []
         for child_id in children_ids:
-            children.append(build_agent(configuration, instantiated, child_id))
-        agent_arguments["subordinate"] = children
+            children.append(build_agent(configuration, instantiated, shared_objects, child_id))
+        if len(children) > 0:
+            agent_arguments["subordinates"] = children
 
     # Create the thing
     agent = agent_class(**agent_arguments)
     instantiated[agent_id] = agent
+
+    # associate shared objects
+    for obj in shared_objects:
+        if agent_id in obj["shared_with"]:
+            associate_shared_objects(agent, obj)
+
     return agent
 
 
@@ -65,6 +82,57 @@ def get_agent_information(agents, agent_id):
         if agent["id"] == agent_id:
             return agent
     raise ValueError("Agent of id {0} is not in agent_information".format(agent_id))
+
+
+# ----------------------------------------------------------------------------------------------- #
+# -----------------------------------BUILD SHARED OBJ-------------------------------------------- #
+# ----------------------------------------------------------------------------------------------- #
+
+
+def build_shared_list(configuration):
+    """
+    Build a list of shared objects
+    :param configuration: the config file
+    :return: a list of dict with keywords (name, object, shared_with)
+    """
+    shared_objects = []
+
+    for obj in configuration["shared"]:
+        shared_objects.append(build_shared_object(obj))
+
+    return shared_objects
+
+
+def build_shared_object(object_informations):
+    """
+
+    :param object_informations: the config file part representing a shared object
+    :return: a dict with keywords (name, object, shared_with) where :
+        - name : the key to recognise the object
+        - object : the object instantiated
+        - shared_with : list of indices, indicate which agents can see the object
+    """
+    shared = dict()
+    shared["name"] = object_informations["name"]
+    shared["object"] = get_class(object_informations["class_name"])(**object_informations["arguments"])
+    shared["shared_with"] = object_informations["shared_with"]
+    return shared
+
+
+def associate_shared_objects(agent, obj):
+    """
+    Wrap the association of shared objects for later checks
+    :param agent:
+    :param obj:
+    :return:
+    """
+
+    agent.add_shared(obj["name"], obj['object'])
+
+
+# ----------------------------------------------------------------------------------------------- #
+# ----------------------------------------CHECK CONFIG------------------------------------------- #
+# ----------------------------------------------------------------------------------------------- #
 
 
 def check_configuration(configuration):
