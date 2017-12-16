@@ -1,92 +1,25 @@
 import numpy as np
 
-# State of the automaton
-class _State():
-	def __init__(self, _relative_pixel):
-		self.relative_pixel = _relative_pixel
-		self.true_nextstate = None
-		self.false_nextstate = None
-		self.relative_disk_center = None
+# start points for matching
+_TOP_LEFT = 0
+_TOP_RIGHT = 1
+_BOTTOM_LEFT = 2
+_BOTTOM_RIGHT = 3
 
-def _run_automata(screen, matched_pixels, i, j, state, val):
-	# Absolute coordinates
-	x = i + state.relative_pixel[0]
-	y = j + state.relative_pixel[1]
 
-	# Final state in the automaton
-	if state.relative_disk_center is not None:
-		nb_matched = 0
+"""
+Updates the "player_relative" matrix by pushing units with "unit_id"
+to the foreground, when there is some overlapping.
 
-		if x >= 0 and x < len(screen) \
-			and y >= 0 and y < len(screen[0]):
-			matched_pixels[x][y] = 1
-			nb_matched += 1
+This operation could generate some errors in some ambiguous cases:
+some pixels which don't contain the unit could be set to unit_id anyway.
 
-		# If disk included in disk, tries to match largest disk
-		if state.true_nextstate is not None:
-			ret, n, matched_pixels = _run_automata(screen, matched_pixels, i, j, state.true_nextstate, val)
-			nb_matched += n
-			if ret is not None:
-				return ret, nb_matched, matched_pixels
-
-		return {'x': i + state.relative_disk_center['x'], \
-				'y': j + state.relative_disk_center['y']}, nb_matched, matched_pixels
-
-	if x < 0 or x >= len(screen) \
-		or y < 0 or y >= len(screen[0]):
-
-		ret_true, ret_false = None, None
-		nb_matched_true, nb_matched_false = None, None
-		matched_pixels_true, matched_pixels_false = None, None
-
-		if state.true_nextstate is not None:
-			matched_pixels_true = matched_pixels.copy()
-			ret_true, nb_matched_true, matched_pixels_true = _run_automata(screen, matched_pixels_true, i, j, state.true_nextstate, val)
-		if state.false_nextstate is not None:
-			matched_pixels_false = matched_pixels.copy()
-			ret_false, nb_matched_false, matched_pixels_false = _run_automata(screen, matched_pixels_false, i, j, state.false_nextstate, val)
-		
-		if ret_true and (not ret_false or nb_matched_true >= nb_matched_false):
-			matched_pixels = matched_pixels_true
-			return ret_true, nb_matched_true, matched_pixels
-		elif ret_false:
-			matched_pixels = matched_pixels_false
-			return ret_false, nb_matched_false, matched_pixels
-		else:
-			return None, 0, matched_pixels
-
-	elif screen[x][y] == val:
-		if state.true_nextstate is None:
-			return None, 0, matched_pixels
-		else:
-			matched_pixels[x][y] = 1
-			ret, nb_matched, matched_pixels = _run_automata(screen, matched_pixels, i, j, state.true_nextstate, val)
-			if ret is None: # backtracking
-				matched_pixels[x][y] = 0
-				nb_matched -= 1
-			return ret, (nb_matched+1), matched_pixels
-	else:
-		if state.false_nextstate is None:
-			return None, 0, matched_pixels
-		else:
-			return _run_automata(screen, matched_pixels, i, j, state.false_nextstate, val)
-
-# Given a screen, uses the automaton to match disks and returns their centroids.
-def _match(screen, automaton, val):
-	centroids = []
-	matched_pixels = np.zeros((len(screen), len(screen[0])))
-
-	for i in range(len(screen)):
-		for j in range(len(screen[0])):
-
-			if screen[i][j] == val and matched_pixels[i][j] == 0:
-
-				c, nb, matched_pixels = _run_automata(screen, matched_pixels, i, j, automaton, val)
-				if c:
-					centroids.append(c)
-				else:
-					raise Exception("Error: can't match disk")
-	return centroids
+Keyword arguments:
+player_relative, unit_density -- observation layers
+unit_id -- id of the units to move to the foreground
+"""
+def _move_to_foreground(player_relative, unit_density, unit_id):
+	return
 
 # Builds a disk mask using midpoint circle algorithm
 def _get_disk_mask(radius):
@@ -121,58 +54,34 @@ def _get_disk_mask(radius):
 
 	return mask
 
-# Build automaton to match the mask
-def _build_automaton(mask):
-	# Extracts mask coordinates
-	mask_pixels = []
-	for i in range(len(mask)):
-		for j in range(len(mask[0])):
-			if mask[i][j] == 1:
-				mask_pixels.append({'x': i, 'y': j})
 
-	# Creates a new branch of states
-	def _addBranch(start_state, relative_pixels, relative_disk_center):
-		cur_state = start_state
-		while len(relative_pixels) > 0:
-			cur_state.true_nextstate = _State(relative_pixels.popitem()[0])
-			cur_state = cur_state.true_nextstate
-		cur_state.relative_disk_center = relative_disk_center
+"""
+Returns whether their is a match between the mask and the player_relative layer.
+Returns true even if the match is partially outside of the layer.
 
-	start_state = None
-	for startPixel in mask_pixels:
-		relative_disk_center = {'x': ((len(mask)-1) / 2 - startPixel['x']), \
-						'y': ((len(mask[0])-1) / 2 - startPixel['y'])}
+Keyword arguments:
+unit_id -- the unit id to be matched in player_relative
+direction -- direction used for matching (_TOP_LEFT, _TOP_RIGHT, _BOTTOM_LEFT or _BOTTOM_RIGHT)
+start_point -- start point of the matching
+"""
+def _is_match(player_relative, mask, unit_id, direction, start_point):
+	return false
 
-		relative_pixels = {}
-		for curPixel in mask_pixels:
-			dx = curPixel['x'] - startPixel['x']
-			dy = curPixel['y'] - startPixel['y']
-			if dx != 0 or dy != 0:
-				relative_pixels[(dx, dy)] = (dx, dy)
-		
-		if not start_state:
-			start_state = _State(relative_pixels.popitem()[0])
-			_addBranch(start_state, relative_pixels, relative_disk_center)
-		else:
-			cur_state = start_state
-			while len(relative_pixels) > 0:
-				if cur_state.relative_pixel in relative_pixels:
-					del relative_pixels[cur_state.relative_pixel]
-					cur_state = cur_state.true_nextstate
-				else:
-					if cur_state.false_nextstate:
-						cur_state = cur_state.false_nextstate
-					else:
-						cur_state.false_nextstate = _State(relative_pixels.popitem()[0])
-						_addBranch(cur_state.false_nextstate, relative_pixels, relative_disk_center)
 
-	return start_state
+"""
+Updates unit_density by decrementing cells matching with the mask.
 
-# Computes disks centers positions by matching them with a mask.
-# We assume input contains disks with no error, potentially overlapping, such as resources.
-# Linear time complexity using a generalized Rabin-Karp algorithm.
-def match_disk_overlapping_no_error(screen, disks_radius, val):
-	mask = _get_disk_mask(disks_radius)
-	automaton = _build_automaton(mask)
-	centroids = _match(screen, automaton, val)
-	return centroids, mask
+Keyword arguments:
+unit_id -- the unit id to be matched in player_relative
+direction -- direction used for matching (_TOP_LEFT, _TOP_RIGHT, _BOTTOM_LEFT or _BOTTOM_RIGHT)
+start_point -- start point of the matching
+"""
+def _update_unit_density(unit_density, mask, unit_id, direction, start_point):
+	return
+
+
+"""
+Computes and returns disks centers positions by matching them with a mask.
+"""
+def get_centroid_centers(player_relative, unit_density, disks_radius, unit_id):
+	return
