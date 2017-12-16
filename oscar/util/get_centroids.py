@@ -19,7 +19,39 @@ player_relative, unit_density -- observation layers
 unit_id -- id of the units to move to the foreground
 """
 def _move_to_foreground(player_relative, unit_density, unit_id):
-	return
+	# Stores whether a pixel has changed in player_relative
+	processed = np.zeros((len(player_relative), len(player_relative[0])))
+
+	for i in range(len(player_relative)):
+		for j in range(len(player_relative[0])):
+			if processed[i][j] == 0 and player_relative[i][j] == unit_id:
+
+				# Explores contiguous pixels with DFS
+				# and moves them to foreground when necessary 
+				stack = []
+				stack.append((i, j))
+
+				def to_foreground(i, j, player_relative, unit_density, unit_id):
+					if unit_density[i, j] > 1:
+						player_relative[i, j] = unit_id
+
+				def process_pixel(i, j, player_relative, unit_density, processed, unit_id, stack):
+					if processed[i, j] != 0:
+						return
+
+					processed[i, j] = 1
+					to_foreground(i, j, player_relative, unit_density, unit_id)
+					if player_relative[i, j] == unit_id:
+						stack.append((i, j))
+
+				while len(stack) > 0:
+					cur = stack.pop()
+
+					process_pixel(cur[0] - 1, cur[1], player_relative, unit_density, processed, unit_id, stack)
+					process_pixel(cur[0] + 1, cur[1], player_relative, unit_density, processed, unit_id, stack)
+					process_pixel(cur[0], cur[1] - 1, player_relative, unit_density, processed, unit_id, stack)
+					process_pixel(cur[0], cur[1] + 1, player_relative, unit_density, processed, unit_id, stack)
+
 
 # Builds a disk mask using midpoint circle algorithm
 def _get_disk_mask(radius):
