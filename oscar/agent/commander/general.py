@@ -10,7 +10,7 @@ DEFAULT_CONFIGURATION = "config/economic.json"
 class General(BaseAgent):
     def __init__(self, configuration_filename=DEFAULT_CONFIGURATION):
         super().__init__()
-        self._child = build_hierarchy(configuration_filename)
+        self._child, self.training_memory = build_hierarchy(configuration_filename)
         print(self)
         self._action_list = []
         self._failure_callback = None
@@ -68,6 +68,10 @@ class General(BaseAgent):
     def setup(self, obs_spec, action_spec):
         super().setup(obs_spec, action_spec)
         self._child.setup(obs_spec, action_spec)
+
+    def reset(self):
+        super().reset()
+        self._child.reset()
 
     def __str__(self):
         try:
