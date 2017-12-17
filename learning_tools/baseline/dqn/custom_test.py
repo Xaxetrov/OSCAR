@@ -57,7 +57,8 @@ if __name__ == '__main__':
             done = False
             while not done:
                 # Take action and update exploration to the newest value
-                action = act(obs[None], update_eps=0.0)
+                action = act(obs[None], update_eps=0.0)[0]
+                print(action)
                 new_obs, rew, done, _ = env.step(action)
                 # Store transition in the replay buffer.
                 obs = new_obs

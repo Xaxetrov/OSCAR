@@ -18,7 +18,7 @@ import oscar.env
 ENV_NAME = "pysc2-simple64-meta-per-v0"
 SAVE_PATH = "learning_tools/learning_nn/" + ENV_NAME + "/dqn"
 
-NUMBER_OF_TRAINING_GAME = 100
+NUMBER_OF_TRAINING_GAME = 120
 NUMBER_OF_CPU = 4
 
 

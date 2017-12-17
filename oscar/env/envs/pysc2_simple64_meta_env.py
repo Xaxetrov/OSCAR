@@ -38,7 +38,6 @@ class Pysc2Simple64MetaEnv(Pysc2Env):
 
     def _step(self, action):
         self.action_list += self.get_meta_action(action)
-
         while True:
             formatted_action = self.action_list.popleft()
             if formatted_action.function not in self.last_obs.observation["available_actions"]:
