@@ -14,6 +14,10 @@ register(
     entry_point='oscar.env.envs:Pysc2MineralshardEnv2',
 )
 register(
-    id='pysc2-collect-meta-v0',
-    entry_point='oscar.env.envs:Pysc2CollectMetaEnv',
+    id='pysc2-simple64-meta-v0',
+    entry_point='oscar.env.envs:Pysc2Simple64MetaEnv',
+)
+register(
+    id='pysc2-simple64-meta-per-v0',
+    entry_point='oscar.env.envs:Pysc2Simple64MetaPerEnv',
 )

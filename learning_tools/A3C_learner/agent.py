@@ -161,7 +161,8 @@ class Environment(threading.Thread):
         while True:
             time.sleep(THREAD_DELAY)  # yield
 
-            if self.render: self.env.render()
+            if self.render:
+                self.env.render()
 
             a = self.agent.act(s, self.env)
             s_, r, done, info = self.env.step(a)

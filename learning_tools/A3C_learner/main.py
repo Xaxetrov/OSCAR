@@ -47,20 +47,40 @@ for o in opts:
 for e in env_list:
     e.start()
 
-time.sleep(RUN_TIME)
+try:
+    time.sleep(RUN_TIME)
+except RuntimeError:
+    print("trainning cancelled")
+except KeyboardInterrupt:
+    print("trainning cancelled")
 
-for e in env_list:
-    e.stop()
-for e in env_list:
-    e.join()
+save_neural_network(brain.model)
+print("model saved (in case of env close fail)")
 
-for o in opts:
-    o.stop()
-for o in opts:
-    o.join()
+try:
+    print("Training time spend")
+
+    for e in env_list:
+        e.stop()
+    for e in env_list:
+        e.join()
+
+    print("env closed")
+
+    for o in opts:
+        o.stop()
+    for o in opts:
+        o.join()
+
+    print("optimizer closed")
+except RuntimeError:
+    print("Thread stoping cancelled, saving NN and close")
+except KeyboardInterrupt:
+    print("Thread stoping cancelled, saving NN and close")
 
 print("Training finished")
 save_neural_network(brain.model)
+print("model saved")
 for e in env_list:
     e.env.close()
     del e

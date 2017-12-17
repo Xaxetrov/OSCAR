@@ -14,7 +14,7 @@ def find_position(obs, unit_type_id, select_method="random_center", player_relat
         unit_type_id_list = [unit_type_id]
 
     unit_type_map = obs.observation["screen"][UNIT_TYPE]
-    player_relative_map = obs.observation["screen"][PLAYER_RELATIVE]
+    player_relative_map = obs.observation["screen"][SCREEN_PLAYER_RELATIVE]
     correct_unit_type_array = np.isin(unit_type_map, unit_type_id_list)
     correct_player_relative_array = (player_relative_map == player_relative)
     unit_y, unit_x = (correct_unit_type_array & correct_player_relative_array).nonzero()

@@ -34,7 +34,7 @@ class Pysc2MineralshardEnv(Pysc2Env):
                                 agent_race='T',
                                 screen_size_px=(64, 64),
                                 minimap_size_px=(64, 64),
-                                visualize=True,
+                                visualize=False,
                                 step_mul=8,
                                 game_steps_per_episode=None  # use map default
                                 )
