@@ -146,13 +146,13 @@ def check_max_one_training_agent(configuration):
     return training_agent_count < 2
 
 
-def get_class(kls):
+def get_class(class_name):
     """
     returns the class corresponding to a string
-    :param kls: the given string pointing to the class from the working directory
+    :param class_name: the given string pointing to the class from the working directory
     :return: the class as an object
     """
-    parts = kls.split('.')
+    parts = class_name.split('.')
     class_module = ".".join(parts[:-1])
     m = __import__(class_module)
     for comp in parts[1:]:
@@ -167,14 +167,23 @@ def get_arguments(args, training_memory):
     :param training_memory: memory to be used for training agent if any
     :return: a dict with at least the same keys and values parsed into objects
     """
+    for (arg_name, arg_value) in args.item():
+        try:
+            arg_value = int(arg_value)
+        except ValueError:
+            pass
+        if arg_value == "True":
+            arg_value = True
+        elif arg_value == "False":
+            arg_value = False
+        args[arg_name] = arg_value
+
     # if train mode is set
     if "train_mode" in args:
-        # parse the string into a boolean and add a memory object
-        if args["train_mode"] == "True":
-            args["train_mode"] = True
+        # add a memory object
+        if args["train_mode"]:
             args["shared_memory"] = training_memory
         else:
-            args["train_mode"] = False
             args["shared_memory"] = None
     return args
 

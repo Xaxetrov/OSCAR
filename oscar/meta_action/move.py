@@ -19,13 +19,11 @@ def attack_minimap(obs, queued=True):
     minimap_visibility = obs.observation['minimap'][MINI_VISIBILITY]
     enemy_pos_y, enemy_pos_x = (minimap_player_relative == PLAYER_HOSTILE).nonzero()
     if len(enemy_pos_x) > 0:
-        returned_index = random.randint(0, len(enemy_pos_x) - 1)
-        pos = (enemy_pos_x[returned_index], enemy_pos_y[returned_index])
+        pos = random.choice(list(zip(enemy_pos_x, enemy_pos_y)))
     else:
         scoot_pos_y, scoot_pos_x = ((minimap_height != 0) & (minimap_visibility == 0)).nonzero()
         if len(scoot_pos_x) > 0:
-            returned_index = random.randint(0, len(scoot_pos_x) - 1)
-            pos = (scoot_pos_x[returned_index], scoot_pos_y[returned_index])
+            pos = random.choice(list(zip(scoot_pos_x, scoot_pos_y)))
         else:
             minimap_size = np.shape(minimap_player_relative)[0]
             pos_x = random.randint(0, minimap_size - 1)

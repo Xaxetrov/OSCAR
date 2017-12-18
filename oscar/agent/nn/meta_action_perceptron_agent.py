@@ -10,7 +10,7 @@ ACTION_SPACE_SIZE = 9
 OBSERVATION_SPACE_SHAPE = (12,)
 
 
-class MetaActionPer(LearningAgent):
+class MetaActionPerceptronAgent(LearningAgent):
 
     def __init__(self, message="I'm learning", train_mode=False, shared_memory=None):
         self.last_obs = None
@@ -48,9 +48,7 @@ class MetaActionPer(LearningAgent):
         if selected_unit_id == 0:
             try:
                 selected_unit_id = full_obs.observation['multi_select'][0][0]
-            except TypeError:
-                pass
-            except IndexError:
+            except (TypeError, IndexError):
                 pass
         ret_obs_list.append(selected_unit_id / TERRAN_MARINE)
         # information on the remaining mineral on screen, normalized (205 is an experimental value...)
@@ -93,11 +91,7 @@ class MetaActionPer(LearningAgent):
                 return [actions.FunctionCall(SELECT_ARMY, [SELECT_ALL])]
             elif action_id == 8:  # attack !
                 return meta_action.attack_minimap(self.last_obs, queued=False)
-        except meta_action.NoValidSCVError:
-            pass
-        except meta_action.NoValidBuildingLocationError:
-            pass
-        except meta_action.NoUnitError:
+        except meta_action.ActionError:
             pass
 
         return [actions.FunctionCall(NO_OP, [])]
