@@ -14,19 +14,18 @@ class LearningStructure:
         self.train_mode = train_mode
         self.shared_memory = shared_memory
         # check shared memory is consistent with train mode
-        if train_mode is True and shared_memory is None:
+        if self.train_mode is True and self.shared_memory is None:
             raise BadSharedMemoryError("When train mode is set to True a valid shared memory must be provided")
         # check if action/obs space are set by the sub classes
-        if self.action_space is None or self.observation_space is None:
+        if self.train_mode and (self.action_space is None or self.observation_space is None):
             raise RuntimeError("action_space and observation_space must be set before calling LearningStructure init !")
-
-        # set memory with agent action/obs spaces
-        shared_memory.action_space = self.action_space
-        shared_memory.observation_space = self.observation_space
 
         # set which step method must be called
         if self.train_mode:
             self.do_step = self._learning_step
+            # set memory with agent action/obs spaces
+            shared_memory.action_space = self.action_space
+            shared_memory.observation_space = self.observation_space
         else:
             self.do_step = self._step
         super().__init__()

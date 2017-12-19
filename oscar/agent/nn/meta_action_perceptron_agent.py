@@ -20,7 +20,14 @@ class MetaActionPerceptronAgent(LearningAgent):
         super().__init__(train_mode, shared_memory)
 
     def _step(self, obs):
-        raise RuntimeError("Not implemented yet...")
+        self.last_obs = obs
+        # use a random meta action
+        action_id = np.random.randint(0, ACTION_SPACE_SIZE)
+        print("random action id:", action_id, flush=True)
+        play = self._transform_action(action_id)
+        print("play returned:", play, flush=True)
+        return play
+        # raise RuntimeError("Not implemented yet...")
 
     def _format_observation(self, full_obs):
         self.last_obs = full_obs
