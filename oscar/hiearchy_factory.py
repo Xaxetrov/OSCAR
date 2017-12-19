@@ -167,7 +167,7 @@ def get_arguments(args, training_memory):
     :param training_memory: memory to be used for training agent if any
     :return: a dict with at least the same keys and values parsed into objects
     """
-    for (arg_name, arg_value) in args.item():
+    for arg_name, arg_value in args.items():
         try:
             arg_value = int(arg_value)
         except ValueError:
