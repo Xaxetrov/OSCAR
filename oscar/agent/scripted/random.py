@@ -8,7 +8,6 @@ from oscar.agent.custom_agent import CustomAgent
 class RandomAgent(CustomAgent):
     def __init__(self):
         super().__init__()
-        pass
 
     def step(self, obs):
         output = []

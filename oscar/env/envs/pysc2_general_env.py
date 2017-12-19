@@ -29,6 +29,9 @@ class Pysc2GeneralEnv(Pysc2Env):
             game_steps_per_episode=None  # use map default
         )
         self.general = General(DEFAULT_CONFIGURATION)
+        action_spec = self.pysc2_env.action_spec()
+        observation_spec = self.pysc2_env.observation_spec()
+        self.general.setup(observation_spec, action_spec)
         # self.observation_space = self.general.training_memory.observation_space
         super().__init__()
 

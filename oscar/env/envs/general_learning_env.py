@@ -65,6 +65,7 @@ class Pysc2EnvRunner(threading.Thread):
         self.last_army_count = 0
         self.step_count = 0
         self.last_obs = None
+        # setup env
         self.env = Pysc2GeneralEnv()
         # get shared memory from general
         self.shared_memory = self.env.general.training_memory
