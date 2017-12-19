@@ -74,14 +74,20 @@ class General(BaseAgent):
         args = current_action.arguments
         if len(args) != len(asked_args):
             print("---- Error args size not accurate ----")
+            print("- action:", current_action.function, args)
+            print("- wanted args:", asked_args)
             return False
         for arg, asked_arg in zip(args, asked_args):
             if len(arg) != len(asked_arg.sizes):
                 print("---- Error arg size not accurate ----")
+                print("- action:", current_action.function, args)
+                print("- wanted args:", asked_args)
                 return False
             for value, asked_size in zip(arg, asked_arg.sizes):
                 if value < 0 or value >= asked_size:
                     print("---- Error arg value not accurate ----")
+                    print("- action:", current_action.function, args)
+                    print("- wanted args:", asked_args)
                     return False
             pass
         return True
