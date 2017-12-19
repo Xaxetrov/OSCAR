@@ -53,14 +53,13 @@ class Pysc2GeneralEnv(Pysc2Env):
         return super()._reset()
 
     def _render(self, mode='human', close=False):
-        pass
+        super()._render(mode, close)
 
     def _close(self):
-        self.pysc2_env.close()
+        super()._close()
 
     def _seed(self, seed=None):
-        # any way to set the seed of pysc2 ?
-        pass
+        super()._seed(seed)
 
     def get_action_mask(self):
         return None  # no action required here

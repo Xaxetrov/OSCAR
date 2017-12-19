@@ -31,7 +31,6 @@ class GeneralLearningEnv(gym.Env):
         # get the reward of the current run and reset it to 0 for next step
         reward = self.env_thread.reward  # / self.env_thread.step_count
         self.env_thread.reward = 0
-        assert reward >= 0
         # get done state from thread
         done = self.env_thread.was_done
         if done:
@@ -87,6 +86,8 @@ class Pysc2EnvRunner(threading.Thread):
                 self.last_obs, _, self.done, _ = self.env.step(None)
                 self.update_reward()
                 if self.stop:
+                    self.env.close()
+                    del self.env
                     return
             self.was_done = True
             self.semaphore_obs_ready.release()
