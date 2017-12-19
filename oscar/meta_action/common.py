@@ -25,12 +25,11 @@ def find_position(obs, unit_type_id, select_method="random_center", player_relat
     if select_method == "random_center":
         return find_random_center(unit_type_map, unit_x, unit_y)
     elif select_method == "random":
-        returned_index = random.randint(0, len(unit_x) - 1)
-        return (unit_x[returned_index], unit_y[returned_index])
+        return random.choice(list(zip(unit_x, unit_y)))
     elif select_method == "mean":
-        return (int(unit_x.mean()), int(unit_y.mean()))
+        return int(unit_x.mean()), int(unit_y.mean())
     elif select_method == "all":
-        return (unit_x, unit_y)
+        return unit_x, unit_y
     else:
         valid_select_method_name = ["random_center", "random", "mean", "all"]
         raise ValueError("Unexpected select_method name {0}. Allowed values are: {1}."
