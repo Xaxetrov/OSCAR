@@ -31,6 +31,7 @@ class GeneralLearningEnv(gym.Env):
         # get the reward of the current run and reset it to 0 for next step
         reward = self.env_thread.reward  # / self.env_thread.step_count
         self.env_thread.reward = 0
+        assert reward >= 0
         # get done state from thread
         done = self.env_thread.was_done
         if done:
@@ -61,7 +62,6 @@ class Pysc2EnvRunner(threading.Thread):
         self.was_done = False
         self.reward = 0
         self.total_reward = 0
-        self.step_reward = 0
         self.last_army_count = 0
         self.step_count = 0
         self.last_obs = None
@@ -78,6 +78,8 @@ class Pysc2EnvRunner(threading.Thread):
         while True:
             self.done = False
             self.reward = 0
+            self.total_reward = 0
+            self.last_army_count = 0
             self.step_count = 0
             self.last_obs = self.env.reset()
             while not self.done:
@@ -94,9 +96,10 @@ class Pysc2EnvRunner(threading.Thread):
         new_total_reward = 0
         new_total_reward += self.last_obs.observation['score_cumulative'][5]
         new_total_reward += self.last_obs.observation['score_cumulative'][6]
-        self.step_reward = new_total_reward - self.total_reward
+        step_reward = 0
+        step_reward += new_total_reward - self.total_reward
         self.total_reward = new_total_reward
         army_count = self.last_obs.observation['player'][ARMY_COUNT]
-        self.step_reward += max(0, army_count - self.last_army_count)
+        step_reward += max(0, army_count - self.last_army_count)
         self.last_army_count = army_count
-        self.reward += self.step_reward
+        self.reward += step_reward
