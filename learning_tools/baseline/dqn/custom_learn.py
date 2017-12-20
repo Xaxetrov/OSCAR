@@ -19,7 +19,7 @@ import oscar.env
 ENV_NAME = "general-learning-v0"
 SAVE_PATH = "learning_tools/learning_nn/" + ENV_NAME + "/dqn"
 
-NUMBER_OF_TRAINING_GAME = 1
+NUMBER_OF_TRAINING_GAME = 5
 NUMBER_OF_CPU = 4
 
 
@@ -63,6 +63,7 @@ if __name__ == '__main__':
         episode_rewards = [0.0]
         obs = env.reset()
         t = 0
+        old_t = 0
         try:
             for g in range(NUMBER_OF_TRAINING_GAME):
                 done = False
@@ -88,11 +89,14 @@ if __name__ == '__main__':
                         update_target()
 
                     if done:  # and len(episode_rewards) % 10 == 0:
-                        logger.record_tabular("steps", t)
-                        logger.record_tabular("episodes", len(episode_rewards) - 1)
-                        logger.record_tabular("mean episode reward", round(np.mean(episode_rewards[-101:-1]), 1))
+                        # logger.record_tabular("steps", t)
+                        # logger.record_tabular("episodes", len(episode_rewards) - 1)
+                        # logger.record_tabular("episode steps", t - old_t)
+                        # logger.record_tabular("episode reward", episode_rewards[-2])
+                        # logger.record_tabular("mean episode reward", round(np.mean(episode_rewards[-101:-1]), 1))
                         logger.record_tabular("% time spent exploring", int(100 * exploration.value(t)))
                         logger.dump_tabular()
+                        # old_t = t
                     t += 1
         except KeyboardInterrupt:
             print("Training aborted")

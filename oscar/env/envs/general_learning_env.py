@@ -1,9 +1,14 @@
 import gym
 import threading
+import numpy as np
 from gym import spaces
 
 from oscar.env.envs.pysc2_general_env import Pysc2GeneralEnv
 from oscar.constants import *
+
+from baselines import logger
+
+GAME_MAX_STEP = 2000
 
 
 class GeneralLearningEnv(gym.Env):
@@ -20,6 +25,7 @@ class GeneralLearningEnv(gym.Env):
         self.env_thread.start()
 
     def _step(self, action):
+        info_dict = {}
         # set action into shared memory
         self.shared_memory.shared_action = action
         # let the thread run again
@@ -35,8 +41,9 @@ class GeneralLearningEnv(gym.Env):
         done = self.env_thread.was_done
         if done:
             self.env_thread.was_done = False  # reset was_done to false for next loop
+            info_dict["win_state"] = self.env_thread.get_win_state()
         # return current obs
-        return obs, reward, done, {}
+        return obs, reward, done, info_dict
 
     def _reset(self):
         # wait for the env to stop as waiting action
@@ -64,6 +71,8 @@ class Pysc2EnvRunner(threading.Thread):
         self.last_army_count = 0
         self.step_count = 0
         self.last_obs = None
+        # variable for stats
+        self.episodes_reward = []
         # setup env
         self.env = Pysc2GeneralEnv()
         # get shared memory from general
@@ -80,6 +89,7 @@ class Pysc2EnvRunner(threading.Thread):
             self.total_reward = 0
             self.last_army_count = 0
             self.step_count = 0
+            self.episodes_reward.append(0)
             self.last_obs = self.env.reset()
             while not self.done:
                 self.step_count += 1
@@ -90,13 +100,15 @@ class Pysc2EnvRunner(threading.Thread):
                     del self.env
                     return
             self.was_done = True
-            self.semaphore_obs_ready.release()
+
+            self.print_episode_stats()
             # run end, release semaphore to let main env finish its step
+            self.semaphore_obs_ready.release()
 
     def update_reward(self):
         new_total_reward = 0
-        new_total_reward += self.last_obs.observation['score_cumulative'][5]
-        new_total_reward += self.last_obs.observation['score_cumulative'][6]
+        new_total_reward += self.last_obs.observation['score_cumulative'][KILLED_UNITS]
+        new_total_reward += self.last_obs.observation['score_cumulative'][KILLED_BUILDINGS]
         step_reward = 0
         step_reward += new_total_reward - self.total_reward
         self.total_reward = new_total_reward
@@ -104,3 +116,26 @@ class Pysc2EnvRunner(threading.Thread):
         step_reward += max(0, army_count - self.last_army_count)
         self.last_army_count = army_count
         self.reward += step_reward
+        self.episodes_reward[-1] += step_reward
+
+    def get_win_state(self):
+        """
+        Look at the current state of the game (assuming that it's the episode end)
+        to determine if the agent win / loss / null
+        :return: int: 0 loss, 1 null and 2 win
+        """
+        if self.step_count > GAME_MAX_STEP:
+            return 1
+        elif self.last_obs.observation['player'][ARMY_COUNT] > 10:
+            return 2
+        else:
+            return 0
+
+    def print_episode_stats(self):
+        logger.record_tabular("steps", self.env.general.steps)
+        logger.record_tabular("episodes", len(self.episodes_reward))
+        logger.record_tabular("episode steps", self.step_count)
+        logger.record_tabular("episode reward", self.episodes_reward[-1])
+        logger.record_tabular("mean episode reward", round(np.mean(self.episodes_reward[-101:]), 1))
+        logger.record_tabular("win state", self.get_win_state())
+        logger.dump_tabular()
