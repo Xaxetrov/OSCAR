@@ -1,4 +1,4 @@
-from oscar.meta_action.common import *
+from oscar.util.selection import *
 from oscar.util.location import Location
 from oscar.util.coordinates_helper import Coordinates_helper
 

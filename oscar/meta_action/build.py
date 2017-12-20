@@ -9,8 +9,8 @@ def build(obs, building_tiles_size, building_id, propagate_error=False):
     # Find a valid emplacement
     building_tiles_size += 0  # Handle the free space needed around the building.
     building_cell_size = int(building_tiles_size * TILES_SIZE_IN_CELL)
-    unit_type = obs.observation["screen"][UNIT_TYPE]
-    height_map = obs.observation["screen"][HEIGHT_MAP]
+    unit_type = obs.observation["screen"][SCREEN_UNIT_TYPE]
+    height_map = obs.observation["screen"][SCREEN_HEIGHT_MAP]
     valid_location_center_list = _find_valid_building_location(unit_type, height_map, building_cell_size)
     if not valid_location_center_list:
         valid_location_center_list = _find_valid_building_location(unit_type, height_map, building_cell_size,
