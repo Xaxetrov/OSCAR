@@ -7,6 +7,7 @@ from oscar.util.exploration_helper import *
 
 def scout(obs, coordinates_helper, cur_location = None, propagate_error = True):
     result_action_list = None
+
     try:
         result_action_list = select_scv(obs)
     except NoValidSCVError:
@@ -17,18 +18,8 @@ def scout(obs, coordinates_helper, cur_location = None, propagate_error = True):
         cur_location = coordinates_helper.get_loc_in_minimap(obs)
 
     target = get_new_target(obs, cur_location, coordinates_helper, 5)
-
-    # move camera to target
-    move_camera1 = move_camera(target, coordinates_helper)[0]
-    result_action_list.append(move_camera1)
-    
-    # give move order to unit
-    move_to_target = actions.FunctionCall(ATTACK_SCREEN, [NOT_QUEUED, coordinates_helper.get_screen_center().to_array()])
+    move_to_target = actions.FunctionCall(ATTACK_MINIMAP, [NOT_QUEUED, target.to_array()])
     result_action_list.append(move_to_target)
-    
-    # move camera back
-    move_camera2 = move_camera(cur_location, coordinates_helper)[0]
-    result_action_list.append(move_camera2)
 
     return result_action_list
 
