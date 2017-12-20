@@ -2,13 +2,14 @@ import gym
 import threading
 import numpy as np
 from gym import spaces
+import time
 
 from oscar.env.envs.pysc2_general_env import Pysc2GeneralEnv
 from oscar.constants import *
 
 from baselines import logger
 
-GAME_MAX_STEP = 2000
+GAME_MAX_STEP = 1700
 
 
 class GeneralLearningEnv(gym.Env):
@@ -30,6 +31,8 @@ class GeneralLearningEnv(gym.Env):
         self.shared_memory.shared_action = action
         # let the thread run again
         self.semaphore_action_set.release()
+        # increase the number of steps performed by the learning agent
+        self.env_thread.learning_agent_step += 1
         # wait a call to the target agent
         self.semaphore_obs_ready.acquire(blocking=True, timeout=None)
         # get the obs of the current state as seen by the agent
@@ -73,6 +76,8 @@ class Pysc2EnvRunner(threading.Thread):
         self.last_obs = None
         # variable for stats
         self.episodes_reward = []
+        self.start_time = 0
+        self.learning_agent_step = 0
         # setup env
         self.env = Pysc2GeneralEnv()
         # get shared memory from general
@@ -83,12 +88,14 @@ class Pysc2EnvRunner(threading.Thread):
         super().__init__()
 
     def run(self):
+        self.start_time = time.time()
         while True:
             self.done = False
             self.reward = 0
             self.total_reward = 0
             self.last_army_count = 0
             self.step_count = 0
+            self.learning_agent_step = 0
             self.episodes_reward.append(0)
             self.last_obs = self.env.reset()
             while not self.done:
@@ -124,7 +131,7 @@ class Pysc2EnvRunner(threading.Thread):
         to determine if the agent win / loss / null
         :return: int: 0 loss, 1 null and 2 win
         """
-        if self.step_count > GAME_MAX_STEP:
+        if self.step_count >= GAME_MAX_STEP:
             return 1
         elif self.last_obs.observation['player'][ARMY_COUNT] > 10:
             return 2
@@ -132,10 +139,13 @@ class Pysc2EnvRunner(threading.Thread):
             return 0
 
     def print_episode_stats(self):
+        logger.record_tabular("time", (time.time() - self.start_time) / 60)
         logger.record_tabular("steps", self.env.general.steps)
         logger.record_tabular("episodes", len(self.episodes_reward))
         logger.record_tabular("episode steps", self.step_count)
+        logger.record_tabular("learning agent steps", self.learning_agent_step)
         logger.record_tabular("episode reward", self.episodes_reward[-1])
-        logger.record_tabular("mean episode reward", round(np.mean(self.episodes_reward[-101:]), 1))
+        logger.record_tabular("mean episode reward", np.mean(self.episodes_reward[-101:]))
+        logger.record_tabular("median episode reward", np.median(self.episodes_reward[-101:]))
         logger.record_tabular("win state", self.get_win_state())
         logger.dump_tabular()
