@@ -10,26 +10,40 @@ class Economic(CustomAgent):
         super().__init__()
 
     def set_supply_depot_built(self):
-        print("supply depot")
+        print("supply depot built")
         self.supply_depot_built = True
 
     def set_barracks_built(self):
-        print("barracks")
+        print("barracks built")
         self.barracks_built = True
 
     def step(self, obs):
         play = {}
 
         if not self.supply_depot_built:
-            meta_action = build(obs, 2, BUILD_SUPPLY_DEPOT)
+            meta_action = None
+            try:
+                meta_action = build(obs, 2, BUILD_SUPPLY_DEPOT)
+                if meta_action:
+                    play["success_callback"] = self.set_supply_depot_built
+            except NoValidSCVError:
+                print("supply depot build failed")
+                meta_action = [actions.FunctionCall(NO_OP, [])]
+
             play["actions"] = meta_action
-            play["success_callback"] = self.set_supply_depot_built
             return play
 
         if not self.barracks_built:
-            meta_action = build(obs, 3, BUILD_BARRACKS)
+            meta_action = None
+            try:
+                meta_action = build(obs, 3, BUILD_BARRACKS)
+                if meta_action:
+                    play["success_callback"] = self.set_barracks_built
+            except NoValidSCVError:
+                print("barracks build failed")
+                meta_action = [actions.FunctionCall(NO_OP, [])]
+
             play["actions"] = meta_action
-            play["success_callback"] = self.set_barracks_built
             return play
 
         try:
