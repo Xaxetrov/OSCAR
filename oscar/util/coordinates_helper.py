@@ -39,8 +39,16 @@ class Coordinates_helper():
 
     def get_random_minimap_location(self):
         loc = Location()
-        loc.x = np.random.randint(self.obs_range['x']['min'], self.obs_range['x']['max'])
-        loc.y = np.random.randint(self.obs_range['y']['min'], self.obs_range['y']['max'])
+        if self.obs_range['x']['min'] == self.obs_range['x']['max']:
+            loc.x = self.obs_range['x']['min']
+        else:
+            loc.x = np.random.randint(self.obs_range['x']['min'], self.obs_range['x']['max'])
+
+        if self.obs_range['y']['min'] == self.obs_range['y']['max']:
+            loc.y = self.obs_range['y']['min']
+        else:
+            loc.y = np.random.randint(self.obs_range['y']['min'], self.obs_range['y']['max'])
+
         return loc
 
     # Limits are inclusive
@@ -232,6 +240,10 @@ class Calibration():
                 self._completed = True
                 self._move_range['x']['min'] = self._obs_range['x']['min'] + self._camera_obs_offset['x']
                 self._move_range['x']['max'] = self._obs_range['x']['max'] + self._camera_obs_offset['x']
+
+                if not self._camera_obs_offset['y']:
+                    self._camera_obs_offset['y'] = offset['y'].item()
+
                 self._move_range['y']['min'] = self._obs_range['y']['min'] + self._camera_obs_offset['y']
                 self._move_range['y']['max'] = self._obs_range['y']['max'] + self._camera_obs_offset['y']
                 self.export()
