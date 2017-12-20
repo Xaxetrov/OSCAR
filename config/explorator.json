@@ -1,0 +1,13 @@
+{
+  "structure": {
+  },
+  "agents": [
+    {
+      "id": 0,
+      "class_name": "oscar.agent.scripted.explorator.Explorator",
+      "arguments": {
+        "message": "Let's conquer the world"
+      }
+    }
+  ]
+}
