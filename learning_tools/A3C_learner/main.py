@@ -47,15 +47,14 @@ for o in opts:
 for e in env_list:
     e.start()
 
+print("learning started")
+
 try:
     time.sleep(RUN_TIME)
 except RuntimeError:
     print("trainning cancelled")
 except KeyboardInterrupt:
     print("trainning cancelled")
-
-save_neural_network(brain.model)
-print("model saved (in case of env close fail)")
 
 try:
     print("Training time spend")

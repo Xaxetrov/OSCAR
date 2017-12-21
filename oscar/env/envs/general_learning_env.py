@@ -63,6 +63,10 @@ class GeneralLearningEnv(gym.Env):
     def _seed(self, seed=None):
         pass
 
+    def get_action_mask(self):
+        # every action is supposed to be playable
+        return np.ones(shape=self.action_space.n)
+
 
 class Pysc2EnvRunner(threading.Thread):
 

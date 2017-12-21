@@ -1,9 +1,9 @@
 # constants
-ENV = 'pysc2-simple64-meta-per-v0'
+ENV = 'general-learning-v0'
 
-RUN_TIME = 60 * 10
-THREADS = 1
-OPTIMIZERS = 1
+RUN_TIME = 60 * 13
+THREADS = 3
+OPTIMIZERS = 2
 THREAD_DELAY = 0.0001
 
 GAMMA = 0.99
