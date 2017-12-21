@@ -82,4 +82,9 @@ def find_random_center(unit_type_map, unit_x, unit_y, unit_type_id_list):
             # apply the best move found with a factor to get closer to the center (at least hoping so)
             selected_coordinate_x += move_x * RANDOM_CENTER_MOVE_FACTOR
             selected_coordinate_y += move_y * RANDOM_CENTER_MOVE_FACTOR
+            # check that the new coordinate are still on the screen
+            selected_coordinate_x = max(0, selected_coordinate_x)
+            selected_coordinate_x = min(selected_coordinate_x, SCREEN_RESOLUTION - 1)
+            selected_coordinate_y = max(0, selected_coordinate_y)
+            selected_coordinate_y = min(selected_coordinate_y, SCREEN_RESOLUTION - 1)
     return selected_coordinate_x, selected_coordinate_y
