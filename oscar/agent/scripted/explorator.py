@@ -1,11 +1,13 @@
 from oscar.agent.custom_agent import CustomAgent
 from oscar.meta_action import *
+import pickle
 
 class Explorator(CustomAgent):
     def __init__(self, message="I hate you"):
         self._message = message
         self.coordinates_helper = Coordinates_helper()
         self.cur_location = None
+        self.obs_log = []
         super().__init__()
 
     def scout_sent(self):
@@ -14,6 +16,12 @@ class Explorator(CustomAgent):
     def step(self, obs):
         if not self.cur_location:
             self.cur_location = self.coordinates_helper.get_loc_in_minimap(obs)
+
+        if len(self.obs_log) < 50:
+            self.obs_log.append(obs)
+            if len(self.obs_log) == 50:
+                pickle.dump( self.obs_log, open( "obs.p", "wb" ) )
+
 
         play = {}
 
