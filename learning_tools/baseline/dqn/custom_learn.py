@@ -19,7 +19,7 @@ import oscar.env
 ENV_NAME = "general-learning-v0"
 SAVE_PATH = "learning_tools/learning_nn/" + ENV_NAME + "/dqn"
 
-NUMBER_OF_TRAINING_GAME = 5
+NUMBER_OF_TRAINING_GAME = 20
 NUMBER_OF_CPU = 4
 
 
