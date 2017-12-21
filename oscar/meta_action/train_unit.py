@@ -1,4 +1,4 @@
-from oscar.meta_action.common import *
+from oscar.util.selection import *
 
 
 def train_unit(obs, building_id, action_train_id):

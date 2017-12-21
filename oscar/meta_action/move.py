@@ -1,4 +1,4 @@
-from oscar.meta_action.common import *
+from oscar.util.selection import *
 
 
 def harvest_mineral(obs, queued=True):

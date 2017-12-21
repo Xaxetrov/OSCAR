@@ -1,4 +1,4 @@
-from oscar.meta_action.common import *
+from oscar.util.selection import *
 
 
 def select_scv(obs):
