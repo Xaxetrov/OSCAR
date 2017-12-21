@@ -7,7 +7,6 @@ class Explorator(CustomAgent):
         self._message = message
         self.coordinates_helper = Coordinates_helper()
         self.cur_location = None
-        self.obs_log = []
         super().__init__()
 
     def scout_sent(self):
@@ -17,12 +16,6 @@ class Explorator(CustomAgent):
         if not self.cur_location:
             self.cur_location = self.coordinates_helper.get_loc_in_minimap(obs)
 
-        if len(self.obs_log) < 50:
-            self.obs_log.append(obs)
-            if len(self.obs_log) == 50:
-                pickle.dump( self.obs_log, open( "obs.p", "wb" ) )
-
-
         play = {}
 
         meta_action = None
@@ -31,7 +24,7 @@ class Explorator(CustomAgent):
             if meta_action:
                 play["success_callback"] = self.scout_sent
         except NoValidSCVError:
-            #print("scouting failed")
+            print("scouting failed")
             meta_action = [actions.FunctionCall(NO_OP, [])]
 
         play["actions"] = meta_action
