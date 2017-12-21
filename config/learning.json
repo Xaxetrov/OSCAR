@@ -1,0 +1,14 @@
+{
+  "structure": {
+  },
+  "agents": [
+    {
+      "id": 0,
+      "class_name": "oscar.agent.nn.meta_action_perceptron_agent.MetaActionPerceptronAgent",
+      "arguments": {
+        "message": "You are beautiful",
+        "train_mode": "True"
+      }
+    }
+  ]
+}

@@ -10,7 +10,7 @@ DEFAULT_CONFIGURATION = "config/economic.json"
 class General(BaseAgent):
     def __init__(self, configuration_filename=DEFAULT_CONFIGURATION):
         super().__init__()
-        self._child = build_hierarchy(configuration_filename)
+        self._child, self.training_memory = build_hierarchy(configuration_filename)
         print(self)
         self._action_list = []
         self._failure_callback = None
@@ -18,6 +18,7 @@ class General(BaseAgent):
         self._success = False
 
     def step(self, obs):
+        super().step(obs)
         if len(self._action_list) != 0:
             return self._check_and_return_action(obs)
 
@@ -57,17 +58,46 @@ class General(BaseAgent):
         :param obs: The observation provided by pysc2.
         :return: The first action of the action list if it is valid, else NO_OP
         """
-        if self._action_list[0].function in obs.observation["available_actions"]:
+        current_action = self._action_list.pop(0)
+        if current_action.function in obs.observation["available_actions"] \
+                and self._check_argument(current_action):
             self._success = True
-            return self._action_list.pop(0)
+            return current_action
         else:
             self._action_list = []
             self._success = False
             return actions.FunctionCall(NO_OP, [])
 
+    def _check_argument(self, current_action):
+        asked_args = self.action_spec.functions[current_action.function].args
+        args = current_action.arguments
+        if len(args) != len(asked_args):
+            print("---- Error args size not accurate ----")
+            print("- action:", current_action.function, args)
+            print("- wanted args:", asked_args)
+            return False
+        for arg, asked_arg in zip(args, asked_args):
+            if len(arg) != len(asked_arg.sizes):
+                print("---- Error arg size not accurate ----")
+                print("- action:", current_action.function, args)
+                print("- wanted args:", asked_args)
+                return False
+            for value, asked_size in zip(arg, asked_arg.sizes):
+                if value < 0 or value >= asked_size:
+                    print("---- Error arg value not accurate ----")
+                    print("- action:", current_action.function, args)
+                    print("- wanted args:", asked_args)
+                    return False
+            pass
+        return True
+
     def setup(self, obs_spec, action_spec):
         super().setup(obs_spec, action_spec)
         self._child.setup(obs_spec, action_spec)
+
+    def reset(self):
+        super().reset()
+        self._child.reset()
 
     def __str__(self):
         try:

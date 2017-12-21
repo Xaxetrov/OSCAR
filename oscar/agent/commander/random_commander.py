@@ -7,5 +7,5 @@ class RandomCommander(BaseCommander):
     def __init__(self, subordinates):
         super().__init__(subordinates)
 
-    def choose_subordinate(self):
+    def choose_subordinate(self, obs):
         return random.choice(self._subordinates)

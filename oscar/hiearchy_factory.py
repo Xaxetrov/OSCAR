@@ -1,5 +1,7 @@
 import json
 
+from oscar.env.shared_objects import SharedObjects
+
 
 def build_hierarchy(configuration_filename: str):
     """
@@ -17,21 +19,30 @@ def build_hierarchy(configuration_filename: str):
     # Create a maintained set of instantiated agents
     instantiated = {}
 
+    # Setup a training memory for agent in training mode
+    training_memory = SharedObjects()
+
     # Build family and return general's children
-    general_subordinate = build_agent(configuration, instantiated, 0)
-    return general_subordinate
+    general_subordinate = build_agent(configuration, instantiated, 0, training_memory)
+
+    # if the training memory is not set with agent value, then nobody use it
+    # then delete it
+    if training_memory.action_space is None:
+        training_memory = None
+    return general_subordinate, training_memory
 
 
-def build_agent(configuration, instantiated, agent_id):
+def build_agent(configuration, instantiated, agent_id, training_memory):
     """
     Builds an agent from a configuration.
     Recursive function : builds the children before the agent itself
     :param agent_id: The id of the agent in the "structure" and "agents" part of the configuration
+    :param training_memory: the memory to be used to communicate between the environment and the agent during training
     :return: the built agent
     """
     agent_info = get_agent_information(configuration["agents"], agent_id)
     agent_class = get_class(agent_info["class_name"])
-    agent_arguments = agent_info["arguments"]
+    agent_arguments = get_arguments(agent_info["arguments"], training_memory)
 
     # First check if the agent (and its children) has already been instantiated by another commander
     if agent_id in instantiated:
@@ -45,7 +56,8 @@ def build_agent(configuration, instantiated, agent_id):
     if len(children_ids) != 0:
         children = []
         for child_id in children_ids:
-            children.append(build_agent(configuration, instantiated, child_id))
+            children_agent = build_agent(configuration, instantiated, child_id, training_memory)
+            children.append(children_agent)
         agent_arguments["subordinate"] = children
 
     # Create the thing
@@ -77,6 +89,8 @@ def check_configuration(configuration):
         raise CyclicStructureError("The loaded structure is cyclic")
     if not check_agents_are_known(configuration):
         raise UndefinedAgentError("An agent is declared in the structure but undefined")
+    if not check_max_one_training_agent(configuration):
+        raise AgentArgumentError("A hierarchy can only have one or zero training agent")
     return True
 
 
@@ -124,18 +138,54 @@ def check_agents_are_known(configuration):
     return True
 
 
-def get_class(kls):
+def check_max_one_training_agent(configuration):
+    training_agent_count = 0
+    for agent in configuration["agents"]:
+        if "train_mode" in agent["arguments"] and agent["arguments"]["train_mode"] == "True":
+            training_agent_count += 1
+    return training_agent_count < 2
+
+
+def get_class(class_name):
     """
     returns the class corresponding to a string
-    :param kls: the given string pointing to the class from the working directory
+    :param class_name: the given string pointing to the class from the working directory
     :return: the class as an object
     """
-    parts = kls.split('.')
+    parts = class_name.split('.')
     class_module = ".".join(parts[:-1])
     m = __import__(class_module)
     for comp in parts[1:]:
         m = getattr(m, comp)
     return m
+
+
+def get_arguments(args, training_memory):
+    """
+    Argument Parser
+    :param args: dict of all the agent arguments with key and value as string
+    :param training_memory: memory to be used for training agent if any
+    :return: a dict with at least the same keys and values parsed into objects
+    """
+    for arg_name, arg_value in args.items():
+        try:
+            arg_value = int(arg_value)
+        except ValueError:
+            pass
+        if arg_value == "True":
+            arg_value = True
+        elif arg_value == "False":
+            arg_value = False
+        args[arg_name] = arg_value
+
+    # if train mode is set
+    if "train_mode" in args:
+        # add a memory object
+        if args["train_mode"]:
+            args["shared_memory"] = training_memory
+        else:
+            args["shared_memory"] = None
+    return args
 
 
 class CyclicStructureError(RuntimeError):
@@ -144,3 +194,7 @@ class CyclicStructureError(RuntimeError):
 
 class UndefinedAgentError(RuntimeError):
     """An agent is declared in the structure but undefined"""
+
+
+class AgentArgumentError(RuntimeError):
+    """Arguments set to agents are not consistent with what is expected"""

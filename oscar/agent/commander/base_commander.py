@@ -26,7 +26,7 @@ class BaseCommander(ABC, CustomAgent):
         """
 
         if not self._locked_choice:
-            self._playing_subordinate = self.choose_subordinate()
+            self._playing_subordinate = self.choose_subordinate(obs)
         play = self._playing_subordinate.step(obs)
         try:
             self._locked_choice = play["locked_choice"]
@@ -51,7 +51,7 @@ class BaseCommander(ABC, CustomAgent):
         self._subordinates.remove(agent)
 
     @abstractmethod
-    def choose_subordinate(self):
+    def choose_subordinate(self, obs):
         """
         Choose a subordinate among the list of subordinates, and make it play.
         :return: A subordinate among the list of subordinates.
@@ -70,6 +70,11 @@ class BaseCommander(ABC, CustomAgent):
         super().setup(obs_spec, action_spec())
         for subordinate in self._subordinates:
             subordinate.setup(obs_spec, action_spec)
+
+    def reset(self):
+        super().reset()
+        for subordinate in self._subordinates:
+            subordinate.reset()
 
     def __str__(self):
         return self.print_tree(0)
