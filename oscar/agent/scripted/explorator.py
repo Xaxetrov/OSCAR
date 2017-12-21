@@ -1,5 +1,6 @@
 from oscar.agent.custom_agent import CustomAgent
 from oscar.meta_action import *
+import pickle
 
 class Explorator(CustomAgent):
     def __init__(self, message="I hate you"):
@@ -23,7 +24,7 @@ class Explorator(CustomAgent):
             if meta_action:
                 play["success_callback"] = self.scout_sent
         except NoValidSCVError:
-            #print("scouting failed")
+            print("scouting failed")
             meta_action = [actions.FunctionCall(NO_OP, [])]
 
         play["actions"] = meta_action

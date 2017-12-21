@@ -1,7 +1,12 @@
+from random import randint
 from oscar.util.selection import *
+from oscar.util.screen_helper import *
 
-
-def select_scv(obs):
+""" 
+Selects an idle scv, using built-in pySc2 function. 
+Priority is given to scv visible on screen.
+"""
+def select_idle_scv_screen_priority(obs):
     """
     Select a SCV, with priority order: first, try to select a SCV collecting resources (mineral or vespene gas).
     This will only try to select a SCV on screen. Then, if an idle SCV exist, select it (not necessarily on
@@ -34,9 +39,31 @@ def select_scv(obs):
 
     return select_idle_scv(obs)
 
-
+""" Selects an idle scv, using built-in pySc2 function. """
 def select_idle_scv(obs):
     # Select an idle SCV
     if obs.observation["player"][IDLE_WORKER_COUNT] != 0:
         return [actions.FunctionCall(SELECT_IDLE_WORKER, [NEW_SELECTION])]
     raise NoValidSCVError()
+
+
+""" Selects a random scv on screen, using screen layers. """
+def select_scv_on_screen(obs):
+    centers = get_center(obs, TERRAN_SCV, PLAYER_SELF)
+    if len(centers) == 0:
+        raise NoValidSCVError()
+
+    # Picks random scv
+    pos = list(centers[randint(0, len(centers)-1)])
+
+    # Handles scv partially out of the screen
+    if pos[0] < 0:
+        pos[0] = 0
+    elif pos[0] >= SCREEN_RESOLUTION:
+        pos[0] = SCREEN_RESOLUTION-1
+    if pos[1] < 0:
+        pos[1] = 0
+    elif pos[1] >= SCREEN_RESOLUTION:
+        pos[1] = SCREEN_RESOLUTION-1
+
+    return [actions.FunctionCall(SELECT_POINT, [NEW_SELECTION, pos])]

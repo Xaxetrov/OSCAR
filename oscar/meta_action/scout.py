@@ -9,10 +9,13 @@ def scout(obs, coordinates_helper, cur_location = None, propagate_error = True):
     result_action_list = None
 
     try:
-        result_action_list = select_scv(obs)
+        result_action_list = select_idle_scv_screen_priority(obs)
     except NoValidSCVError:
-        if propagate_error:
-            raise
+        try:
+            result_action_list = select_scv_on_screen(obs)
+        except NoValidSCVError:
+            if propagate_error:
+                raise
 
     if not cur_location:
         cur_location = coordinates_helper.get_loc_in_minimap(obs)

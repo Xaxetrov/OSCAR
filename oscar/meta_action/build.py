@@ -6,12 +6,13 @@ from oscar.constants import *
 def build(obs, building_tiles_size, building_id, propagate_error=True):
     result_action_list = None
     try:
-        result_action_list = select_scv(obs)
+        result_action_list = select_idle_scv_screen_priority(obs)
     except NoValidSCVError:
-        # If propagate_error is False, the SCV will be idle at the end of the build action.
-        # Another agent will need to sent it back to work.
-        if propagate_error:
-            raise
+        try:
+            result_action_list = select_scv_on_screen(obs)
+        except NoValidSCVError:
+            if propagate_error:
+                raise
 
     # Find a valid emplacement
     building_tiles_size += 0  # Handle the free space needed around the building.
