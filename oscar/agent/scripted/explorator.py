@@ -1,6 +1,5 @@
 from oscar.agent.custom_agent import CustomAgent
 from oscar.meta_action import *
-import pickle
 
 class Explorator(CustomAgent):
     def __init__(self, message="I hate you"):
