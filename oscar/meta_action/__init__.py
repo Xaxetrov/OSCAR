@@ -6,3 +6,4 @@ from oscar.meta_action.camera import *
 from oscar.meta_action.scout import *
 from oscar.meta_action.attack import *
 from oscar.meta_action.harvest import *
+from oscar.meta_action.watch import *

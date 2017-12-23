@@ -37,18 +37,11 @@ class Coordinates_helper():
                 if minimap[row][col] == 1:
                     return Location(col, row)
 
+    # Returns top-left corner position of a screen in the minimap 
     def get_random_minimap_location(self):
         loc = Location()
-        if self.obs_range['x']['min'] == self.obs_range['x']['max']:
-            loc.x = self.obs_range['x']['min']
-        else:
-            loc.x = np.random.randint(self.obs_range['x']['min'], self.obs_range['x']['max'])
-
-        if self.obs_range['y']['min'] == self.obs_range['y']['max']:
-            loc.y = self.obs_range['y']['min']
-        else:
-            loc.y = np.random.randint(self.obs_range['y']['min'], self.obs_range['y']['max'])
-
+        loc.x = np.random.randint(0, self.minimap_size['x'] - self.field_of_view_minimap['x'])
+        loc.y = np.random.randint(0, self.minimap_size['y'] - self.field_of_view_minimap['y'])
         return loc
 
     # Limits are inclusive
