@@ -1,7 +1,8 @@
 from oscar.agent.custom_agent import CustomAgent
 from oscar.meta_action import *
+from oscar.util.coordinates_helper import Coordinates_helper
 
-class Explorator(CustomAgent):
+class Scout(CustomAgent):
     def __init__(self, message="I hate you"):
         self._message = message
         self.coordinates_helper = Coordinates_helper()

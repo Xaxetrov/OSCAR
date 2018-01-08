@@ -16,6 +16,9 @@ class Location():
     def distance(self, other):
     	return math.sqrt(self.squarred_distance(other));
 
+    def get_flipped(self):
+        return Location(self.y, self.x)
+
     def to_array(self):
     	return [self.x, self.y]
 
