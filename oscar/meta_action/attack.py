@@ -1,18 +1,14 @@
-from oscar.util.selection import *
-
-
-def harvest_mineral(obs, queued=True):
-    any_mineral = find_position(obs, ALL_MINERAL_FIELD, player_relative=PLAYER_NEUTRAL)
-    return [actions.FunctionCall(HARVEST_GATHER_SCREEN, [QUEUED if queued else NOT_QUEUED, any_mineral])]
-
+import numpy as np
+from oscar.constants import *
+import random
 
 def attack_minimap(obs, queued=True):
     """
-    attack a position on minimap, position is choisen randomly from known enemy position
-    if any or randomly from minimap (sort of scoot...)
+    Attacks a position on the minimap. Position corresponds to a visible enemy on the screen if any, 
+    randomly on the minimap otherwise (sort of scouting...)
     :param obs: the observation given by pysc2 at current step
     :param queued: if the returned action must be queued or not
-    :return: return a list of one attack minimap action
+    :return: a list of one attack minimap action
     """
     minimap_player_relative = obs.observation['minimap'][MINI_PLAYER_RELATIVE]
     minimap_height = obs.observation['minimap'][MINI_HEIGHT_MAP]
@@ -21,9 +17,9 @@ def attack_minimap(obs, queued=True):
     if len(enemy_pos_x) > 0:
         pos = random.choice(list(zip(enemy_pos_x, enemy_pos_y)))
     else:
-        scoot_pos_y, scoot_pos_x = ((minimap_height != 0) & (minimap_visibility == 0)).nonzero()
-        if len(scoot_pos_x) > 0:
-            pos = random.choice(list(zip(scoot_pos_x, scoot_pos_y)))
+        scout_pos_y, scout_pos_x = ((minimap_height != 0) & (minimap_visibility == 0)).nonzero()
+        if len(scout_pos_x) > 0:
+            pos = random.choice(list(zip(scout_pos_x, scout_pos_y)))
         else:
             minimap_size = np.shape(minimap_player_relative)[0]
             pos_x = random.randint(0, minimap_size - 1)

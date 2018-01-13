@@ -6,8 +6,8 @@ from oscar.env.shared_objects import SharedObjects
 def build_hierarchy(configuration_filename: str):
     """
     Builds a hierarchy of agents from a json file
-    :param configuration_filename:
-    :return: the general subordinates ?
+    :param configuration_filename: the path of the configuration file to be loaded
+    :return: the general agent and a shared memory for training
     """
     with open(configuration_filename) as configuration_file:
         configuration = json.load(configuration_file)
@@ -19,28 +19,39 @@ def build_hierarchy(configuration_filename: str):
     # Create a maintained set of instantiated agents
     instantiated = {}
 
+    # build shared objects to be associated with agents later
+    shared_objects = build_shared_objects(configuration)
+
     # Setup a training memory for agent in training mode
     training_memory = SharedObjects()
 
-    # Build family and return general's children
-    general_subordinate = build_agent(configuration, instantiated, 0, training_memory)
+    # Build hierarchy and return general's children
+    general_agent = build_agent(configuration, instantiated, shared_objects, 0, training_memory)
 
     # if the training memory is not set with agent value, then nobody use it
     # then delete it
     if training_memory.action_space is None:
         training_memory = None
-    return general_subordinate, training_memory
+
+    return general_agent, training_memory
 
 
-def build_agent(configuration, instantiated, agent_id, training_memory):
+# ----------------------------------------------------------------------------------------------- #
+# ----------------------------------------BUILD AGENTS------------------------------------------- #
+# ----------------------------------------------------------------------------------------------- #
+
+def build_agent(configuration, instantiated, shared_objects, agent_id, training_memory):
     """
     Builds an agent from a configuration.
     Recursive function : builds the children before the agent itself
+    :param configuration: the configuration file
+    :param instantiated: a maintained set of instanciated agents
+    :param shared_objects: a list of objects shared among some agents
     :param agent_id: The id of the agent in the "structure" and "agents" part of the configuration
     :param training_memory: the memory to be used to communicate between the environment and the agent during training
     :return: the built agent
     """
-    agent_info = get_agent_information(configuration["agents"], agent_id)
+    agent_info = get_agent_by_id(configuration["agents"], agent_id)
     agent_class = get_class(agent_info["class_name"])
     agent_arguments = get_arguments(agent_info["arguments"], training_memory)
 
@@ -48,7 +59,7 @@ def build_agent(configuration, instantiated, agent_id, training_memory):
     if agent_id in instantiated:
         return instantiated[agent_id]
 
-    # Generate children
+    # Build children
     try:
         children_ids = configuration["structure"][agent_id]
     except KeyError:
@@ -56,17 +67,24 @@ def build_agent(configuration, instantiated, agent_id, training_memory):
     if len(children_ids) != 0:
         children = []
         for child_id in children_ids:
-            children_agent = build_agent(configuration, instantiated, child_id, training_memory)
+            children_agent = build_agent(configuration, instantiated, shared_objects, child_id, training_memory)
             children.append(children_agent)
-        agent_arguments["subordinate"] = children
+        if len(children) > 0:
+            agent_arguments["subordinates"] = children
 
     # Create the thing
     agent = agent_class(**agent_arguments)
     instantiated[agent_id] = agent
+
+    # associate shared objects
+    for obj in shared_objects:
+        if agent_id in obj["shared_with"]:
+            bind_shared_object(agent, obj)
+
     return agent
 
 
-def get_agent_information(agents, agent_id):
+def get_agent_by_id(agents, agent_id):
     """
     Finds an agent in a list of agents, by id
     :param agents: the list to look into
@@ -79,11 +97,56 @@ def get_agent_information(agents, agent_id):
     raise ValueError("Agent of id {0} is not in agent_information".format(agent_id))
 
 
+# ----------------------------------------------------------------------------------------------- #
+# -----------------------------------BUILD SHARED OBJ-------------------------------------------- #
+# ----------------------------------------------------------------------------------------------- #
+
+def build_shared_objects(configuration):
+    """
+    Builds a list of shared objects
+    :param configuration: the config file
+    :return: a list of dict with keywords (name, object, shared_with)
+    """
+    shared_objects = []
+
+    if "shared" in configuration:
+        for obj in configuration["shared"]:
+            shared_objects.append(build_shared_object(obj))
+
+    return shared_objects
+
+
+def build_shared_object(object_information):
+    """
+    :param object_information: the config file part representing a shared object
+    :return: a dict with keywords (id, object, shared_with) where:
+        - name: a key to identify the shared object
+        - object: the object to be instantiated
+        - shared_with: a list of indices, indicating which agents can access the shared object
+    """
+    shared = dict()
+    shared["name"] = object_information["name"]
+    shared["object"] = get_class(object_information["class_name"])(**object_information["arguments"])
+    shared["shared_with"] = object_information["shared_with"]
+    return shared
+
+
+def bind_shared_object(agent, obj):
+    """
+    Binds a shared object to an agent
+    """
+    agent.add_shared(obj["name"], obj['object'])
+
+
+# ----------------------------------------------------------------------------------------------- #
+# ----------------------------------------CONFIG CHECK------------------------------------------- #
+# ----------------------------------------------------------------------------------------------- #
+
 def check_configuration(configuration):
     """
-    runs various integrity tests on a given structured configuration
+    Runs various integrity tests on a given structured configuration
     :param configuration:
-    :return: if all checks are passed
+    :return: whether all checks are passed
     """
     if not check_structure_acyclic(configuration["structure"]):
         raise CyclicStructureError("The loaded structure is cyclic")
@@ -95,7 +158,8 @@ def check_configuration(configuration):
 
 
 def check_structure_acyclic(structure):
-    """Return True if the directed graph g has a cycle.
+    """
+    Returns whether the directed graph g has a cycle.
     g must be represented as a dictionary mapping vertices to
     iterables of neighbouring vertices. For example:
 
@@ -103,7 +167,6 @@ def check_structure_acyclic(structure):
     True
     >>> check_structure_acyclic({1: (2,), 2: (3,), 3: (4,)})
     False
-
     """
     path = set()
     visited = set()
@@ -124,7 +187,7 @@ def check_structure_acyclic(structure):
 
 def check_agents_are_known(configuration):
     """
-    Check if all keys of the configuration "structure" are defined in the "agents" section
+    Checks if all keys of the configuration "structure" are defined in the "agents" section
     :param configuration: the object group to look at
     :return: if all agents are well defined
     """
@@ -148,7 +211,7 @@ def check_max_one_training_agent(configuration):
 
 def get_class(class_name):
     """
-    returns the class corresponding to a string
+    Returns the class corresponding to a string
     :param class_name: the given string pointing to the class from the working directory
     :return: the class as an object
     """
@@ -162,7 +225,7 @@ def get_class(class_name):
 
 def get_arguments(args, training_memory):
     """
-    Argument Parser
+    Argument parser
     :param args: dict of all the agent arguments with key and value as string
     :param training_memory: memory to be used for training agent if any
     :return: a dict with at least the same keys and values parsed into objects

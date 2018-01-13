@@ -160,6 +160,29 @@ def _update_unit_density(unit_density, mask, radius, start_point):
 			if mask[x, y] != 0:
 				unit_density[abs_x, abs_y] -= 1
 
+"""
+Returns a list of unique ids corresponding
+to the units visible on the screen, for a given player_id.
+
+Keyword arguments:
+player_id -- player id to match
+"""
+def get_units_id(obs, player_id):
+	units_dic = {}
+	units_list = []
+
+	screen_unit_type = obs.observation["screen"][SCREEN_UNIT_TYPE]
+	player_relative = obs.observation["screen"][SCREEN_PLAYER_RELATIVE]
+
+	for x in range(len(screen_unit_type)):
+		for y in range(len(screen_unit_type[0])):
+			id = screen_unit_type[x, y]
+
+			if id != 0 and player_relative[x, y] == player_id and not units_dic[id]:
+				units_dic[id] = 1
+				units_list.append(id)
+
+	return units_list
 
 """
 Computes and returns disks centers positions, in linear time of the size of the screen.

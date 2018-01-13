@@ -16,6 +16,7 @@ SMART_SCREEN = actions.FUNCTIONS.Smart_screen.id
 TRAIN_SCV_QUICK = actions.FUNCTIONS.Train_SCV_quick.id
 TRAIN_MARINE_QUICK = actions.FUNCTIONS.Train_Marine_quick.id
 MOVE_CAMERA = actions.FUNCTIONS.move_camera.id
+MOVE_MINIMAP = actions.FUNCTIONS.Move_minimap.id
 NO_OP = actions.FUNCTIONS.no_op.id
 
 # Features
