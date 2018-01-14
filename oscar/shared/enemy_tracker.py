@@ -35,9 +35,9 @@ class EnemyTracker:
     Computes and stores the approximate location of units on screen.
     """
     def scan_screen(self, obs, shared):
-        screen_scan = ScreenScan(shared['env'].timestamp, shared['camera'].location(obs))
+        screen_scan = ScreenScan(shared['env'].timestamp, shared['camera'].location(obs, shared))
 
-        units = shared['screen'].scan(obs)
+        units = shared['screen'].scan(obs, shared)
         for u in units:
             screen_scan.add_unit(u)
 

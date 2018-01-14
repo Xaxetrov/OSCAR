@@ -81,7 +81,7 @@ class Spy(CustomAgent):
         _MIN_VISIBLE_RATIO = 0.5
 
         visibles, non_visibles = 0, 0
-        for p in Camera.iterate(obs, location):
+        for p in self._shared['camera'].iterate(obs, location):
             if obs.observation['minimap'][MINI_VISIBILITY][p.y, p.x] == VISIBLE_CELL:
                 visibles += 1
             else:
