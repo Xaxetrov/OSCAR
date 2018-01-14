@@ -1,34 +1,39 @@
 from oscar.agent.custom_agent import CustomAgent
-from oscar.meta_action import *
-from oscar.util.coordinates_helper import Coordinates_helper
+from oscar.meta_action.scout import *
+from oscar.shared.env import Env
+
 
 class Scout(CustomAgent):
-    def __init__(self, message="I hate you"):
+    def __init__(self, message=""):
         self._message = message
-        self.coordinates_helper = Coordinates_helper()
-        self.cur_location = None
         super().__init__()
 
-    def scout_sent(self):
+    @staticmethod
+    def scout_sent():
         print("scout sent")
 
-    def step(self, obs):
-        if not self.cur_location:
-            self.cur_location = self.coordinates_helper.get_loc_in_minimap(obs)
 
+    def step(self, obs):
         play = {}
 
-        meta_action = None
-        try:
-            meta_action = scout(obs, self.coordinates_helper, self.cur_location)
-            if meta_action:
-                play["success_callback"] = self.scout_sent
-        except NoValidSCVError:
-            print("scouting failed")
-            meta_action = [actions.FunctionCall(NO_OP, [])]
+        self._shared_objects['env'].timestamp += 1
+        self._shared_objects["idle_tracker"].update(obs, self._shared_objects['env'].timestamp)
+        res = self._shared_objects["idle_tracker"].search_idle_unit(obs)
 
-        play["actions"] = meta_action
+        if res['unit']:
+            play['actions'] = \
+                [actions.FunctionCall(SELECT_POINT, [NEW_SELECTION, res['unit'].location.screen.get_flipped().to_array()])] \
+                + scout(obs)
+
+        elif res['actions']:
+            play['actions'] = res['actions']
+            play['locked_choice'] = True
+
+        else: # failed to find an idle unit
+            play['actions'] = [actions.FunctionCall(NO_OP, [])]
+            
         return play
+
 
     def print_tree(self, depth):
         return "I am a {} and my depth is {}. I have a message to tell you : {}".format(type(self).__name__, depth
