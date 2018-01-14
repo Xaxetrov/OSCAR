@@ -2,9 +2,9 @@ import numpy as np
 import random
 from oscar.constants import *
 from oscar.util.point import Point
-from oscar.util.minimap import Minimap
-from oscar.util.screen import Screen
-from oscar.util.camera import Camera
+from oscar.shared.minimap import Minimap
+from oscar.shared.screen import Screen
+from oscar.shared.camera import Camera
 from oscar.util.unit import Unit
 from oscar.util.location import Location
 
@@ -37,20 +37,20 @@ class IdleTracker():
         self._candidate_list = None
         self.reset_search()
 
-    def update(self, obs, timestamp):
+    def update(self, obs, shared):
         """
         Updates tracking data using minimap view.
         Should be called at the beginning of every step.
         """
-        self._last_obs[timestamp % IdleTracker._MINIMAP_IDLE_STEPS] = obs
+        self._last_obs[shared['env'].timestamp % IdleTracker._MINIMAP_IDLE_STEPS] = obs
 
         if self._idle_units_map is None:
-            self._idle_units_map = np.zeros((Minimap.width(obs), Minimap.height(obs)))
+            self._idle_units_map = np.zeros((shared['minimap'].width(obs), shared['minimap'].height(obs)))
         if self._blacklist_map is None:
-            self._blacklist_map = np.zeros((Minimap.width(obs), Minimap.height(obs)))
+            self._blacklist_map = np.zeros((shared['minimap'].width(obs), shared['minimap'].height(obs)))
 
-        self._update_idle_units_map(obs)
-        self._update_blacklist_map(obs)
+        self._update_idle_units_map(obs, shared)
+        self._update_blacklist_map(obs, shared)
 
     def reset_search(self):
         """
@@ -61,7 +61,7 @@ class IdleTracker():
         self._scan_count = 0
         self._candidate_list = None
 
-    def search_idle_unit(self, obs, unit_ids=None, target=None, max_dist=None):
+    def search_idle_unit(self, obs, shared, unit_ids=None, target=None, max_dist=None):
         """
          Searches for idle units, close to a given location.
          To do so, checks the minimap, moves the camera and observes the screen during multiple steps.
@@ -82,7 +82,7 @@ class IdleTracker():
         }
 
         if self._state == IdleTracker._INITIAL_STATE:
-            self._candidate = self._get_best_idle_candidate(obs, unit_ids, target, max_dist)
+            self._candidate = self._get_best_idle_candidate(obs, shared, unit_ids, target, max_dist)
             if self._candidate: # moves camera to observe candidate
                 response['actions'] = [actions.FunctionCall(MOVE_CAMERA, 
                     [self._candidate.location.minimap.to_array()])]
@@ -91,7 +91,7 @@ class IdleTracker():
                 return response
 
         elif self._state == IdleTracker._SCAN_SCREEN_STATE:
-            friendly_units = self._get_friendly_units_on_screen(obs)
+            friendly_units = self._get_friendly_units_on_screen(obs, shared)
 
             if self._candidate_list is None:
                 self._candidate_list = friendly_units
@@ -107,7 +107,7 @@ class IdleTracker():
             if len(self._candidate_list) == 0: # No idle unit on the screen
                 if self._candidate in self._idle_units:
                     self._idle_units.remove(self._candidate)
-                self._blacklist_screen(obs)
+                self._blacklist_screen(obs, shared)
                 self.reset_search()
             else:
                 self._scan_count += 1
@@ -134,27 +134,26 @@ class IdleTracker():
                     response['actions'] = [actions.FunctionCall(NO_OP, [])]
 
         if not response['actions'] and not response['unit']:
-            return self.search_idle_unit(obs, unit_ids, target, max_dist)
+            return self.search_idle_unit(obs, shared, unit_ids, target, max_dist)
         else:
             return response
 
     @staticmethod
-    def _get_friendly_units_on_screen(obs):
-        scanned = Screen.scan(obs)
-        camera_loc = Camera.location(obs)
+    def _get_friendly_units_on_screen(obs, shared):
+        scanned = shared['screen'].scan(obs)
 
         friendly_units = []
         for s in scanned:
             if s.player_id == PLAYER_SELF and s.unit_id not in TERRAN_BUIDINGS:
-                loc = Location(screen_loc=s.location.screen, camera_loc=camera_loc)
-                loc.minimap = Minimap.compute_camera_location(obs, loc.camera, loc.screen)
+                loc = Location(screen_loc=s.location.screen, camera_loc=shared['camera'].location(obs))
+                loc.minimap = shared['camera'].location_from_screen(obs, shared, loc.camera, loc.screen)
                 friendly_units.append(Unit(loc, s.unit_id))
         return friendly_units
 
-    def _update_idle_units_map(self, obs):
+    def _update_idle_units_map(self, obs, shared):
         cur_minimap = obs.observation['minimap'][MINI_PLAYER_RELATIVE]
-        for x in range(Minimap.width(obs)):
-            for y in range(Minimap.height(obs)):
+        for x in range(shared['minimap'].width(obs)):
+            for y in range(shared['minimap'].height(obs)):
                 if cur_minimap[y, x] != PLAYER_SELF \
                     and self._idle_units_map[x, y] != 0:
                     self._idle_units_map[x, y] = 0
@@ -163,28 +162,28 @@ class IdleTracker():
                         if u.location.minimap.equals(Point(x, y)):
                             self._idle_units.remove(u)
 
-    def _update_blacklist_map(self, obs):
+    def _update_blacklist_map(self, obs, shared):
         cur_minimap = obs.observation['minimap'][MINI_PLAYER_RELATIVE]
-        for x in range(Minimap.width(obs)):
-            for y in range(Minimap.height(obs)):
+        for x in range(shared['minimap'].width(obs)):
+            for y in range(shared['minimap'].height(obs)):
                 if cur_minimap[y, x] != PLAYER_SELF \
                     and self._blacklist_map[x, y] != 0:
                     self._blacklist_map[x, y] = 0
 
-    def _blacklist_screen(self, obs):
+    def _blacklist_screen(self, obs, shared):
         camera = obs.observation['minimap'][MINI_CAMERA]
         player_relative = obs.observation['minimap'][MINI_PLAYER_RELATIVE]
 
-        for x in range(Minimap.width(obs)):
-            for y in range(Minimap.height(obs)):
+        for x in range(shared['minimap'].width(obs)):
+            for y in range(shared['minimap'].height(obs)):
                 if camera[y, x] == 1 and player_relative[y, x] == PLAYER_SELF:
                     self._blacklist_map[x, y] = 1
 
-    def _get_new_candidates_from_minimap(self, obs):
+    def _get_new_candidates_from_minimap(self, obs, shared):
         friendly_fixed_points = []
 
-        for x in range(Minimap.width(obs)):
-            for y in range(Minimap.height(obs)):
+        for x in range(shared['minimap'].width(obs)):
+            for y in range(shared['minimap'].height(obs)):
 
                 if self._blacklist_map[x, y] != 0 or self._idle_units_map[x, y] != 0:
                     continue
@@ -203,7 +202,7 @@ class IdleTracker():
 
         return friendly_fixed_points
 
-    def _get_best_idle_candidate(self, obs, unit_ids=None, target=None, max_dist=None):
+    def _get_best_idle_candidate(self, obs, shared, unit_ids=None, target=None, max_dist=None):
         """
         Returns minimap position of an idle unit candidate.
         """
@@ -221,7 +220,7 @@ class IdleTracker():
                         best_candidate = u
                         break
                     else:
-                        dist = target.distance(u.minimap_loc)
+                        dist = target.distance(u.location.minimap)
                         if (not max_dist or dist <= max_dist) and \
                             (not min_dist or dist < min_dist):
                             best_candidate = u
@@ -229,7 +228,7 @@ class IdleTracker():
 
         """ if there is no identified idle unit, try to find a candidate with the minimap """
         if not best_candidate:
-            minimap_candidates = self._get_new_candidates_from_minimap(obs)
+            minimap_candidates = self._get_new_candidates_from_minimap(obs, shared)
             random.shuffle(minimap_candidates)
             for u in minimap_candidates:
                 if not target:

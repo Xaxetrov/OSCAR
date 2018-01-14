@@ -17,13 +17,13 @@ class Scout(CustomAgent):
         play = {}
 
         self._shared['env'].timestamp += 1
-        self._shared["idle_tracker"].update(obs, self._shared['env'].timestamp)
-        res = self._shared["idle_tracker"].search_idle_unit(obs)
+        self._shared['idle_tracker'].update(obs, self._shared)
+        res = self._shared["idle_tracker"].search_idle_unit(obs, self._shared)
 
         if res['unit']:
             play['actions'] = \
                 [actions.FunctionCall(SELECT_POINT, [NEW_SELECTION, res['unit'].location.screen.get_flipped().to_array()])] \
-                + scout(obs)
+                + scout(obs, self._shared)
 
         elif res['actions']:
             play['actions'] = res['actions']

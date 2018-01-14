@@ -1,6 +1,7 @@
 from oscar.constants import *
-from oscar.util.screen import Screen
-
+from oscar.shared.screen import Screen
+from oscar.shared.camera import Camera
+from oscar.shared.env import Env
 
 class ScreenScan:
     """ Stores results of a screen scan. """
@@ -33,10 +34,10 @@ class EnemyTracker:
     """
     Computes and stores the approximate location of units on screen.
     """
-    def scan_screen(self, obs, camera_loc, timestamp):
-        screen_scan = ScreenScan(timestamp, camera_loc)
+    def scan_screen(self, obs, shared):
+        screen_scan = ScreenScan(shared['env'].timestamp, shared['camera'].location(obs))
 
-        units = Screen.scan(obs)
+        units = shared['screen'].scan(obs)
         for u in units:
             screen_scan.add_unit(u)
 

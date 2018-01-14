@@ -24,6 +24,25 @@ class Camera(object):
         return max(camera_y) - min(camera_y) + 1
 
     @staticmethod
+    def location_from_screen(obs, shared, camera_loc, screen_loc):
+        scale_x = Camera.width(obs) / len(obs.observation['screen'][0])
+        scale_y = Camera.height(obs) / len(obs.observation['screen'][0][0])
+
+        return shared['minimap'].bound(obs, Point(
+            int(round(camera_loc.x - 0.5*Camera.width(obs) + screen_loc.x * scale_x)),
+            int(round(camera_loc.y - 0.5*Camera.height(obs) + screen_loc.y * scale_y))))
+
+    @staticmethod
+    def random_target(obs):
+        minimap_width = len(obs.observation['minimap'][0])
+        minimap_height = len(obs.observation['minimap'][0][0])
+
+        loc = Point()
+        loc.x = np.random.randint(int(Camera.width(obs)/2), minimap_width - int(Camera.width(obs)/2))
+        loc.y = np.random.randint(int(Camera.height(obs)/2), minimap_height - int(Camera.height(obs)/2))
+        return loc
+
+    @staticmethod
     def iterate(obs, camera_loc=None):
         """ Generates camera pixels location """
         mini_camera = obs.observation['minimap'][MINI_CAMERA]

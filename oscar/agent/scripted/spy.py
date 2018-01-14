@@ -1,13 +1,13 @@
 from oscar.agent.custom_agent import CustomAgent
 from oscar.meta_action import *
-from oscar.util.camera import Camera
+from oscar.shared.camera import Camera
 from oscar.shared.env import Env
 import time
 
 
 class Spy(CustomAgent):
     '''
-    Positions units at strategic points and moves camera
+    Positions units at strategic locations and moves camera
     in order to collect information on the enemy.
     '''
 
@@ -33,16 +33,10 @@ class Spy(CustomAgent):
 
         play = {}
         self._shared['env'].timestamp += 1
-        self._shared['idle_tracker'].update(obs, self._shared['env'].timestamp)
-
-        point = Camera.location(obs)
+        self._shared['idle_tracker'].update(obs, self._shared)
 
         if self._state == Spy._INITIAL_STATE:
-            self._target = get_spy_target(
-                obs, 
-                self._shared['enemy_tracker'],
-                self._shared['env'].timestamp
-                )
+            self._target = get_spy_target(obs, self._shared)
 
             if not self._target:
                 play['actions'] = [actions.FunctionCall(NO_OP, [])]
@@ -58,12 +52,12 @@ class Spy(CustomAgent):
                     self._state = Spy._SEND_UNIT
 
         elif self._state == Spy._SCREEN_SCAN:
-            self._shared['enemy_tracker'].scan_screen(obs, point, self._shared['env'].timestamp)
+            self._shared['enemy_tracker'].scan_screen(obs, self._shared)
             play['actions'] = [actions.FunctionCall(NO_OP, [])]
             self._state = Spy._INITIAL_STATE
 
         elif self._state == Spy._SEND_UNIT:
-            res = self._shared['idle_tracker'].search_idle_unit(obs, target=self._target)
+            res = self._shared['idle_tracker'].search_idle_unit(obs, self._shared, target=self._target)
 
             if res['unit']:
                 play['actions'] = \
