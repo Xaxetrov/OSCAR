@@ -18,19 +18,30 @@ class BaseCommander(ABC, CustomAgent):
         self._locked_choice = False
         self._playing_subordinate = None
 
-    def step(self, obs):
+    def step(self, obs, locked_choice=None):
         """
         Does some work and choose a subordinate that will play
         :param obs: observations from the game
         :return: an action chosen by a subordinate
         """
 
-        if not self._locked_choice:
+        """if not self._locked_choice:
             self._playing_subordinate = self.choose_subordinate(obs)
         play = self._playing_subordinate.step(obs)
         try:
             self._locked_choice = play["locked_choice"]
         except KeyError:
+            self._locked_choice = False
+        return play"""
+
+        if locked_choice is None:
+            locked_choice = self._locked_choice
+
+        self._playing_subordinate = self.choose_subordinate(obs, locked_choice)
+        play = self._playing_subordinate.step(obs, locked_choice)
+        if "locked_choice" in play:
+            self._locked_choice = play["locked_choice"]
+        else:
             self._locked_choice = False
         return play
 
@@ -51,11 +62,14 @@ class BaseCommander(ABC, CustomAgent):
         self._subordinates.remove(agent)
 
     @abstractmethod
-    def choose_subordinate(self, obs):
+    def choose_subordinate(self, obs, locked_choice):
         """
         Choose a subordinate among the list of subordinates, and make it play.
         :return: A subordinate among the list of subordinates.
         """
+
+    def play_locked_choice(self):
+        return self._playing_subordinate
 
     def unlock_choice(self):
         if self._locked_choice:

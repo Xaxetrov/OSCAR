@@ -13,7 +13,7 @@ class Scout(CustomAgent):
         print("scout sent")
 
 
-    def step(self, obs):
+    def step(self, obs, locked_choice=None):
         play = {}
 
         self._shared_objects['env'].timestamp += 1
