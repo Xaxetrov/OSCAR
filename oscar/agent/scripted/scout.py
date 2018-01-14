@@ -16,9 +16,9 @@ class Scout(CustomAgent):
     def step(self, obs, locked_choice=None):
         play = {}
 
-        self._shared_objects['env'].timestamp += 1
-        self._shared_objects["idle_tracker"].update(obs, self._shared_objects['env'].timestamp)
-        res = self._shared_objects["idle_tracker"].search_idle_unit(obs)
+        self._shared['env'].timestamp += 1
+        self._shared["idle_tracker"].update(obs, self._shared['env'].timestamp)
+        res = self._shared["idle_tracker"].search_idle_unit(obs)
 
         if res['unit']:
             play['actions'] = \

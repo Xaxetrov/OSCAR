@@ -32,16 +32,16 @@ class Spy(CustomAgent):
     def step(self, obs, locked_choice=None):
 
         play = {}
-        self._shared_objects['env'].timestamp += 1
-        self._shared_objects['idle_tracker'].update(obs, self._shared_objects['env'].timestamp)
+        self._shared['env'].timestamp += 1
+        self._shared['idle_tracker'].update(obs, self._shared['env'].timestamp)
 
         point = Camera.location(obs)
 
         if self._state == Spy._INITIAL_STATE:
             self._target = get_spy_target(
                 obs, 
-                self._shared_objects['enemy_tracker'],
-                self._shared_objects['env'].timestamp
+                self._shared['enemy_tracker'],
+                self._shared['env'].timestamp
                 )
 
             if not self._target:
@@ -58,12 +58,12 @@ class Spy(CustomAgent):
                     self._state = Spy._SEND_UNIT
 
         elif self._state == Spy._SCREEN_SCAN:
-            self._shared_objects['enemy_tracker'].scan_screen(obs, point, self._shared_objects['env'].timestamp)
+            self._shared['enemy_tracker'].scan_screen(obs, point, self._shared['env'].timestamp)
             play['actions'] = [actions.FunctionCall(NO_OP, [])]
             self._state = Spy._INITIAL_STATE
 
         elif self._state == Spy._SEND_UNIT:
-            res = self._shared_objects['idle_tracker'].search_idle_unit(obs, target=self._target)
+            res = self._shared['idle_tracker'].search_idle_unit(obs, target=self._target)
 
             if res['unit']:
                 play['actions'] = \
