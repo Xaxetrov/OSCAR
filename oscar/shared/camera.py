@@ -34,14 +34,6 @@ class Camera(object):
             self._height = max(camera_y) - min(camera_y) + 1
         return self._height
 
-    def location_from_screen(self, obs, shared, camera_loc, screen_loc):
-        scale_x = self.width(obs) / len(obs.observation['screen'][0])
-        scale_y = self.height(obs) / len(obs.observation['screen'][0][0])
-
-        return shared['minimap'].bound(obs, Point(
-            int(round(camera_loc.x - 0.5*self.width(obs) + screen_loc.x * scale_x)),
-            int(round(camera_loc.y - 0.5*self.height(obs) + screen_loc.y * scale_y))))
-
     def random_target(self, obs):
         minimap_width = len(obs.observation['minimap'][0])
         minimap_height = len(obs.observation['minimap'][0][0])

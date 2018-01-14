@@ -20,6 +20,17 @@ class Screen(object):
     def height(obs):
         return len(obs.observation['screen'][0][0])
 
+    @staticmethod
+    def random_point(obs, margin=0):
+        loc = Point()
+        loc.x = np.random.randint(margin, Screen.width(obs)-margin-1)
+        loc.y = np.random.randint(margin, Screen.height(obs)-margin-1)
+        return loc
+
+    def scan_units(self, obs, shared, unit_ids, player_id):
+        scan = self.scan(obs, shared)
+        return [u for u in scan if u.unit_id in unit_ids and u.player_id == player_id]
+
     def scan(self, obs, shared):
         """ Returns a list of the units on screen """
 

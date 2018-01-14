@@ -146,7 +146,7 @@ class IdleTracker():
         for s in scanned:
             if s.player_id == PLAYER_SELF and s.unit_id not in TERRAN_BUIDINGS:
                 loc = Location(screen_loc=s.location.screen, camera_loc=shared['camera'].location(obs, shared))
-                loc.minimap = shared['camera'].location_from_screen(obs, shared, loc.camera, loc.screen)
+                loc.compute_minimap_loc(obs, shared)
                 friendly_units.append(Unit(loc, s.unit_id))
         return friendly_units
 

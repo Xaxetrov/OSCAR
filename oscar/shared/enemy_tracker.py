@@ -1,7 +1,5 @@
 from oscar.constants import *
-from oscar.shared.screen import Screen
-from oscar.shared.camera import Camera
-from oscar.shared.env import Env
+
 
 class ScreenScan:
     """ Stores results of a screen scan. """
