@@ -55,8 +55,13 @@ Thus an agent can define his own observation and action space from the pysc2's o
 ## Authors
 
 Bruno Godefroy
+
 Edern Haumont
+
 Jérome Liermann
+
 Ruben Pericas-Moya
+
 François Robion
+
 Nicolas Six
