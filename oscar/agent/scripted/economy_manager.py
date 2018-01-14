@@ -9,14 +9,23 @@ class EconomyManager(CustomAgent):
     def __init__(self, message="I hate you"):
         self._message = message
         self.is_worker_selected = False
+        self.building_center = None
+        self.last_obs = None
         super().__init__()
+
+    def supply_depot_built(self):
+        print("built supply depot")
+        self._shared['economy'].add_supply_depot(self.last_obs, self._shared,
+            Location(camera_loc=self._shared['camera'].location(self.last_obs, self._shared), screen_loc=self.building_center))
+        self.is_worker_selected = False
 
     def step(self, obs, locked_choice=None):
         play = {}
         play['actions'] = []
 
-        if self._shared['env'].timestamp == 0:
-            for u in self._shared['screen'].scan_units(obs, self._shared, [TERRAN_SCV], PLAYER_SELF):
+        if self._shared['env'].timestamp == 1 \
+            and len(self._shared['economy'].command_centers) == 0:
+            for u in self._shared['screen'].scan_units(obs, self._shared, [TERRAN_COMMAND_CENTER], PLAYER_SELF):
                 self._shared['economy'].add_command_center(obs, self._shared,
                     Location(screen_loc=u.location.screen, camera_loc=self._shared['camera'].location(obs, self._shared)))
 
@@ -37,13 +46,11 @@ class EconomyManager(CustomAgent):
                 play['actions'] += [actions.FunctionCall(SELECT_POINT, 
                     [NEW_SELECTION, selected_scv.location.screen.get_flipped().to_array()])]
 
-            building_center = get_random_building_point(obs, self._shared, 2 * TILES_SIZE_IN_CELL)
-            if building_center:
-                self._shared['economy'].add_supply_depot(obs, self._shared,
-                    Location(camera_loc=self._shared['camera'].location(obs, self._shared), screen_loc=building_center))
-                #play['actions'] += [actions.FunctionCall(MOVE_SCREEN, [NOT_QUEUED, building_center.get_flipped().to_array()])]
-                play['actions'] += [actions.FunctionCall(BUILD_SUPPLY_DEPOT, [NOT_QUEUED, building_center.get_flipped().to_array()])]
-                self.is_worker_selected = False
+            self.building_center = get_random_building_point(obs, self._shared, 2 * TILES_SIZE_IN_CELL)
+            if self.building_center:
+                play['actions'] += [actions.FunctionCall(BUILD_SUPPLY_DEPOT, [NOT_QUEUED, self.building_center.get_flipped().to_array()])]
+                play['success_callback'] = self.supply_depot_built
+                self.last_obs = obs
 
         elif self.is_worker_selected:
             minerals = self._shared['screen'].scan_units(obs, self._shared, list(ALL_MINERAL_FIELD), PLAYER_NEUTRAL)
@@ -51,12 +58,13 @@ class EconomyManager(CustomAgent):
                 selected_mineral = random.choice(minerals)
                 play['actions'] += [actions.FunctionCall(HARVEST_GATHER_SCREEN, 
                     [NOT_QUEUED, selected_mineral.location.screen.get_flipped().to_array()])]
-                self.is_worker_selected = False
 
-        if len(play['actions']) == 0 \
-            and len(self._shared['economy'].command_centers) > 0:
-            play['actions'] = [actions.FunctionCall(MOVE_CAMERA, 
-                    [self._shared['economy'].command_centers[0].minimap.to_array()])]
+        if len(play['actions']) == 0:
+            if len(self._shared['economy'].command_centers) > 0:
+                play['actions'] = [actions.FunctionCall(MOVE_CAMERA, 
+                        [self._shared['economy'].command_centers[0].minimap.to_array()])]
+            else:
+                play['actions'] = [actions.FunctionCall(NO_OP, [])]
 
         return play
 
