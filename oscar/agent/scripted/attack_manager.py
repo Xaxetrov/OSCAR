@@ -16,7 +16,7 @@ class AttackManager(CustomAgent):
         enemy_point = get_random_enemy_location(obs)
         if enemy_point:
             play['actions'] = [actions.FunctionCall(SELECT_ARMY, [NEW_SELECTION]),
-                actions.FunctionCall(ATTACK_MINIMAP, [NOT_QUEUED, enemy_point.get_flipped().to_array()])]
+                actions.FunctionCall(ATTACK_MINIMAP, [NOT_QUEUED, enemy_point.to_array()])]
 
         if 'actions' not in play:
             play['actions'] = [actions.FunctionCall(NO_OP, [])]
