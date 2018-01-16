@@ -3,6 +3,12 @@ from oscar.constants import *
 from oscar.util.point import Point
 
 
+def is_enemy_visible(obs):
+    player_relative = obs.observation['minimap'][MINI_PLAYER_RELATIVE]
+    hostile_y, hostile_x = (player_relative == PLAYER_HOSTILE).nonzero()
+
+    return len(hostile_x) > 0
+
 def get_random_enemy_location(obs):
     player_relative = obs.observation['minimap'][MINI_PLAYER_RELATIVE]
     hostile_y, hostile_x = (player_relative == PLAYER_HOSTILE).nonzero()

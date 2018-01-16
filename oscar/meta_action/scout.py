@@ -32,7 +32,7 @@ def _score_target(obs, shared, camera_location, target):
     _UNEXPLORED_SCORE = 2
     _EXPLORED_SCORE = 1
     _VISIBLE_SCORE = 0
-    _DISTANCE_WEIGHT = 0.01
+    _DISTANCE_WEIGHT = 0.0
 
     visibility = obs.observation['minimap'][MINI_VISIBILITY]
     distance = camera_location.distance(target)
