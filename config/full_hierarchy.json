@@ -1,0 +1,93 @@
+{
+  "structure": {
+    "0": [3, 6, 1],
+    "6": [4, 5]
+  },
+  "agents": [
+    {
+      "id": 0,
+      "class_name": "oscar.agent.scripted.strategy_manager.StrategyManager",
+      "arguments": {}
+    },
+    {
+      "id": 1,
+      "class_name": "oscar.agent.scripted.scout.Scout",
+      "arguments": {}
+    },
+    {
+      "id": 2,
+      "class_name": "oscar.agent.scripted.spy.Spy",
+      "arguments": {}
+    },
+    {
+      "id": 3,
+      "class_name": "oscar.agent.scripted.economy_manager.EconomyManager",
+      "arguments": {}
+    },
+    {
+      "id": 4,
+      "class_name": "oscar.agent.scripted.army_supplier.ArmySupplier",
+      "arguments": {}
+    },
+    {
+      "id": 5,
+      "class_name": "oscar.agent.scripted.attack_manager.AttackManager",
+      "arguments": {}
+    },
+    {
+      "id": 6,
+      "class_name": "oscar.agent.scripted.combat_manager.CombatManager",
+      "arguments": {}
+    }
+  ],
+  "shared": [
+    {
+      "name": "env",
+      "class_name": "oscar.shared.env.Env",
+      "arguments": {},
+      "shared_with": [0, 1, 2, 3, 4, 5, 6]
+    },
+    {
+      "name": "camera",
+      "class_name": "oscar.shared.camera.Camera",
+      "arguments": {},
+      "shared_with": [0, 1, 2, 3, 4, 5, 6]
+    },
+    {
+      "name": "screen",
+      "class_name": "oscar.shared.screen.Screen",
+      "arguments": {},
+      "shared_with": [0, 1, 2, 3, 4, 5, 6]
+    },
+    {
+      "name": "minimap",
+      "class_name": "oscar.shared.minimap.Minimap",
+      "arguments": {},
+      "shared_with": [0, 1, 2, 3, 4, 5, 6]
+    },
+    {
+      "name": "enemy_tracker",
+      "class_name": "oscar.shared.enemy_tracker.EnemyTracker",
+      "arguments": {},
+      "shared_with": [0, 1, 2, 3, 4, 5, 6]
+    },
+    {
+      "name": "idle_tracker",
+      "class_name": "oscar.shared.idle_tracker.IdleTracker",
+      "arguments": {},
+      "shared_with": [0, 1, 2, 3, 4, 5, 6]
+    },
+    {
+      "name": "economy",
+      "class_name": "oscar.shared.economy.Economy",
+      "arguments": {},
+      "shared_with": [0, 1, 2, 3, 4, 5, 6]
+    },
+    {
+      "name": "army",
+      "class_name": "oscar.shared.army.Army",
+      "arguments": {},
+      "shared_with": [0, 1, 2, 3, 4, 5, 6]
+    }
+  ]
+}
