@@ -3,11 +3,11 @@ class Army:
 
 	def __init__(self):
 		self.barracks = []
-		self.fresh_new_marines = []
+		self.marines = 0
 
 	def add_barracks(self, obs, shared, location):
 		location.compute_minimap_loc(obs, shared)
 		self.barracks.append(location)
 
-	def add_marine(self, barracks_loc):
-		self.fresh_new_marines.append(barracks_loc)
+	def add_marine(self):
+		self.marines += 1
