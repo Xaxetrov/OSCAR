@@ -1,7 +1,7 @@
 {
   "structure": {
     "0": [3, 6, 1],
-    "6": [4, 5]
+    "6": [4, 5, 7]
   },
   "agents": [
     {
@@ -38,6 +38,11 @@
       "id": 6,
       "class_name": "oscar.agent.scripted.combat_manager.CombatManager",
       "arguments": {}
+    },
+    {
+      "id": 7,
+      "class_name": "oscar.agent.scripted.micro_manager.MicroManager",
+      "arguments": {}
     }
   ],
   "shared": [
@@ -45,49 +50,49 @@
       "name": "env",
       "class_name": "oscar.shared.env.Env",
       "arguments": {},
-      "shared_with": [0, 1, 2, 3, 4, 5, 6]
+      "shared_with": [0, 1, 2, 3, 4, 5, 6, 7]
     },
     {
       "name": "camera",
       "class_name": "oscar.shared.camera.Camera",
       "arguments": {},
-      "shared_with": [0, 1, 2, 3, 4, 5, 6]
+      "shared_with": [0, 1, 2, 3, 4, 5, 6, 7]
     },
     {
       "name": "screen",
       "class_name": "oscar.shared.screen.Screen",
       "arguments": {},
-      "shared_with": [0, 1, 2, 3, 4, 5, 6]
+      "shared_with": [0, 1, 2, 3, 4, 5, 6, 7]
     },
     {
       "name": "minimap",
       "class_name": "oscar.shared.minimap.Minimap",
       "arguments": {},
-      "shared_with": [0, 1, 2, 3, 4, 5, 6]
+      "shared_with": [0, 1, 2, 3, 4, 5, 6, 7]
     },
     {
       "name": "enemy_tracker",
       "class_name": "oscar.shared.enemy_tracker.EnemyTracker",
       "arguments": {},
-      "shared_with": [0, 1, 2, 3, 4, 5, 6]
+      "shared_with": [0, 1, 2, 3, 4, 5, 6, 7]
     },
     {
       "name": "idle_tracker",
       "class_name": "oscar.shared.idle_tracker.IdleTracker",
       "arguments": {},
-      "shared_with": [0, 1, 2, 3, 4, 5, 6]
+      "shared_with": [0, 1, 2, 3, 4, 5, 6, 7]
     },
     {
       "name": "economy",
       "class_name": "oscar.shared.economy.Economy",
       "arguments": {},
-      "shared_with": [0, 1, 2, 3, 4, 5, 6]
+      "shared_with": [0, 1, 2, 3, 4, 5, 6, 7]
     },
     {
       "name": "army",
       "class_name": "oscar.shared.army.Army",
       "arguments": {},
-      "shared_with": [0, 1, 2, 3, 4, 5, 6]
+      "shared_with": [0, 1, 2, 3, 4, 5, 6, 7]
     }
   ]
 }

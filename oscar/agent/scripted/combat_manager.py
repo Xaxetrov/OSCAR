@@ -6,6 +6,7 @@ class CombatManager(BaseCommander):
 
     _ARMY_SUPPLIER = 0
     _ATTACK_MANAGER = 1
+    _MICRO_MANAGER = 2
 
     def __init__(self, subordinates):
         self.count = 0
@@ -15,9 +16,15 @@ class CombatManager(BaseCommander):
         if locked_choice:
             return self.play_locked_choice()
 
-        if self._shared['env'].timestamp % 5 == 0:
+        if self.count % 80 == 0:
+            print("-- attack manager --")
             playing_subordinate = self._subordinates[CombatManager._ATTACK_MANAGER]
-        else:
+        elif self.count % 4 == 0:
+            print("-- army supplier --")
             playing_subordinate = self._subordinates[CombatManager._ARMY_SUPPLIER]
+        else:
+            print("-- micro manager --")
+            playing_subordinate = self._subordinates[CombatManager._MICRO_MANAGER]
 
+        self.count += 1
         return playing_subordinate

@@ -20,7 +20,7 @@ class General(BaseAgent):
 
     def step(self, obs):
         super().step(obs)
-        #time.sleep(0.5)
+        #time.sleep(1.0)
         if len(self._action_list) != 0:
             return self._check_and_return_action(obs)
 
