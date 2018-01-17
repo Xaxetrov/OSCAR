@@ -20,3 +20,5 @@ class SharedObjects:
         self.action_space = None
         # shape of the observations given by the env
         self.observation_space = None
+        # vector masking defining the action that are available or not
+        self.available_action_mask = None

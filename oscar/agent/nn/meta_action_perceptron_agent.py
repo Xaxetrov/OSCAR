@@ -73,6 +73,7 @@ class MetaActionPerceptronAgent(LearningAgent):
 
     def get_meta_action(self, action_id):
         try:
+            # action_id 0 is no_op
             if action_id == 1:  # build supply
                 return meta_action.build(self.last_obs,
                                          building_tiles_size=2,
@@ -102,6 +103,39 @@ class MetaActionPerceptronAgent(LearningAgent):
             pass
 
         return [actions.FunctionCall(NO_OP, [])]
+
+    def _available_action_mask(self):
+        mask = np.ones(shape=self.action_space.n)
+        # get useful information
+        unit_type = self.last_obs.observation["screen"][SCREEN_UNIT_TYPE]
+        minerals = self.last_obs.observation['player'][MINERALS]
+        vespene = self.last_obs.observation['player'][VESPENE]
+        food_used = self.last_obs.observation['player'][FOOD_USED]
+        food_cap = self.last_obs.observation['player'][FOOD_CAP]
+        has_supply_depot = np.count_nonzero(unit_type == TERRAN_SUPPLYDEPOT) > 0
+        has_barrack = np.count_nonzero(unit_type == TERRAN_BARRACKS_ID) > 0
+        # information on the currently selected unit
+        selected_unit_id = self.last_obs.observation['single_select'][0][0]
+        if selected_unit_id == 0:
+            try:
+                selected_unit_id = self.last_obs.observation['multi_select'][0][0]
+            except (TypeError, IndexError):
+                pass
+
+        # perform basic check (mask unavailable actions)
+        if minerals < 100:
+            mask[1] = 0
+        if not has_supply_depot or minerals < 150:
+            mask[2] = 0
+        if selected_unit_id != TERRAN_SCV:
+            mask[4] = 0
+        if not has_barrack or minerals < 50 or food_used + 1 > food_cap:
+            mask[5] = 0
+        if minerals < 50 or food_used + 1 > food_cap:
+            mask[6] = 0
+        if selected_unit_id not in [TERRAN_SCV, TERRAN_MARINE]:
+            mask[8] = 0
+        return mask
 
     def print_tree(self, depth):
         return "I am a {} and my depth is {}. I have a message to tell you : {}".format(type(self).__name__, depth
