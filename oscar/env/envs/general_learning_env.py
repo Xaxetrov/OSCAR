@@ -65,6 +65,7 @@ class GeneralLearningEnv(gym.Env):
 
     def get_action_mask(self):
         # every action is supposed to be playable
+        # TODO: allow the learning agent to chose the available actions
         return np.ones(shape=self.action_space.n)
 
 

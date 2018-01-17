@@ -5,6 +5,7 @@ import threading
 import numpy as np
 
 from learning_tools.A3C_learner.constants import *
+import warnings
 
 brain = None  # brain is global in A3C
 NUM_ACTIONS = 0
@@ -57,6 +58,7 @@ class Agent:
             # normalize (set sum back to 1.0)
             p_sum = np.sum(p)
             if p_sum == 0:
+                warnings.warn("no action available return 0")
                 # no action are playable... return the first (and hope it will work)
                 return 0
             p /= p_sum
