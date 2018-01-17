@@ -3,8 +3,9 @@ from pysc2.agents.base_agent import BaseAgent
 
 from oscar.hiearchy_factory import build_hierarchy
 from oscar.constants import NO_OP
+import time
 
-DEFAULT_CONFIGURATION = "config/economic.json"
+DEFAULT_CONFIGURATION = "config/full_hierarchy.json"
 
 
 class General(BaseAgent):
@@ -19,6 +20,7 @@ class General(BaseAgent):
 
     def step(self, obs):
         super().step(obs)
+        #time.sleep(0.5)
         if len(self._action_list) != 0:
             return self._check_and_return_action(obs)
 

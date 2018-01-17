@@ -20,13 +20,13 @@ def build_hierarchy(configuration_filename: str):
     instantiated = {}
 
     # build shared objects to be associated with agents later
-    shared_objects = build_shared_objects(configuration)
+    shared = build_shared(configuration)
 
     # Setup a training memory for agent in training mode
     training_memory = SharedObjects()
 
     # Build hierarchy and return general's children
-    general_agent = build_agent(configuration, instantiated, shared_objects, 0, training_memory)
+    general_agent = build_agent(configuration, instantiated, shared, 0, training_memory)
 
     # if the training memory is not set with agent value, then nobody use it
     # then delete it
@@ -40,13 +40,13 @@ def build_hierarchy(configuration_filename: str):
 # ----------------------------------------BUILD AGENTS------------------------------------------- #
 # ----------------------------------------------------------------------------------------------- #
 
-def build_agent(configuration, instantiated, shared_objects, agent_id, training_memory):
+def build_agent(configuration, instantiated, shared, agent_id, training_memory):
     """
     Builds an agent from a configuration.
     Recursive function : builds the children before the agent itself
     :param configuration: the configuration file
     :param instantiated: a maintained set of instanciated agents
-    :param shared_objects: a list of objects shared among some agents
+    :param shared: a list of objects shared among some agents
     :param agent_id: The id of the agent in the "structure" and "agents" part of the configuration
     :param training_memory: the memory to be used to communicate between the environment and the agent during training
     :return: the built agent
@@ -67,7 +67,7 @@ def build_agent(configuration, instantiated, shared_objects, agent_id, training_
     if len(children_ids) != 0:
         children = []
         for child_id in children_ids:
-            children_agent = build_agent(configuration, instantiated, shared_objects, child_id, training_memory)
+            children_agent = build_agent(configuration, instantiated, shared, child_id, training_memory)
             children.append(children_agent)
         if len(children) > 0:
             agent_arguments["subordinates"] = children
@@ -77,7 +77,7 @@ def build_agent(configuration, instantiated, shared_objects, agent_id, training_
     instantiated[agent_id] = agent
 
     # associate shared objects
-    for obj in shared_objects:
+    for obj in shared:
         if agent_id in obj["shared_with"]:
             bind_shared_object(agent, obj)
 
@@ -101,19 +101,19 @@ def get_agent_by_id(agents, agent_id):
 # -----------------------------------BUILD SHARED OBJ-------------------------------------------- #
 # ----------------------------------------------------------------------------------------------- #
 
-def build_shared_objects(configuration):
+def build_shared(configuration):
     """
     Builds a list of shared objects
     :param configuration: the config file
     :return: a list of dict with keywords (name, object, shared_with)
     """
-    shared_objects = []
+    shared = []
 
     if "shared" in configuration:
         for obj in configuration["shared"]:
-            shared_objects.append(build_shared_object(obj))
+            shared.append(build_shared_object(obj))
 
-    return shared_objects
+    return shared
 
 
 def build_shared_object(object_information):

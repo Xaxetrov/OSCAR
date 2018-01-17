@@ -6,7 +6,7 @@ class CustomAgent(BaseAgent):
 
     def __init__(self):
         super().__init__()
-        self._shared_objects = {}
+        self._shared = {}
 
     def add_shared(self, name, shared):
-        self._shared_objects[name] = shared
+        self._shared[name] = shared

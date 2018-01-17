@@ -17,7 +17,7 @@ class Economic(CustomAgent):
         print("barracks built")
         self.barracks_built = True
 
-    def step(self, obs):
+    def step(self, obs, locked_choice=None):
         play = {}
 
         if not self.supply_depot_built:
