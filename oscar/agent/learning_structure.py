@@ -1,3 +1,4 @@
+import numpy as np
 
 
 class LearningStructure:
@@ -58,6 +59,8 @@ class LearningStructure:
         formatted_obs = self._format_observation(obs)
         # give the obs to the shared memory
         self.shared_memory.shared_obs = formatted_obs
+        # give the available action to the shared memory
+        self.shared_memory.available_action_mask = self._available_action_mask()
         # set the semaphore to allow the learning thread to choose an action
         self.shared_memory.semaphore_obs_ready.release()
         # wait for the action to be selected
@@ -83,6 +86,15 @@ class LearningStructure:
          and lock)
         """
         raise NotImplementedError()
+
+    def _available_action_mask(self):
+        """
+        A mask to be applied to a vector of action probability to mask to action which are
+        not available at that given time. (Useful for A3C)
+        :return: a mask (vector of the same size as action)
+        """
+        # default behaviour: all actions are available
+        return np.ones(shape=self.action_space.n)
 
 
 class BadSharedMemoryError(RuntimeError):
