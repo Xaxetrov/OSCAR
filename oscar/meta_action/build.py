@@ -23,9 +23,9 @@ def build(obs, building_tiles_size, building_id, propagate_error=True):
     valid_point_center_list = find_valid_building_point(unit_type, height_map, building_cell_size)
     if not valid_point_center_list:
         valid_point_center_list = find_valid_building_point(unit_type, height_map, building_cell_size,
-                                                                   SCREEN_RESOLUTION / 20)
-    if not valid_point_center_list:
-        raise NoValidBuildingPointError()
+                                                            SCREEN_RESOLUTION / 20)
+        if not valid_point_center_list:
+            raise NoValidBuildingPointError()
     building_point = random.choice(valid_point_center_list)
     building_point = (building_point[1], building_point[0])
     build_action = actions.FunctionCall(building_id, [NOT_QUEUED, building_point])

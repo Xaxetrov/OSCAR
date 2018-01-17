@@ -20,3 +20,9 @@ class NoUnitError(ActionError):
     """
     Raise when a unit or building is not present on screen whereas a function is asked to find one.
     """
+
+
+class NoValidBuildingPointError(ActionError):
+    """
+    TODO: give a more precise description than the name of the error
+    """
