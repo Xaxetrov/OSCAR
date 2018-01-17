@@ -6,7 +6,7 @@ from oscar.util.location import Location
 class StrategyManager(BaseCommander):
 
     _ECONOMY_MANAGER = 0
-    _ARMY_MANAGER = 1
+    _COMBAT_MANAGER = 1
     _SCOUT = 2
 
 
@@ -29,11 +29,14 @@ class StrategyManager(BaseCommander):
             return self.play_locked_choice()
 
         if self.count % 50 == 0:
+            print("-- scout --")
             playing_subordinate = self._subordinates[StrategyManager._SCOUT]
         elif self.count % 2 == 0:
+            print("-- economy manager --")
             playing_subordinate = self._subordinates[StrategyManager._ECONOMY_MANAGER]
         else:
-            playing_subordinate = self._subordinates[StrategyManager._ARMY_MANAGER]
+            print("-- combat --")
+            playing_subordinate = self._subordinates[StrategyManager._COMBAT_MANAGER]
 
         self.count += 1
         return playing_subordinate

@@ -29,12 +29,12 @@ class ArmySupplier(CustomAgent):
             self._worker_selected = False
             self._barracks_selected = False
 
-            if obs.observation['player'][MINERALS] >= 150 \
-                and len(self._shared['army'].barracks) == 0 \
-                and len(self._shared['economy'].supply_depots) > 0:
+            if obs.observation['player'][MINERALS] > 500 \
+                and len(self._shared['army'].barracks) < 3:
                 self._state = ArmySupplier._BUILDING_BARRACKS
 
-            elif len(self._shared['army'].barracks) > 0 \
+            elif obs.observation['player'][FOOD_CAP] - obs.observation['player'][FOOD_USED] > 0 \
+                and len(self._shared['army'].barracks) > 0 \
                 and obs.observation['player'][MINERALS] >= 50:
                 self._state = ArmySupplier._TRAINING_MARINE
 

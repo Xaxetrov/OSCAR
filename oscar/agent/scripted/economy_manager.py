@@ -29,11 +29,11 @@ class EconomyManager(CustomAgent):
             self._worker_selected = False
             self._command_center_selected = False
 
-            if len(self._shared['economy'].supply_depots) < 2 \
+            if obs.observation['player'][FOOD_CAP] - obs.observation['player'][FOOD_USED] < 5 \
                 and obs.observation['player'][MINERALS] >= 100:
                 self._state = EconomyManager._BUILDING_SUPPLY_DEPOT
 
-            elif len(self._shared['economy'].supply_depots) >= 2 \
+            elif obs.observation['player'][FOOD_CAP] - obs.observation['player'][FOOD_USED] > 0 \
                 and obs.observation['player'][MINERALS] >= 50 \
                 and self._shared['economy'].scv < 20:
                 self._state = EconomyManager._TRAINING_SCV

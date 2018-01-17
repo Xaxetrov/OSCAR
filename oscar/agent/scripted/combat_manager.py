@@ -17,13 +17,13 @@ class CombatManager(BaseCommander):
             return self.play_locked_choice()
 
         if self.count % 80 == 0:
-            print("attack manager")
+            print("-- attack manager --")
             playing_subordinate = self._subordinates[CombatManager._ATTACK_MANAGER]
         elif self.count % 4 == 0:
-            print("army supplier")
+            print("-- army supplier --")
             playing_subordinate = self._subordinates[CombatManager._ARMY_SUPPLIER]
         else:
-            print("micro manager")
+            print("-- micro manager --")
             playing_subordinate = self._subordinates[CombatManager._MICRO_MANAGER]
 
         self.count += 1
