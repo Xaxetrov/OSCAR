@@ -6,6 +6,9 @@ from pysc2.env import environment
 
 from oscar.env.envs.pysc2_env import Pysc2Env
 from oscar.agent.commander.general import General
+import numpy as np
+from oscar.constants import *
+import warnings
 
 DEFAULT_CONFIGURATION = "config/learning.json"
 
@@ -46,7 +49,15 @@ class Pysc2GeneralEnv(Pysc2Env):
         :return: a tuple with the observation, reward, done and an empty dict
         """
         action = self.general.step(self.last_obs)
-        return super()._step([action])
+        obs, reward, done, debug_dict = super()._step([action])
+        # explore observation to decide if agent can still play
+        # first condition is to check if a command center exist
+        # second is to check if the agent has unit or minerals to create one
+        if obs.observation['player'][FOOD_CAP] < 15 \
+                or (obs.observation['player'][FOOD_USED] == 0 and obs.observation['player'][MINERALS] < 50):
+            warnings.warn("Environment decided that game is lost")
+            done = True
+        return obs, reward, done, debug_dict
 
     def _reset(self):
         self.general.reset()
