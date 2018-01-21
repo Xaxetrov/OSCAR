@@ -1,4 +1,3 @@
-"""A random agent for starcraft."""
 import numpy
 from pysc2.agents import base_agent
 from pysc2.lib import actions
@@ -21,7 +20,10 @@ _EPSILON_GREEDY = 1.0 # exploration vs exploitation criteria
 
 
 class PlayAgent(base_agent.BaseAgent):
-    """A NN agent for starcraft."""
+    """
+    Same as DQNAgent but does not learn.
+    Simply applies a trained model to test it.
+    """
 
     model = None
 
@@ -60,8 +62,10 @@ class PlayAgent(base_agent.BaseAgent):
 
     @staticmethod
     def get_move_action(linear_position):
-        """return a pysc2 action and argument to do a move action at the pos given
-            -linear_position : position of the move on a 16x16 grid, integer equal to y*16+x
+        """
+        Returns a pysc2 move action and argument to get to a given position
+        :param linear_position: position of the move on a 16x16 grid, integer equal to y*16+x
+        :return: The move action
         """
         x_16 = (linear_position % 16)
         y_16 = (linear_position // 16)
@@ -72,9 +76,10 @@ class PlayAgent(base_agent.BaseAgent):
 
     @staticmethod
     def get_non_spacial_action(action_id):
-        """return a pysc2 action corresponding to the given action id
-            -action id: 0 -> NO_OP
-                        1 -> Select all army
+        """
+        Returns a pysc2 action corresponding to the given action id
+        :param action_id: 0 -> NO_OP; 1 -> Select all army
+        :return: an action id and its arguments
         """
         if action_id == 1:
             selected_action = _SELECT_ARMY

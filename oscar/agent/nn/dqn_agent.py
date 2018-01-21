@@ -1,4 +1,3 @@
-"""A random agent for starcraft."""
 from collections import namedtuple
 
 import numpy
@@ -31,7 +30,10 @@ OutputStructure = namedtuple("OutputStructure", "spatial_action_size non_spatial
 
 
 class DQNAgent(base_agent.BaseAgent):
-    """A NN agent for starcraft."""
+    """
+    A Deep Q learning agent
+    See https://keon.io/deep-q-learning/ for a tutorial of a similar agent.
+    """
 
     model = None
 
@@ -50,8 +52,10 @@ class DQNAgent(base_agent.BaseAgent):
         self.shrink = output.spatial_action_size / 16
 
     def get_random_action(self, obs):
-        """return an available random action
-            -obs: the obs parameter given to the agent for the step call
+        """
+        Returns an available random action
+        :param obs: the obs parameter given to the agent for the step call
+        :return: guess what... A RANDOM ACTION
         """
         number_of_possible_action = 1  # _NO_OP
         if _MOVE_SCREEN in obs.observation["available_actions"]:
@@ -68,9 +72,11 @@ class DQNAgent(base_agent.BaseAgent):
             return self.get_non_spacial_action(selected_action_id % self.spatial_action_size2x16)
 
     def get_move_action(self, linear_position):
-        """return a pysc2 action and argument to do a move action at the pos given
-            -linear_position : position of the move on a 16x16 grid, integer equal to y*16+x
-            """
+        """
+        Returns a pysc2 move action and argument to get to a given position
+        :param linear_position: position of the move on a 16x16 grid, integer equal to y*16+x
+        :return: The move action
+        """
         x_16 = (linear_position % 16)
         y_16 = (linear_position // 16)
         x_true = x_16 * self.shrink
@@ -80,9 +86,10 @@ class DQNAgent(base_agent.BaseAgent):
         return _MOVE_SCREEN, action_args
 
     def get_non_spacial_action(self, action_id):
-        """return a pysc2 action coresponding to the given action id
-            -action id: 0 -> NO_OP
-                        1 -> Select all army
+        """
+        Returns a pysc2 action corresponding to the given action id
+        :param action_id: 0 -> NO_OP; 1 -> Select all army
+        :return: an action id and its arguments
         """
         if action_id == 1:
             selected_action = _SELECT_ARMY
@@ -95,6 +102,11 @@ class DQNAgent(base_agent.BaseAgent):
         return selected_action, action_args
 
     def step(self, obs):
+        """
+        A deep Q learning iteration
+        :param obs:
+        :return:
+        """
         super(DQNAgent, self).step(obs)
 
         state = [obs.observation["screen"][features.SCREEN_FEATURES.player_relative.index],
