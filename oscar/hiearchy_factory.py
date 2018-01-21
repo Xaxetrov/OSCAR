@@ -202,6 +202,11 @@ def check_agents_are_known(configuration):
 
 
 def check_max_one_training_agent(configuration):
+    """
+    Checks if there is at most one agent set to be trained
+    :param configuration: the object group to look at
+    :return: if there is less than 2 defined agents with the "train_mode" argument
+    """
     training_agent_count = 0
     for agent in configuration["agents"]:
         if "train_mode" in agent["arguments"] and agent["arguments"]["train_mode"] == "True":

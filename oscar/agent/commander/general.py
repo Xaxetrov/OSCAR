@@ -9,7 +9,14 @@ DEFAULT_CONFIGURATION = "config/full_hierarchy.json"
 
 
 class General(BaseAgent):
+    """
+    The agent at the top of the command chain. It is usually him that will be the interface with PySC2
+    """
     def __init__(self, configuration_filename=DEFAULT_CONFIGURATION):
+        """
+        Initializes members and call hierarchy factory
+        :param configuration_filename: The configuration file to pass to the hierarchy factory on launch
+        """
         super().__init__()
         self._child, self.training_memory = build_hierarchy(configuration_filename)
         print(self)
@@ -19,6 +26,13 @@ class General(BaseAgent):
         self._success = False
 
     def step(self, obs):
+        """
+        Called by PySC2 directly.
+        Either unstack the current action_list
+        or callbacks depending on success or failure and ask for child for new actions
+        :param obs: observation object passed by PySC2
+        :return: some action
+        """
         super().step(obs)
         #time.sleep(1.0)
         if len(self._action_list) != 0:
@@ -71,6 +85,11 @@ class General(BaseAgent):
             return actions.FunctionCall(NO_OP, [])
 
     def _check_argument(self, current_action):
+        """
+        Checks that passed action arguments are valid
+        :param current_action: action with arguments to check
+        :return: Valid or not
+        """
         asked_args = self.action_spec.functions[current_action.function].args
         args = current_action.arguments
         if len(args) != len(asked_args):

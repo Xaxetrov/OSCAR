@@ -3,6 +3,10 @@ from oscar.agent.learning_structure import LearningStructure
 
 
 class LearningCommander(BaseCommander, LearningStructure):
+    """
+    A special commander that is able to learn
+    Double inheritance class : BaseCommander and LearningStructure
+    """
 
     def __init__(self, subordinate, train_mode=False, shared_memory=None):
         # init base commander mother class

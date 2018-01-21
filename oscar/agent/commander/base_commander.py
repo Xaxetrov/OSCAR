@@ -91,9 +91,18 @@ class BaseCommander(ABC, CustomAgent):
             subordinate.reset()
 
     def __str__(self):
+        """
+        See print_tree
+        :return:
+        """
         return self.print_tree(0)
 
     def print_tree(self, depth):
+        """
+        Recursively builds the hierarchy tree of the agent
+        :param depth: current depth in the general tree (used for indentation in the string)
+        :return: hierarchy tree (string)
+        """
         depth += 1
         ret = "I am a {} and I have {} subordinates :\n".format(type(self).__name__, len(self._subordinates))
         for subordinate in self._subordinates:
