@@ -1,11 +1,34 @@
 # OSCAR
 
-OSCAR is a school project we had during our 5th year at INSA Lyon.
+OSCAR (*Omniscient Starcraft Awesome Retaliator*) is an autonomous team project conducted during a semester at INSA Lyon, France. It aims at experimenting artificial intelligence for Starcraft II, using the [PySc2](https://github.com/deepmind/pysc2) API from DeepMind.    
+The project consists in:
+* some small scripted agents to deal with subtasks of the game (scouting, managing economy, ...)
+* a hierarchical framework to unify some small specialized agents into a bot capable to play the full game
+* some tools and agents to experiment reinforcement learning
 
-The goal of this project is to discover Machine Learning by exploring the construction of an AI for the StarCraft II game using the pysc2 API published by DeepMind.
+## Installation (Unix)
+The project requires Python 3.5.
 
-## Run
-TODO: complete
+`git clone https://github.com/Xaxetrov/OSCAR.git`   
+`pip3 install pysc2`    
+`pip3 install gym`    
+`pip3 install baselines`   
+
+## Run (Unix)
+`cd OSCAR`    
+Add current directory to Python path: `export PYTHONPATH=$(pwd)`
+
+#### Scripted bot
+The General agent should be launched with PySc2. For example,    
+`python -m pysc2.bin.agent --agent_race T --bot_race T --difficulty 1 --map Flat64 --agent oscar.agent.commander.general.General`
+
+#### Deep Q-Network
+training: `python learning_tools/baseline/dqn/custom_learn.py`    
+test: `python learning_tools/baseline/dqn/custom_test.py`    
+
+#### Asynchronous Actor-Critic Agents (A3C)
+training: `python learning_tools/A3C_learner/main.py`    
+test: `python learning_tools/A3C_test/a3c_tester.py`
 
 ## Architecture
 There are three different basic bricks in our architecture: a general, 0 to many commanders and at least one agent.
