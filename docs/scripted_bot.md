@@ -2,9 +2,11 @@
 
 Using our hierarchical framework, we have implemented a simple proof-of-concept scripted bot. This one is very limited. It plays terrans with a simple strategy and is only able to beat the built-in AI of Starcraft in "very easy" mode.
 
+<br><br>
 <p align="center">
-<img align="center" src="https://github.com/Xaxetrov/OSCAR/blob/docs/docs/images/scripted.png?raw=true" alt="The scripted bot" title="The scripted bot" height="300px">
+<img align="center" src="https://github.com/Xaxetrov/OSCAR/blob/docs/docs/images/scripted.png?raw=true" alt="The scripted bot" title="The scripted bot" height="250px">
 </p>
+<br><br>
 
 It is composed of 2 commanders and 5 agents:
 
