@@ -9,7 +9,7 @@ The framework enables to create bots as directed acyclic graphs containing three
  ***Agent***: leaf of the graph. When called, it returns actions to be executed.
 
 <p align="center">
-<img align="center" src="https://github.com/Xaxetrov/OSCAR/raw/master/docs/images/hierarchy.png?raw=true" alt="An example of hierarchical bot" title="An example of hierarchical bot" height="300px">
+<img align="center" src="https://github.com/Xaxetrov/OSCAR/blob/docs/docs/images/hierarchy.png?raw=true" alt="An example of hierarchical bot" title="An example of hierarchical bot" height="300px">
 </p>
  
 At each step of the game, commanders and agents play accordingly to the graph structure, starting from the general. Once an agent has returned some actions, these ones are sent back to the general and played through PySc2. Afterwards, a callback called by the general notifies the playing agent of the result (success or error) of its actions.
