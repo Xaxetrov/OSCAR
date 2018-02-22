@@ -10,4 +10,4 @@
 
 ### Operating system
 
-###Hardware
+### Hardware
