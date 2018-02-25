@@ -3,7 +3,7 @@
 OSCAR (*Omniscient Starcraft Awesome Retaliator*) is an autonomous team project conducted during a semester at INSA Lyon, France. It aims at experimenting artificial intelligence for Starcraft II, using the [PySc2](https://github.com/deepmind/pysc2) API from DeepMind.    
 The project consists in:
 * a hierarchical framework to unify some small specialized agent ([read more](https://github.com/Xaxetrov/OSCAR/blob/master/docs/hierarchical_framework.md))
-* a scripted multi-agent bot playing the full game ([read more](https://github.com/Xaxetrov/OSCAR/blob/master/docs/scripted_bot.md))
+* a scripted multi-agent bot playing the full game ([read more](https://github.com/Xaxetrov/OSCAR/blob/master/docs/scripted_bot.md), [video](https://www.youtube.com/watch?v=UaOj5CRV1vg))
 * some tools and agents to experiment reinforcement learning ([read more](https://github.com/Xaxetrov/OSCAR/blob/master/docs/reinforcement_learning.md))
 
 ## Installation (Unix)
