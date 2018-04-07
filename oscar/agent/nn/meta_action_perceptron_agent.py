@@ -20,6 +20,11 @@ class MetaActionPerceptronAgent(LearningAgent):
         super().__init__(train_mode, shared_memory)
 
     def _step(self, obs):
+        """
+        Method called when in playing mod (cf LearningAgent)
+        :param obs: current observation
+        :return: a dict of the agent's choice for this step (action list, callbacks)
+        """
         self.last_obs = obs
         # use a random meta action
         action_id = np.random.randint(0, ACTION_SPACE_SIZE)
@@ -30,6 +35,11 @@ class MetaActionPerceptronAgent(LearningAgent):
         # raise RuntimeError("Not implemented yet...")
 
     def _format_observation(self, full_obs):
+        """
+        transform the pysc2 observation into input for the learning agent (cf LearningAgent)
+        :param full_obs: pysc2 observation
+        :return: agent observation
+        """
         self.last_obs = full_obs
         unit_type = full_obs.observation["screen"][SCREEN_UNIT_TYPE]
         minimap_player_relative = full_obs.observation['minimap'][MINI_PLAYER_RELATIVE]
@@ -67,11 +77,21 @@ class MetaActionPerceptronAgent(LearningAgent):
         return np.array(ret_obs_list, copy=True, dtype=float)
     
     def _transform_action(self, action_id):
+        """
+        transform an action id into a proper action (cf: LearningAgent)
+        :param action_id: id of the action
+        :return: action (in the hierarchy point of view)
+        """
         action = self.get_meta_action(action_id)
         play = {'actions': action}
         return play
 
     def get_meta_action(self, action_id):
+        """
+        transform an action id into action by calling a meta action.
+        :param action_id: id of the action
+        :return: return of the meta action call
+        """
         try:
             # action_id 0 is no_op
             if action_id == 1:  # build supply
@@ -105,6 +125,11 @@ class MetaActionPerceptronAgent(LearningAgent):
         return [actions.FunctionCall(NO_OP, [])]
 
     def _available_action_mask(self):
+        """
+        Mask for unavailable actions (cf: LearningAgent)
+        :return: a mask of the size of the possible action with 1 if the action
+            is probably possible and 0 otherwise.
+        """
         mask = np.ones(shape=self.action_space.n)
         # get useful information
         unit_type = self.last_obs.observation["screen"][SCREEN_UNIT_TYPE]
