@@ -83,7 +83,7 @@ def get_neural_network(input_shape, output_shape_list,
                    name='first_layer_for_none_spacial'
                    )(sc_f)
 
-        d1 = BatchNormalization()(d1)
+        # d1 = BatchNormalization()(d1)  # may create NaN ?
 
         # generate output shapes
         output_layers = []
