@@ -83,6 +83,8 @@ def get_neural_network(input_shape, output_shape_list,
                    name='first_layer_for_none_spacial'
                    )(sc_f)
 
+        d1 = BatchNormalization()(d1)
+
         # generate output shapes
         output_layers = []
         for i, size in enumerate(output_shape_list):
@@ -151,6 +153,7 @@ def get_neural_network(input_shape, output_shape_list,
         model.compile(optimizer='adam',
                       loss=loss)
         print("new NN generated, file", file_path, "not found")
+        model.summary()
     return model
 
 

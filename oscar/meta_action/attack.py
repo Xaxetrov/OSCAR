@@ -2,6 +2,7 @@ import numpy as np
 from oscar.constants import *
 import random
 
+
 def attack_minimap(obs, queued=True):
     """
     Attacks a position on the minimap. Position corresponds to a visible enemy on the screen if any, 

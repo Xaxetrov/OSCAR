@@ -22,9 +22,9 @@ def get_spy_target(obs, shared, samples = 5):
             best_target = target
 
     if best_score == 0:
-    	return None
+        return None
     else:
-    	return best_target
+        return best_target
 
 
 def _score_spy_target(obs, shared, target):
@@ -46,7 +46,7 @@ def _score_spy_target(obs, shared, target):
         if mini_player_relative[p.y, p.x] == PLAYER_HOSTILE:
             enemy_score += 1
     if enemy_score == 0:
-    	return 0
+        return 0
     enemy_score /= shared['camera'].width(obs) * shared['camera'].height(obs) # Normalization
 
     """ Computes a score based on the date of the last observation of the location """
@@ -61,4 +61,4 @@ def _score_spy_target(obs, shared, target):
     else:
         date_score = 1
 
-    return (enemy_score * _ENEMY_WEIGHT + date_score * _DATE_WEIGHT)
+    return enemy_score * _ENEMY_WEIGHT + date_score * _DATE_WEIGHT

@@ -128,8 +128,18 @@ class Pysc2EnvRunner(threading.Thread):
         army_count = self.last_obs.observation['player'][ARMY_COUNT]
         step_reward += max(0, army_count - self.last_army_count)
         self.last_army_count = army_count
+        if army_count == 0:
+            self.reward -= 1
         self.reward += step_reward
         self.episodes_reward[-1] += step_reward
+        # add end of game reward
+        if self.done:
+            if self.get_win_state() == 0:
+                self.reward -= 1000
+            if self.get_win_state() == 1:
+                self.reward -= 500
+            if self.get_win_state() == 2:
+                self.reward += 1000
 
     def get_win_state(self):
         """
