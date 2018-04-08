@@ -1,8 +1,10 @@
 import gym
 import threading
 import numpy as np
+import pandas as pd
 from gym import spaces
 import time
+import os
 
 from oscar.env.envs.pysc2_general_env import Pysc2GeneralEnv
 from oscar.constants import *
@@ -10,6 +12,15 @@ from oscar.constants import *
 from baselines import logger
 
 GAME_MAX_STEP = 1700
+
+#reward cost:
+KILLED_UNITS_REWARD = 0.2
+KILLED_BUILDINGS_REWARD = 0.5
+CREATED_MARINES_REWARD = 0.1
+NO_ARMY_REWARD = -0.05
+WIN_REWARD = 1.0
+LOSS_REWARD = 0.0
+STATE_MATE_REWARD = 0.2
 
 
 class GeneralLearningEnv(gym.Env):
@@ -44,7 +55,8 @@ class GeneralLearningEnv(gym.Env):
         done = self.env_thread.was_done
         if done:
             self.env_thread.was_done = False  # reset was_done to false for next loop
-            info_dict["win_state"] = self.env_thread.get_win_state()
+            # info_dict["win_state"] = self.env_thread.get_win_state()
+            info_dict["stats"] = self.env_thread.stats
         # return current obs
         return obs, reward, done, info_dict
 
@@ -76,10 +88,12 @@ class Pysc2EnvRunner(threading.Thread):
         self.done = False
         self.was_done = False
         self.reward = 0
-        self.total_reward = 0
         self.last_army_count = 0
+        self.last_killed_units = 0
+        self.last_killed_building = 0
         self.step_count = 0
         self.last_obs = None
+        self.stats = None
         # variable for stats
         self.episodes_reward = []
         self.start_time = 0
@@ -98,7 +112,6 @@ class Pysc2EnvRunner(threading.Thread):
         while True:
             self.done = False
             self.reward = 0
-            self.total_reward = 0
             self.last_army_count = 0
             self.step_count = 0
             self.learning_agent_step = 0
@@ -114,32 +127,38 @@ class Pysc2EnvRunner(threading.Thread):
                     return
             self.was_done = True
 
-            self.print_episode_stats()
+            self.compute_episode_stats()
             # run end, release semaphore to let main env finish its step
             self.semaphore_obs_ready.release()
 
     def update_reward(self):
-        new_total_reward = 0
-        new_total_reward += self.last_obs.observation['score_cumulative'][KILLED_UNITS]
-        new_total_reward += self.last_obs.observation['score_cumulative'][KILLED_BUILDINGS]
         step_reward = 0
-        step_reward += new_total_reward - self.total_reward
-        self.total_reward = new_total_reward
+
+        killed_units = self.last_obs.observation['score_cumulative'][KILLED_UNITS]
+        killed_buildings = self.last_obs.observation['score_cumulative'][KILLED_BUILDINGS]
+        if killed_units > self.last_killed_units:
+            step_reward += KILLED_UNITS_REWARD
+        if killed_buildings > self.last_killed_building:
+            step_reward += KILLED_BUILDINGS_REWARD
+        self.last_killed_units = killed_units
+        self.last_killed_building = killed_buildings
+
         army_count = self.last_obs.observation['player'][ARMY_COUNT]
-        step_reward += max(0, army_count - self.last_army_count)
+        step_reward += max(0, army_count - self.last_army_count) * CREATED_MARINES_REWARD
         self.last_army_count = army_count
         if army_count == 0:
-            self.reward -= 1
-        self.reward += step_reward
-        self.episodes_reward[-1] += step_reward
+            step_reward += NO_ARMY_REWARD
         # add end of game reward
         if self.done:
             if self.get_win_state() == 0:
-                self.reward -= 1000
+                step_reward = LOSS_REWARD
             if self.get_win_state() == 1:
-                self.reward -= 500
+                step_reward = STATE_MATE_REWARD
             if self.get_win_state() == 2:
-                self.reward += 1000
+                step_reward = WIN_REWARD
+        self.reward += step_reward
+        # count total reward for this game
+        self.episodes_reward[-1] += step_reward
 
     def get_win_state(self):
         """
@@ -154,14 +173,36 @@ class Pysc2EnvRunner(threading.Thread):
         else:
             return 0
 
-    def print_episode_stats(self):
-        logger.record_tabular("time", (time.time() - self.start_time) / 60)
-        logger.record_tabular("steps", self.env.general.steps)
-        logger.record_tabular("episodes", len(self.episodes_reward))
-        logger.record_tabular("episode steps", self.step_count)
-        logger.record_tabular("learning agent steps", self.learning_agent_step)
-        logger.record_tabular("episode reward", self.episodes_reward[-1])
-        logger.record_tabular("mean episode reward", np.mean(self.episodes_reward[-101:]))
-        logger.record_tabular("median episode reward", np.median(self.episodes_reward[-101:]))
-        logger.record_tabular("win state", self.get_win_state())
-        logger.dump_tabular()
+    def compute_episode_stats(self):
+        # logger.record_tabular("time", (time.time() - self.start_time) / 60)
+        # logger.record_tabular("steps", self.env.general.steps)
+        # logger.record_tabular("episodes", len(self.episodes_reward))
+        # logger.record_tabular("episode steps", self.step_count)
+        # logger.record_tabular("learning agent steps", self.learning_agent_step)
+        # logger.record_tabular("episode reward", self.episodes_reward[-1])
+        # logger.record_tabular("mean episode reward", np.mean(self.episodes_reward[-101:]))
+        # logger.record_tabular("median episode reward", np.median(self.episodes_reward[-101:]))
+        # logger.record_tabular("win state", self.get_win_state())
+        # logger.dump_tabular()
+        self.stats = pd.DataFrame(data=[[(time.time() - self.start_time) / 60,
+                                         self.env.general.steps,
+                                         len(self.episodes_reward),
+                                         self.step_count,
+                                         self.learning_agent_step,
+                                         self.episodes_reward[-1],
+                                         np.mean(self.episodes_reward[-101:]),
+                                         np.median(self.episodes_reward[-101:]),
+                                         self.get_win_state()]],
+                                  columns=["time",
+                                           "steps",
+                                           "episodes",
+                                           "episode_steps",
+                                           "learning_agent_steps",
+                                           "episode_reward",
+                                           "mean_episode_reward",
+                                           "median_episode_reward",
+                                           "win_state"]
+                                  )
+
+
+

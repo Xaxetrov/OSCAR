@@ -43,9 +43,9 @@ class Screen(object):
 
                 def _try_explore(x, y, queue, scanned):
                     if x < screen_width and y < screen_height \
-                        and scanned[x, y] == 0 \
-                        and obs.observation['screen'][SCREEN_PLAYER_RELATIVE][x, y] == player_relative \
-                        and obs.observation['screen'][SCREEN_UNIT_TYPE][x, y] == unit_id:
+                            and scanned[x, y] == 0 \
+                            and obs.observation['screen'][SCREEN_PLAYER_RELATIVE][x, y] == player_relative \
+                            and obs.observation['screen'][SCREEN_UNIT_TYPE][x, y] == unit_id:
                         queue.append((x, y))
                         scanned[x, y] = 1
                         return True
@@ -80,18 +80,15 @@ class Screen(object):
 
             for x in range(screen_width):
                 for y in range(screen_height):
-                    if scanned[x, y] == 0 \
-                        and obs.observation['screen'][SCREEN_UNIT_TYPE][x, y] != 0:
-                        
+                    if scanned[x, y] == 0 and obs.observation['screen'][SCREEN_UNIT_TYPE][x, y] != 0:
                         center_x, center_y = _explore_contiguous(x, y,
-                            obs.observation['screen'][SCREEN_UNIT_TYPE][x, y],
-                            obs.observation['screen'][SCREEN_PLAYER_RELATIVE][x, y],
-                            scanned)
+                                                                 obs.observation['screen'][SCREEN_UNIT_TYPE][x, y],
+                                                                 obs.observation['screen'][SCREEN_PLAYER_RELATIVE][x, y],
+                                                                 scanned)
 
-                        self._scanned_units.append(Unit(
-                            Location(screen_loc=Point(center_x, center_y)),
-                            obs.observation['screen'][SCREEN_UNIT_TYPE][x, y],
-                            obs.observation['screen'][SCREEN_PLAYER_RELATIVE][x, y]))
+                        self._scanned_units.append(Unit(Location(screen_loc=Point(center_x, center_y)),
+                                                        obs.observation['screen'][SCREEN_UNIT_TYPE][x, y],
+                                                        obs.observation['screen'][SCREEN_PLAYER_RELATIVE][x, y]))
 
             self._scanned_units_timestamp = shared['env'].timestamp
 

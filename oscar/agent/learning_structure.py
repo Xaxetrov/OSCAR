@@ -31,7 +31,7 @@ class LearningStructure:
             self.do_step = self._step
         super().__init__()
 
-    def step(self, obs):
+    def step(self, obs, locked_choice=None):
         """
         Choose between calling normal step or training step.
         :param obs: observation used to choose the action to do

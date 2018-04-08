@@ -1,8 +1,11 @@
 import random
 import numpy as np
+from scipy.signal import convolve2d
 
 from oscar.constants import *
 from oscar.meta_action.meta_action_error import *
+from oscar.shared.env import Env
+from oscar.shared.screen import Screen
 
 RANDOM_CENTER_JUMP_LIMIT = 3
 RANDOM_CENTER_MOVE_FACTOR = 2
@@ -27,13 +30,25 @@ def find_position(obs, unit_type_id, select_method="random_center", player_relat
                         .format(unit_type_id_list, player_relative))
 
     if select_method == "random_center":
-        return find_random_center(unit_type_map, unit_x, unit_y, unit_type_id)
+        return find_random_center(unit_type_map, unit_x, unit_y, unit_type_id_list)
     elif select_method == "random":
         return random.choice(list(zip(unit_x, unit_y)))
     elif select_method == "mean":
         return int(unit_x.mean()), int(unit_y.mean())
     elif select_method == "all":
         return unit_x, unit_y
+    elif select_method == "screen_scan":
+        shared = {'env': Env}
+        screen = Screen()
+        scanned_units = screen.scan(obs=obs, shared=shared)
+        for unit in scanned_units:
+            if unit.unit_id in unit_type_id_list and unit.player_id == player_relative:
+                break
+        else:
+            print("unit not found, trying random method")
+            return random.choice(list(zip(unit_x, unit_y)))
+        return unit.location.screen.x, unit.location.screen.y
+
     else:
         valid_select_method_name = ["random_center", "random", "mean", "all"]
         raise ValueError("Unexpected select_method name {0}. Allowed values are: {1}."
@@ -88,3 +103,38 @@ def find_random_center(unit_type_map, unit_x, unit_y, unit_type_id_list):
             selected_coordinate_y = max(0, selected_coordinate_y)
             selected_coordinate_y = min(selected_coordinate_y, SCREEN_RESOLUTION - 1)
     return selected_coordinate_x, selected_coordinate_y
+
+
+# TODO: debug, the result are coherent but it does not work on pysc2...
+def convolution_selection(correct_unit_type_array: np.ndarray, unit_type_id_list: list):
+    diameter = None  # size of the searched unit in screen
+    for type in unit_type_id_list:
+        if type in ALL_MINERAL_FIELD:
+            diameter = MINERAL_FIELD_TILE_SIZE * TILES_SIZE_IN_CELL
+
+    if diameter is None:
+        raise ValueError("Convolution selection method is only defined for Minerals so far."
+                         "you can define new diameter in convolution_selection if you want to"
+                         "use it for other unit.")
+
+    if diameter % 2 == 0:
+        diameter += 1
+
+    xx, yy = np.mgrid[:diameter, :diameter]
+    radius = diameter//2
+    circle = (xx - radius) ** 2 + (yy - radius) ** 2
+    circle = np.logical_and(circle <= radius**2, circle > (radius-1)**2).astype(np.int)
+
+    # np.savetxt("tmp.txt", correct_unit_type_array, delimiter="", fmt="%1d")
+
+    score_map = convolve2d(in1=correct_unit_type_array,
+                           in2=circle,
+                           mode='same')
+
+    # np.savetxt("tmp2.txt", score_map % 10, delimiter="", fmt="%1d")
+    # np.savetxt("tmp3.txt", circle, delimiter="", fmt="%1d")
+
+    x, y = np.unravel_index(np.argmax(score_map), score_map.shape)
+
+    return x, y
+

@@ -6,7 +6,7 @@ from oscar.agent.learning_agent import LearningAgent
 from oscar import meta_action
 from oscar.constants import *
 
-ACTION_SPACE_SIZE = 6
+ACTION_SPACE_SIZE = 5
 OBSERVATION_SPACE_SHAPE = (5,)
 
 
@@ -87,11 +87,7 @@ class BasicLearningAgent(LearningAgent):
                 return meta_action.train_unit(self.last_obs,
                                               building_id=TERRAN_BARRACKS_ID,
                                               action_train_id=TRAIN_MARINE_QUICK)
-            elif action_id == 4:  # train SCV
-                return meta_action.train_unit(self.last_obs,
-                                              building_id=TERRAN_COMMAND_CENTER,
-                                              action_train_id=TRAIN_SCV_QUICK)
-            elif action_id == 5:  # attack !
+            elif action_id == 4:  # attack !
                 action = [actions.FunctionCall(SELECT_ARMY, [SELECT_ALL])]
                 action += meta_action.attack_minimap(self.last_obs, queued=False)
                 return action
@@ -122,8 +118,6 @@ class BasicLearningAgent(LearningAgent):
             mask[2] = 0
         if not has_barrack or minerals < 50 or food_used + 1 > food_cap:
             mask[3] = 0
-        if minerals < 50 or food_used + 1 > food_cap:
-            mask[4] = 0
         return mask
 
     def print_tree(self, depth):

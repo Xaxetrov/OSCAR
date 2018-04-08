@@ -4,9 +4,9 @@ from oscar.util.screen_helper import *
 from random import randint
 from oscar.constants import *
 
-# Used to create dummy observations, like in pysc2.
-class Obs():
 
+# Used to create dummy observations, like in pysc2.
+class Obs:
     def __init__(self, screen_unit_type, player_relative, unit_density):
         self.observation = {"screen": []}
         for i in range(17):
@@ -17,11 +17,10 @@ class Obs():
         self.observation["screen"][SCREEN_UNIT_DENSITY] = unit_density
 
 
-""" Tests for the function "oscar.util.get_centroids """
-
 def print_screen(screen):
+    """ Tests for the function "oscar.util.get_centroids """
     alias = {}
-    nextAlias = 1
+    next_alias = 1
 
     for j in range(len(screen[0])):
         line = ""
@@ -30,8 +29,8 @@ def print_screen(screen):
                 line += "0"
             else:
                 if screen[i][j] not in alias:
-                    alias[screen[i][j]] = nextAlias
-                    nextAlias += 1
+                    alias[screen[i][j]] = next_alias
+                    next_alias += 1
 
                 line += str(alias[screen[i][j]])
         print(line)
@@ -44,8 +43,7 @@ def get_disk_mask(radius):
 
     def draw_hor_line(mask, x0, x1, y):
         for x in range(x0, x1+1):
-            if x >= 0 and x < len(mask) \
-                and y >= 0 and y < len(mask[0]):
+            if 0 <= x < len(mask) and 0 <= y < len(mask[0]):
                 mask[x][y] = 1
 
     def draw(mask, x0, y0, x, y):
@@ -82,15 +80,14 @@ def draw_disk(screen_unit_type, unit_id, player_relative, player_id, unit_densit
             abs_x = x0 + x
             abs_y = y0 + y
 
-            if abs_x >= 0 and abs_x < len(screen_unit_type) \
-                and abs_y >= 0 and abs_y < len(screen_unit_type[0]) \
-                and mask[x, y] != 0:
+            if 0 <= abs_x < len(screen_unit_type) and 0 <= abs_y < len(screen_unit_type[0]) and mask[x, y] != 0:
                 screen_unit_type[abs_x, abs_y] = unit_id
                 player_relative[abs_x, abs_y] = player_id
                 unit_density[abs_x, abs_y] += 1
 
-""" Generates a random sample screen to test the match_all algorithm """
+
 def test_match_all():
+    """ Generates a random sample screen to test the match_all algorithm """
     SCREEN_WIDTH = 30
     SCREEN_HEIGHT = 30
 
@@ -138,6 +135,7 @@ def test_match_all():
     for i in range(len(centroids)):
         print(str(centroids[i]))
 
+
 def test_get_center():
     obs = pickle.load(open("test/util/obs.p", "rb"))
     obs_id = 49
@@ -152,6 +150,7 @@ def test_get_center():
     print(get_center(obs[obs_id], TERRAN_COMMAND_CENTER, 1))
     print(get_center(obs[obs_id], TERRAN_SCV, 1))
     print(get_center(obs[obs_id], MINERAL_FIELD, 3))
+
 
 if __name__ == "__main__":
     test_match_all()

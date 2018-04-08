@@ -3,6 +3,8 @@ import time
 import random
 import threading
 import numpy as np
+import os
+import pandas as pd
 
 from learning_tools.A3C_learner.constants import *
 import warnings
@@ -171,6 +173,14 @@ class Environment(threading.Thread):
 
             if done:  # terminal state
                 s_ = None
+
+            # write stats to file
+            if 'stats' in info.keys():
+                info['stats'] = info['stats'].assign(epsilon=self.agent.get_epsilon())
+                if os.path.isfile(LOG_FILE):
+                    info['stats'].to_csv(LOG_FILE, sep=',', header=False, index=False, mode='a')
+                else:
+                    info['stats'].to_csv(LOG_FILE, sep=',', header=True, index=False, mode='w')
 
             self.agent.train(s, a, r, s_)
 

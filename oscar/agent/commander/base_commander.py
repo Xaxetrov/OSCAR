@@ -9,7 +9,7 @@ class BaseCommander(ABC, CustomAgent):
     These are specialized agents that capable of delegating tasks to subordinates
     """
 
-    def __init__(self, subordinates):
+    def __init__(self, subordinates: list):
         """
         :param subordinates: a list of agents. These must be initialized already !
         """

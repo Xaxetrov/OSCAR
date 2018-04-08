@@ -25,8 +25,8 @@ class Pysc2GeneralEnv(Pysc2Env):
         self.pysc2_env = SC2Env(  # map_name='CollectMineralsAndGas',
             map_name='Simple64',
             agent_race='T',
-            screen_size_px=(64, 64),
-            minimap_size_px=(64, 64),
+            screen_size_px=(SCREEN_RESOLUTION, SCREEN_RESOLUTION),
+            minimap_size_px=(MINIMAP_RESOLUTION, MINIMAP_RESOLUTION),
             visualize=True,
             step_mul=16,
             game_steps_per_episode=None  # use map default

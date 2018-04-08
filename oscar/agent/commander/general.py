@@ -5,7 +5,8 @@ from oscar.hiearchy_factory import build_hierarchy
 from oscar.constants import NO_OP
 import time
 
-DEFAULT_CONFIGURATION = "config/full_hierarchy.json"
+# DEFAULT_CONFIGURATION = "config/full_hierarchy.json"
+DEFAULT_CONFIGURATION = "config/idleSCVtest.json"
 
 
 class General(BaseAgent):

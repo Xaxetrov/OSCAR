@@ -19,7 +19,7 @@ from learning_tools.A3C_learner.constants import *
 Start by determining the shape of states and actions in a given environment.
 This allows for fast switching of environments simply by changing a single constant (at least for simple environments).
 """
-# set test env using meaning less value which will be over writen by future env deff
+# set test env using meaning less value which will be over writen by future env def
 env_test = Environment(global_brain=None, num_actions=0, render=True, eps_start=0., eps_end=0.)
 NUM_STATE = env_test.env.observation_space.shape
 NUM_ACTIONS = env_test.env.action_space.n

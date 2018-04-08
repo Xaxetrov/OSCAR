@@ -13,7 +13,6 @@ class EconomyManager(CustomAgent):
     _BUILDING_SUPPLY_DEPOT = 2
     _TRAINING_SCV = 3
 
-
     def __init__(self, message="I hate you"):
         self._message = message
         self._state = EconomyManager._IDLE
@@ -105,7 +104,6 @@ class EconomyManager(CustomAgent):
                     play['actions'] = [actions.FunctionCall(TRAIN_SCV_QUICK, [NOT_QUEUED])]
                     self._shared['economy'].add_scv()
                 self._state = EconomyManager._IDLE
-
 
         if 'actions' not in play:
             self._state = EconomyManager._IDLE
