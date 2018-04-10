@@ -28,7 +28,7 @@ class Pysc2GeneralEnv(Pysc2Env):
             screen_size_px=(SCREEN_RESOLUTION, SCREEN_RESOLUTION),
             minimap_size_px=(MINIMAP_RESOLUTION, MINIMAP_RESOLUTION),
             visualize=True,
-            step_mul=16,
+            step_mul=8,
             game_steps_per_episode=None  # use map default
         )
         self.general = General(DEFAULT_CONFIGURATION)

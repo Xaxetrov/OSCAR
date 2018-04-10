@@ -1,6 +1,7 @@
 import numpy as np
 from oscar.constants import *
 from math import floor, ceil
+import itertools
 
 
 def _get_disk_mask_integer_radius(radius):
@@ -144,7 +145,7 @@ def _is_match(screen_unit_type, unit_id, player_relative, player_id, unit_densit
                 else:
                     pixels_matched += 1
 
-    return (pixels_matched > 0)
+    return pixels_matched > 0
 
 
 def _update_unit_density(unit_density, mask, radius, start_point):

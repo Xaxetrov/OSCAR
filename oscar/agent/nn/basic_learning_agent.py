@@ -1,6 +1,7 @@
 from collections import deque
 import numpy as np
 from gym import spaces
+import cProfile, pstats, io
 
 from oscar.agent.learning_agent import LearningAgent
 from oscar import meta_action
@@ -18,6 +19,7 @@ class BasicLearningAgent(LearningAgent):
         self.action_space = spaces.Discrete(ACTION_SPACE_SIZE)
         self.observation_space = spaces.Box(low=0, high=1.0, shape=OBSERVATION_SPACE_SHAPE)
         super().__init__(train_mode, shared_memory)
+        self.pr = cProfile.Profile()
 
     def _step(self, obs):
         """
@@ -40,6 +42,7 @@ class BasicLearningAgent(LearningAgent):
         :param full_obs: pysc2 observation
         :return: agent observation
         """
+        self.pr.enable()
         self.last_obs = full_obs
         unit_type = full_obs.observation["screen"][SCREEN_UNIT_TYPE]
         minimap_player_relative = full_obs.observation['minimap'][MINI_PLAYER_RELATIVE]
@@ -55,6 +58,7 @@ class BasicLearningAgent(LearningAgent):
         # Enemy base found (bool)
         is_enemy_found = np.count_nonzero(minimap_player_relative == PLAYER_HOSTILE) > 0
         ret_obs_list.append(is_enemy_found)
+        self.pr.disable()
         return np.array(ret_obs_list, copy=True, dtype=float)
     
     def _transform_action(self, action_id):
@@ -63,8 +67,10 @@ class BasicLearningAgent(LearningAgent):
         :param action_id: id of the action
         :return: action (in the hierarchy point of view)
         """
+        self.pr.enable()
         action = self.get_meta_action(action_id)
         play = {'actions': action}
+        self.pr.disable()
         return play
 
     def get_meta_action(self, action_id):
@@ -102,6 +108,7 @@ class BasicLearningAgent(LearningAgent):
         :return: a mask of the size of the possible action with 1 if the action
             is probably possible and 0 otherwise.
         """
+        self.pr.enable()
         mask = np.ones(shape=self.action_space.n)
         # get useful information
         unit_type = self.last_obs.observation["screen"][SCREEN_UNIT_TYPE]
@@ -118,7 +125,17 @@ class BasicLearningAgent(LearningAgent):
             mask[2] = 0
         if not has_barrack or minerals < 50 or food_used + 1 > food_cap:
             mask[3] = 0
+        self.pr.disable()
         return mask
+
+    def reset(self):
+        if self.failed_meta_action_counter != 0:
+            s = io.StringIO()
+            ps = pstats.Stats(self.pr, stream=s).sort_stats('cumulative')
+            ps.print_stats()
+            print(s.getvalue())
+        self.pr = cProfile.Profile()
+        super().reset()
 
     def print_tree(self, depth):
         return "I am a {} and my depth is {}. I have a message to tell you : {}".format(type(self).__name__, depth
