@@ -14,7 +14,7 @@ def select_idle_scv_screen_priority(obs):
     :param obs: Observations of the current step.
     :return: The action to execute to select a SCV.
     """
-    scv_x, scv_y = find_position(obs, TERRAN_SCV, select_method="all", exception=NoValidSCVError)
+    scv_xy = find_position(obs, TERRAN_SCV, select_method="all", exception=NoValidSCVError)
     try:
         command_center = find_position(obs, TERRAN_COMMAND_CENTER, select_method="mean")
     except NoUnitError:
@@ -26,18 +26,18 @@ def select_idle_scv_screen_priority(obs):
     except NoUnitError:
         return select_idle_scv(obs)
 
-    best_scv = None
-    best_distance = None
-    for scv in zip(scv_x, scv_y):
-        distance = np.linalg.norm(np.array(scv) - np.array(resource))
-        distance += np.linalg.norm(np.array(scv) - np.array(command_center))
-        if distance < MAX_COLLECTING_DISTANCE and (best_scv is None or distance < best_distance):
-            best_scv = scv
-            best_distance = distance
-    if best_scv is not None:
+    scv = np.array(scv_xy)
+    scv_to_resource = scv - np.array([resource] * scv.shape[1]).T
+    scv_to_command_center = scv - np.array([command_center] * scv.shape[1]).T
+    distance = np.linalg.norm(scv_to_resource, 2, axis=0)
+    distance += np.linalg.norm(scv_to_command_center, 2, axis=0)
+    best_id = distance.argmin()
+    best_scv = (scv_xy[0][best_id], scv_xy[1][best_id])
+    if distance[best_id] < MAX_COLLECTING_DISTANCE:
         return [actions.FunctionCall(SELECT_POINT, [NEW_SELECTION, best_scv])]
+    else:
+        return select_idle_scv(obs)
 
-    return select_idle_scv(obs)
 
 """ Selects an idle scv, using built-in pySc2 function. """
 def select_idle_scv(obs):

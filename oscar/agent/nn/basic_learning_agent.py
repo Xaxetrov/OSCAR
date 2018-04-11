@@ -84,11 +84,13 @@ class BasicLearningAgent(LearningAgent):
             if action_id == 1:  # build supply
                 return meta_action.build(self.last_obs,
                                          building_tiles_size=2,
-                                         building_id=BUILD_SUPPLY_DEPOT)
+                                         building_id=BUILD_SUPPLY_DEPOT,
+                                         use_slow_scv_selection_method=False)
             elif action_id == 2:  # build Barracks
                 return meta_action.build(self.last_obs,
                                          building_tiles_size=3,
-                                         building_id=BUILD_BARRACKS)
+                                         building_id=BUILD_BARRACKS,
+                                         use_slow_scv_selection_method=False)
             elif action_id == 3:  # train Marines
                 return meta_action.train_unit(self.last_obs,
                                               building_id=TERRAN_BARRACKS_ID,
@@ -115,13 +117,14 @@ class BasicLearningAgent(LearningAgent):
         minerals = self.last_obs.observation['player'][MINERALS]
         food_used = self.last_obs.observation['player'][FOOD_USED]
         food_cap = self.last_obs.observation['player'][FOOD_CAP]
+        food_used_worker = self.last_obs.observation['player'][FOOD_USED_BY_WORKERS]
         has_supply_depot = np.count_nonzero(unit_type == TERRAN_SUPPLYDEPOT) > 0
         has_barrack = np.count_nonzero(unit_type == TERRAN_BARRACKS_ID) > 0
 
         # perform basic check (mask unavailable actions)
-        if minerals < 100:
+        if minerals < 100 or food_used_worker == 0:
             mask[1] = 0
-        if not has_supply_depot or minerals < 150:
+        if not has_supply_depot or minerals < 150 or food_used_worker == 0:
             mask[2] = 0
         if not has_barrack or minerals < 50 or food_used + 1 > food_cap:
             mask[3] = 0

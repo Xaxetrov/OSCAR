@@ -136,6 +136,7 @@ class MetaActionPerceptronAgent(LearningAgent):
         minerals = self.last_obs.observation['player'][MINERALS]
         vespene = self.last_obs.observation['player'][VESPENE]
         food_used = self.last_obs.observation['player'][FOOD_USED]
+        food_used_worker = self.last_obs.observation['player'][FOOD_USED_BY_WORKERS]
         food_cap = self.last_obs.observation['player'][FOOD_CAP]
         has_supply_depot = np.count_nonzero(unit_type == TERRAN_SUPPLYDEPOT) > 0
         has_barrack = np.count_nonzero(unit_type == TERRAN_BARRACKS_ID) > 0
@@ -148,9 +149,9 @@ class MetaActionPerceptronAgent(LearningAgent):
                 pass
 
         # perform basic check (mask unavailable actions)
-        if minerals < 100:
+        if minerals < 100 or food_used_worker == 0:
             mask[1] = 0
-        if not has_supply_depot or minerals < 150:
+        if not has_supply_depot or minerals < 150 or food_used_worker == 0:
             mask[2] = 0
         if selected_unit_id != TERRAN_SCV:
             mask[4] = 0

@@ -6,16 +6,19 @@ from oscar.shared.screen import Screen
 from scipy.signal import convolve2d
 
 
-def build(obs, building_tiles_size, building_id, propagate_error=True):
+def build(obs, building_tiles_size, building_id, propagate_error=True, use_slow_scv_selection_method=True):
     result_action_list = None
     try:
         result_action_list = select_idle_scv_screen_priority(obs)
     except NoValidSCVError:
-        try:
-            result_action_list = select_scv_on_screen(obs)
-        except NoValidSCVError:
-            if propagate_error:
-                raise
+        if use_slow_scv_selection_method:
+            try:
+                result_action_list = select_scv_on_screen(obs)
+            except NoValidSCVError:
+                if propagate_error:
+                    raise
+        else:
+            raise
 
     # Find a valid emplacement
     building_tiles_size += 0  # Handle the free space needed around the building.
@@ -86,7 +89,7 @@ def find_valid_building_point(unit_type_screen, height_map, building_size, step=
     # return valid_center_point
 
     # convolution version: (about much more quicker)
-    building_size += 4  # increase building size to prevent them to block units
+    # building_size *= 2  # increase building size to prevent them to block units
     building_patch = np.ones(shape=(building_size, building_size))
     border_x = (height_map[:-1, :] - height_map[1:, :]) != 0
     border_y = (height_map[:, :-1] - height_map[:, 1:]) != 0
@@ -98,7 +101,7 @@ def find_valid_building_point(unit_type_screen, height_map, building_size, step=
     yy, xx = np.where(score == 0)
     # better to only select edges of the score ? (and so build on the edges of posible position
     # and not anywhere in the middle ?)
-    return list(zip(xx, yy))
+    return list(zip(yy, xx))
 
 
 def _check_map_height_for_building(height_map, building_size, potential_center_point):
