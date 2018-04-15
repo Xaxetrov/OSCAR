@@ -1,0 +1,25 @@
+{
+  "structure": {
+    "0": [1, 2]
+  },
+  "agents": [
+    {
+      "id": 0,
+      "class_name": "oscar.agent.commander.collect_idle_scv_commander.CollectIdleScvCommander",
+      "arguments": {}
+    },
+    {
+      "id": 1,
+      "class_name": "oscar.agent.nn.complex_learning_agent.ComplexLearningAgent",
+      "arguments": {
+        "message": "You are beautiful",
+        "train_mode": "True"
+      }
+    },
+    {
+      "id": 2,
+      "class_name": "oscar.agent.scripted.idle_scv.IdleSCVManagerBasic",
+      "arguments": {}
+    }
+  ]
+}
