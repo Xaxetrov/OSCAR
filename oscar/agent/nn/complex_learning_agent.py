@@ -7,17 +7,17 @@ from oscar.agent.learning_agent import LearningAgent
 from oscar import meta_action
 from oscar.constants import *
 
-ACTION_SPACE_SIZE = 5
-OBSERVATION_SPACE_SHAPE = (5,)
+ACTION_SPACE_SIZE = 6
+OBSERVATION_SPACE_SHAPE = (7,)
 
 
-class BasicLearningAgent(LearningAgent):
+class ComplexLearningAgent(LearningAgent):
 
     def __init__(self, message="I'm learning", train_mode=False, shared_memory=None):
         self.last_obs = None
         self._message = message
         self.action_space = spaces.Discrete(ACTION_SPACE_SIZE)
-        self.observation_space = spaces.Box(low=0, high=1.0, shape=OBSERVATION_SPACE_SHAPE)
+        self.observation_space = spaces.Box(low=0.0, high=200.0, shape=OBSERVATION_SPACE_SHAPE)
         super().__init__(train_mode, shared_memory)
         # self.pr = cProfile.Profile()
 
@@ -45,19 +45,21 @@ class BasicLearningAgent(LearningAgent):
         # self.pr.enable()
         self.last_obs = full_obs
         unit_type = full_obs.observation["screen"][SCREEN_UNIT_TYPE]
-        minimap_player_relative = full_obs.observation['minimap'][MINI_PLAYER_RELATIVE]
         ret_obs_list = deque()
+        # minerals available
+        ret_obs_list.append(full_obs.observation['player'][MINERALS])
         # food supply: are we on max
-        food_available = full_obs.observation['player'][FOOD_USED] != full_obs.observation['player'][FOOD_CAP]
+        food_available = full_obs.observation['player'][FOOD_CAP]
         ret_obs_list.append(food_available)
-        # is army bigger than 10 ?
-        ret_obs_list.append(full_obs.observation['player'][ARMY_COUNT] > 10)
+        # is army count
+        ret_obs_list.append(full_obs.observation['player'][ARMY_COUNT])
+        # scv count
+        ret_obs_list.append(full_obs.observation['player'][FOOD_USED_BY_WORKERS])
         # information on which building are already build (don't check player id)
-        ret_obs_list.append(np.count_nonzero(unit_type == TERRAN_BARRACKS_ID) > 0)
-        ret_obs_list.append(np.count_nonzero(unit_type == TERRAN_SUPPLYDEPOT) > 0)
-        # Enemy base found (bool)
-        is_enemy_found = np.count_nonzero(minimap_player_relative == PLAYER_HOSTILE) > 0
-        ret_obs_list.append(is_enemy_found)
+        # experimental measure: barrack surface is 118 with 84x84 screen
+        ret_obs_list.append(np.count_nonzero(unit_type == TERRAN_BARRACKS_ID) // 110)
+        # time step info
+        ret_obs_list.append(self.episode_steps)
         # self.pr.disable()
         return np.array(ret_obs_list, copy=True, dtype=float)
     
