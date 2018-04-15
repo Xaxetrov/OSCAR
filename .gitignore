@@ -6,6 +6,8 @@
 !config/
 !learning_tools/
 !test/
+#ML_homework specific
+!ML_homework/
 
 #Whitelist some extensions
 !*.py
