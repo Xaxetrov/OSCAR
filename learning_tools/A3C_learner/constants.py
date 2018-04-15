@@ -2,7 +2,7 @@
 ENV = 'general-learning-v0'
 
 RUN_TIME = 60 * 60 * 17
-THREADS = 8
+THREADS = 7
 OPTIMIZERS = 2
 THREAD_DELAY = 0.0001
 
