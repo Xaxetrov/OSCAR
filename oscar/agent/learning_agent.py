@@ -24,6 +24,11 @@ class LearningAgent(LearningStructure, CustomAgent):
         """
         LearningStructure.__init__(self, train_mode, shared_memory)
         self.failed_meta_action_counter = 0
+        self.episode_steps = 0
+
+    def step(self, obs, locked_choice=None):
+        self.episode_steps += 1
+        return super().step(obs, locked_choice)
 
     def _learning_step(self, obs):
         result = super()._learning_step(obs)
@@ -37,4 +42,5 @@ class LearningAgent(LearningStructure, CustomAgent):
         super().reset()
         print("Failed meta action :", self.failed_meta_action_counter)
         self.failed_meta_action_counter = 0
+        self.episode_steps = 0
 
