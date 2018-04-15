@@ -21,7 +21,7 @@ class Pysc2GeneralEnv(Pysc2Env):
     # action_space = spaces.Discrete(1)
     # observation_space = None  # set in init
 
-    def __init__(self):
+    def __init__(self, path_to_configuration=DEFAULT_CONFIGURATION):
         self.pysc2_env = SC2Env(  # map_name='CollectMineralsAndGas',
             map_name='Simple64',
             agent_race='T',
@@ -31,7 +31,7 @@ class Pysc2GeneralEnv(Pysc2Env):
             step_mul=8,
             game_steps_per_episode=None  # use map default
         )
-        self.general = General(DEFAULT_CONFIGURATION)
+        self.general = General(path_to_configuration)
         action_spec = self.pysc2_env.action_spec()
         observation_spec = self.pysc2_env.observation_spec()
         self.general.setup(observation_spec, action_spec)

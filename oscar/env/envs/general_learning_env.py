@@ -22,10 +22,12 @@ WIN_REWARD = 1.0
 LOSS_REWARD = 0.0
 STATE_MATE_REWARD = 0.2
 
+DEFAULT_CONFIGURATION = "config/learning.json"
+
 
 class GeneralLearningEnv(gym.Env):
-    def __init__(self):
-        self.env_thread = Pysc2EnvRunner()
+    def __init__(self, configuration_file=DEFAULT_CONFIGURATION):
+        self.env_thread = Pysc2EnvRunner(configuration_file=configuration_file)
         self.shared_memory = self.env_thread.shared_memory
         # get semaphores from shared memory
         self.semaphore_obs_ready = self.shared_memory.semaphore_obs_ready
@@ -84,7 +86,7 @@ class GeneralLearningEnv(gym.Env):
 
 class Pysc2EnvRunner(threading.Thread):
 
-    def __init__(self):
+    def __init__(self, configuration_file):
         self.done = False
         self.was_done = False
         self.reward = 0
@@ -99,7 +101,7 @@ class Pysc2EnvRunner(threading.Thread):
         self.start_time = 0
         self.learning_agent_step = 0
         # setup env
-        self.env = Pysc2GeneralEnv()
+        self.env = Pysc2GeneralEnv(configuration_file)
         # get shared memory from general
         self.shared_memory = self.env.general.training_memory
         self.semaphore_obs_ready = self.shared_memory.semaphore_obs_ready
