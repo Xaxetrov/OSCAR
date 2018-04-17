@@ -1,16 +1,21 @@
 import numpy as np
 import gym
 import time
+import pandas as pd
+import os
 
 from oscar.env.envs.general_learning_env import GeneralLearningEnv
-
 from ML_homework.value_iteration.generate_transition import generate_transition_basic_env
+
+
+RESULT_FILE = "ML_homework/value_iteration/basic.csv"
+NUMBER_OF_TEST = 1
 
 
 def value_iteration(gamma, max_iter, delta):
     r, p = generate_transition_basic_env()
 
-    u = np.random.normal(0.0, 1.0, size=r.shape[0])
+    u = np.random.normal(0.0, 0.5, size=r.shape[0])
 
     for i in range(max_iter):
         previous_u = u.copy()
@@ -24,30 +29,45 @@ def value_iteration(gamma, max_iter, delta):
     return u, policy, i + 1
 
 
+def value_iteration_iterator(gamma, max_iter):
+    r, p = generate_transition_basic_env()
+
+    u = np.random.normal(0.0, 0.5, size=r.shape[0])
+
+    for i in range(max_iter):
+        previous_u = u.copy()
+        q = np.einsum('ijk,ijk -> ij', p, r + gamma * u)
+        u = np.max(q, axis=1)
+
+        policy = np.argmax(q, axis=1)
+        yield policy, np.max(np.abs(u - previous_u))
+
+
 if __name__ == '__main__':
-    u, p, ite = value_iteration(0.1, 1000, 0.0001)
-    print(ite)
-    print(p.shape)
-    print(p)
-    print(u)
-    print(np.argmax(u), np.max(u))
-    env = GeneralLearningEnv("config/learning.json")
+    env = GeneralLearningEnv("config/learning.json", True)
 
     done = False
     obs = env.reset()
+    first = True
 
     obs_to_s = np.array([-1, 2, 8, 4, 16], dtype=np.int)
 
-    i = 0
-    while not done:
-        s = int(np.sum(obs * obs_to_s) + 1)
-        a = p[s]
-        obs, _, done, _ = env.step(a)
-        i += 1
+    for p, error in value_iteration_iterator(0.1, 10):
+        for i in range(NUMBER_OF_TEST):
+            while not done:
+                s = int(np.sum(obs * obs_to_s) + 1)
+                a = p[s]
+                obs, _, done, debug_dict = env.step(a)
+            obs = env.reset()
+            done = False
+            df = debug_dict['stats']
+            df = df.assign(value_change=[error])
+            if os.path.isfile(RESULT_FILE) or first:
+                df.to_csv(RESULT_FILE, sep=',', mode='w', header=True)
+                first = False
+            else:
+                df.to_csv(RESULT_FILE, sep=',', mode='a', header=False)
 
-    print(i)
-
-    env.reset()
     env.close()
     del env
 

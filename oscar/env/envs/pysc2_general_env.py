@@ -21,13 +21,15 @@ class Pysc2GeneralEnv(Pysc2Env):
     # action_space = spaces.Discrete(1)
     # observation_space = None  # set in init
 
-    def __init__(self, path_to_configuration=DEFAULT_CONFIGURATION):
+    def __init__(self,
+                 path_to_configuration=DEFAULT_CONFIGURATION,
+                 enable_visualisation=True):
         self.pysc2_env = SC2Env(  # map_name='CollectMineralsAndGas',
             map_name='Simple64',
             agent_race='T',
             screen_size_px=(SCREEN_RESOLUTION, SCREEN_RESOLUTION),
             minimap_size_px=(MINIMAP_RESOLUTION, MINIMAP_RESOLUTION),
-            visualize=True,
+            visualize=enable_visualisation,
             step_mul=8,
             game_steps_per_episode=None  # use map default
         )

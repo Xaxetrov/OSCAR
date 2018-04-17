@@ -13,7 +13,7 @@ from baselines import logger
 
 GAME_MAX_STEP = 1700
 
-#reward cost:
+# reward cost:
 KILLED_UNITS_REWARD = 0.1
 KILLED_BUILDINGS_REWARD = 0.2
 CREATED_MARINES_REWARD = 0.1
@@ -26,8 +26,9 @@ DEFAULT_CONFIGURATION = "config/learning.json"
 
 
 class GeneralLearningEnv(gym.Env):
-    def __init__(self, configuration_file=DEFAULT_CONFIGURATION):
-        self.env_thread = Pysc2EnvRunner(configuration_file=configuration_file)
+    def __init__(self, configuration_file=DEFAULT_CONFIGURATION, enable_visualisation=True):
+        self.env_thread = Pysc2EnvRunner(configuration_file=configuration_file,
+                                         enable_visualisation=enable_visualisation)
         self.shared_memory = self.env_thread.shared_memory
         # get semaphores from shared memory
         self.semaphore_obs_ready = self.shared_memory.semaphore_obs_ready
@@ -86,7 +87,7 @@ class GeneralLearningEnv(gym.Env):
 
 class Pysc2EnvRunner(threading.Thread):
 
-    def __init__(self, configuration_file):
+    def __init__(self, configuration_file, enable_visualisation):
         self.done = False
         self.was_done = False
         self.reward = 0
@@ -101,7 +102,7 @@ class Pysc2EnvRunner(threading.Thread):
         self.start_time = 0
         self.learning_agent_step = 0
         # setup env
-        self.env = Pysc2GeneralEnv(configuration_file)
+        self.env = Pysc2GeneralEnv(configuration_file, enable_visualisation)
         # get shared memory from general
         self.shared_memory = self.env.general.training_memory
         self.semaphore_obs_ready = self.shared_memory.semaphore_obs_ready

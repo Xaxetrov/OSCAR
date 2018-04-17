@@ -57,7 +57,7 @@ class ComplexLearningAgent(LearningAgent):
         ret_obs_list.append(full_obs.observation['player'][FOOD_USED_BY_WORKERS])
         # information on which building are already build (don't check player id)
         # experimental measure: barrack surface is 118 with 84x84 screen
-        ret_obs_list.append(np.count_nonzero(unit_type == TERRAN_BARRACKS_ID) // 110)
+        ret_obs_list.append(np.count_nonzero(unit_type == TERRAN_BARRACKS_ID) // 100)
         # time step info
         ret_obs_list.append(self.episode_steps)
         # self.pr.disable()
@@ -101,6 +101,10 @@ class ComplexLearningAgent(LearningAgent):
                 action = [actions.FunctionCall(SELECT_ARMY, [SELECT_ALL])]
                 action += meta_action.attack_minimap(self.last_obs, queued=False)
                 return action
+            elif action_id == 5:  # train SCV
+                return meta_action.train_unit(self.last_obs,
+                                              building_id=TERRAN_COMMAND_CENTER,
+                                              action_train_id=TRAIN_SCV_QUICK)
         except meta_action.ActionError:
             pass
 

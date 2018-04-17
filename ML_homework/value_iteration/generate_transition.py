@@ -130,8 +130,8 @@ def study_state(state_id: int):
                 new_state_army_increased = new_state.copy()
                 new_state_army_increased.increase_army_count()
                 new_states = [new_state, new_state_army_increased]
-                p = [0.1 * created_marines_num,
-                     1.0 - 0.1 * created_marines_num]
+                p = [1.0 - 0.1 * created_marines_num,
+                     0.1 * created_marines_num]
                 r = [CREATED_MARINES_REWARD * created_marines_num,
                      CREATED_MARINES_REWARD * created_marines_num]
             else:
