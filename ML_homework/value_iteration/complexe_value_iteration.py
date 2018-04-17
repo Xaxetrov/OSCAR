@@ -98,6 +98,7 @@ if __name__ == '__main__':
 
     env = GeneralLearningEnv("config/learning_complex.json", True)
 
+    first = True
     done = False
     obs = env.reset()
     for pi, error in value_iteration_iterator(0.1, 10):
