@@ -76,11 +76,11 @@ def state_from_obs(obs):
 
 
 if __name__ == '__main__':
-    STATE_FILE = "ML_homework/state_table.csv"
-    # STATE_FILE = "/tmp/state_table.csv"
+    # STATE_FILE = "ML_homework/state_table.csv"
+    STATE_FILE = "/tmp/state_table.csv"
     # UTILITY_FILE = "ML_homework/utility.npy"
     # POLICY_FILE = "ML_homework/policy.npy"
-    NUMBER_OF_TEST = 1
+    NUMBER_OF_TEST = 20
     RESULT_FILE = "ML_homework/value_iteration/complex.csv"
     if not os.path.isfile(STATE_FILE):
         generate_transition_complex_env(STATE_FILE)
