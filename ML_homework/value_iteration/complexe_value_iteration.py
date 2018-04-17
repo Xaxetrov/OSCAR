@@ -76,8 +76,8 @@ def state_from_obs(obs):
 
 
 if __name__ == '__main__':
-    # STATE_FILE = "ML_homework/state_table.csv"
-    STATE_FILE = "/tmp/state_table.csv"
+    STATE_FILE = "ML_homework/state_table.csv"
+    # STATE_FILE = "/tmp/state_table.csv"
     # UTILITY_FILE = "ML_homework/utility.npy"
     # POLICY_FILE = "ML_homework/policy.npy"
     NUMBER_OF_TEST = 1
@@ -89,7 +89,7 @@ if __name__ == '__main__':
         print("state generation already done")
 
     # if not os.path.isfile(UTILITY_FILE) or not os.path.isfile(POLICY_FILE):
-    #     utility, pi, iteration = value_iteration(0.1, 1000, 0.000001)
+    #     utility, pi, iteration = value_iteration(0.1, 1000, 0.000001, file_path=STATE_FILE)
     #     np.save(UTILITY_FILE, utility)
     #     np.save(POLICY_FILE, pi)
     # else:
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     first = True
     done = False
     obs = env.reset()
-    for pi, error in value_iteration_iterator(0.1, 10):
+    for pi, error in value_iteration_iterator(0.1, 10, file_path=STATE_FILE):
         for i in range(NUMBER_OF_TEST):
             while not done:
                 s = state_from_obs(obs)
