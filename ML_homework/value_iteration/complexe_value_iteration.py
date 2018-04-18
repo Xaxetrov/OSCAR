@@ -34,8 +34,9 @@ def value_iteration(gamma, max_iter, delta, file_path: str='state_table.csv'):
     return u, policy, i + 1
 
 
-def value_iteration_iterator(gamma, max_iter, file_path: str='state_table.csv'):
-    q_file_path = "ML_homework/value_iteration/tmp_files/"
+def value_iteration_iterator(gamma, max_iter, file_path: str='state_table.csv',
+                             dump_file_path: str="ML_homework/value_iteration/tmp_files/"):
+    q_file_path = dump_file_path
     if not os.path.exists(q_file_path):
         os.mkdir(q_file_path)
     number_of_state = ComplexState.get_number_of_state()
@@ -78,9 +79,10 @@ def state_from_obs(obs):
 if __name__ == '__main__':
     # STATE_FILE = "ML_homework/state_table.csv"
     STATE_FILE = "/tmp/state_table.csv"
+    Q_SAVE_PATH = "/tmp/OSCAR/"
     # UTILITY_FILE = "ML_homework/utility.npy"
     # POLICY_FILE = "ML_homework/policy.npy"
-    NUMBER_OF_TEST = 20
+    NUMBER_OF_TEST = 30
     RESULT_FILE = "ML_homework/value_iteration/complex.csv"
     if not os.path.isfile(STATE_FILE):
         generate_transition_complex_env(STATE_FILE)
@@ -96,13 +98,13 @@ if __name__ == '__main__':
     #     utility = np.load(UTILITY_FILE, 'r')
     #     pi = np.load(POLICY_FILE, 'r')
 
-    env = GeneralLearningEnv("config/learning_complex.json", True)
+    env = GeneralLearningEnv("config/learning_complex.json", False)
 
     first = True
     done = False
     obs = env.reset()
-    for pi, error in value_iteration_iterator(0.1, 10, file_path=STATE_FILE):
-        for i in range(NUMBER_OF_TEST):
+    for i, (pi, error) in enumerate(value_iteration_iterator(0.1, 10, file_path=STATE_FILE, dump_file_path=Q_SAVE_PATH)):
+        for n in range(NUMBER_OF_TEST):
             while not done:
                 s = state_from_obs(obs)
                 a = pi[s.id()]
@@ -111,6 +113,7 @@ if __name__ == '__main__':
             done = False
             df = debug_dict['stats']
             df = df.assign(value_change=[error])
+            df = df.assign(value_iteration=[i])
             if os.path.isfile(RESULT_FILE) or first:
                 df.to_csv(RESULT_FILE, sep=',', mode='w', header=True)
                 first = False
