@@ -8,7 +8,7 @@ from oscar import meta_action
 from oscar.constants import *
 
 ACTION_SPACE_SIZE = 6
-OBSERVATION_SPACE_SHAPE = (7,)
+OBSERVATION_SPACE_SHAPE = (6,)
 
 
 class ComplexLearningAgent(LearningAgent):
@@ -47,19 +47,20 @@ class ComplexLearningAgent(LearningAgent):
         unit_type = full_obs.observation["screen"][SCREEN_UNIT_TYPE]
         ret_obs_list = deque()
         # minerals available
-        ret_obs_list.append(full_obs.observation['player'][MINERALS])
+        minerals = full_obs.observation['player'][MINERALS]
+        ret_obs_list.append(min(minerals / (10 * 40.0), 1.0))
         # food supply: are we on max
         food_available = full_obs.observation['player'][FOOD_CAP]
-        ret_obs_list.append(food_available)
+        ret_obs_list.append(food_available / 100.0)
         # is army count
-        ret_obs_list.append(full_obs.observation['player'][ARMY_COUNT])
+        ret_obs_list.append(full_obs.observation['player'][ARMY_COUNT] / 100.0)
         # scv count
-        ret_obs_list.append(full_obs.observation['player'][FOOD_USED_BY_WORKERS])
+        ret_obs_list.append(full_obs.observation['player'][FOOD_USED_BY_WORKERS] / 24.0)
         # information on which building are already build (don't check player id)
         # experimental measure: barrack surface is 118 with 84x84 screen
-        ret_obs_list.append(np.count_nonzero(unit_type == TERRAN_BARRACKS_ID) // 100)
+        ret_obs_list.append((np.count_nonzero(unit_type == TERRAN_BARRACKS_ID) // 100) / 4.0 )
         # time step info
-        ret_obs_list.append(self.episode_steps)
+        ret_obs_list.append(self.episode_steps / 100.0)
         # self.pr.disable()
         return np.array(ret_obs_list, copy=True, dtype=float)
     

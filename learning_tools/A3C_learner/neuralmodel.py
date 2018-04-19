@@ -6,7 +6,7 @@ from keras.layers import Conv2D, Input, Dense, Flatten, \
 
 from learning_tools.A3C_learner.constants import *
 
-current_neural_network_file = "learning_tools/learning_nn/" + ENV + ".knn"
+current_neural_network_file = NN_FILE
 
 
 def get_neural_network(input_shape, output_shape_list,

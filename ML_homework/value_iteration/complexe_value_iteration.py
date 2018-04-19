@@ -67,12 +67,12 @@ def value_iteration_iterator(gamma, max_iter, file_path: str='state_table.csv',
 
 def state_from_obs(obs):
     state = ComplexState()
-    state.minerals = int(min(obs[0] // 10, MINERALS_LIMIT))
-    state.food = int(min((obs[1] - 15) // 8, FOOD_LIMIT))
-    state.army_count = int(min(obs[2] // 10, ARMY_COUNT_LIMIT))
-    state.scv_count = int(max(12, min(obs[3], SCV_COUNT_LIMIT + 12)))
-    state.barracks = int(min(obs[4], BARRACK_LIMIT))
-    state.time_step = int(min(obs[5] // 100, TIME_STEP_LIMIT))
+    state.minerals = int(min(int((obs[0] * 40)), MINERALS_LIMIT))
+    state.food = int(min((int(obs[1] * 100) - 15) // 8, FOOD_LIMIT))
+    state.army_count = int(min(int(obs[2] * 100) // 10, ARMY_COUNT_LIMIT))
+    state.scv_count = int(max(12, min(int(obs[3] * 24), SCV_COUNT_LIMIT + 12)))
+    state.barracks = int(min(int(obs[4] * 4), BARRACK_LIMIT))
+    state.time_step = int(min(int(obs[5]), TIME_STEP_LIMIT))
     return state
 
 

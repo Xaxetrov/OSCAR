@@ -9,6 +9,8 @@ import pandas as pd
 from learning_tools.A3C_learner.constants import *
 import warnings
 
+from oscar.env.envs.general_learning_env import GeneralLearningEnv
+
 brain = None  # brain is global in A3C
 NUM_ACTIONS = 0
 frames = 0
@@ -148,7 +150,7 @@ class Environment(threading.Thread):
         NUM_ACTIONS = num_actions
 
         self.render = render
-        self.env = gym.make(ENV)
+        self.env = GeneralLearningEnv(CONFIGURATION_FILE, ENABLE_PYSC2_GUI)
         self.agent = Agent(eps_start, eps_end, eps_steps)
 
     def run_episode(self):
