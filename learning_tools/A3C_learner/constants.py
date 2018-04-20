@@ -1,8 +1,10 @@
 # constants
-ENV = 'general-learning-v0'
+ENV = 'general-learning-v0'  # deprecated
+CONFIGURATION_FILE = 'config/learning_complex.json'
+ENABLE_PYSC2_GUI = True
 
-RUN_TIME = 60 * 60 * 17
-THREADS = 7
+RUN_TIME = 60 * 60 * 23
+THREADS = 8
 OPTIMIZERS = 2
 THREAD_DELAY = 0.0001
 
@@ -21,7 +23,8 @@ LEARNING_RATE = 5e-3
 LOSS_V = .5			# v loss coefficient
 LOSS_ENTROPY = .01 	# entropy coefficient
 
-LOG_FILE = "learning_tools/learning_nn/general-learning-v0.csv"
+LOG_FILE = "learning_tools/learning_nn/" + CONFIGURATION_FILE[7:-4] + "csv"
+NN_FILE = "learning_tools/learning_nn/" + CONFIGURATION_FILE[7:-4] + "knn"
 
 # constants that will be set in main
 # brain = None  # brain is global in A3C
