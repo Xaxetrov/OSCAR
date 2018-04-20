@@ -11,7 +11,7 @@ from oscar.constants import *
 
 # from baselines import logger
 
-GAME_MAX_STEP = 1700
+GAME_MAX_STEP = 1700 * 16  # defined as 1700 agent step when playing one action every 16 game step
 
 # reward cost:
 KILLED_UNITS_REWARD = 0.1
@@ -27,9 +27,10 @@ DEFAULT_CONFIGURATION = "config/learning.json"
 
 
 class GeneralLearningEnv(gym.Env):
-    def __init__(self, configuration_file=DEFAULT_CONFIGURATION, enable_visualisation=True):
+    def __init__(self, configuration_file=DEFAULT_CONFIGURATION, enable_visualisation=True, game_steps_per_update=8):
         self.env_thread = Pysc2EnvRunner(configuration_file=configuration_file,
-                                         enable_visualisation=enable_visualisation)
+                                         enable_visualisation=enable_visualisation,
+                                         game_steps_per_update=game_steps_per_update)
         self.shared_memory = self.env_thread.shared_memory
         # get semaphores from shared memory
         self.semaphore_obs_ready = self.shared_memory.semaphore_obs_ready
@@ -88,7 +89,7 @@ class GeneralLearningEnv(gym.Env):
 
 class Pysc2EnvRunner(threading.Thread):
 
-    def __init__(self, configuration_file, enable_visualisation):
+    def __init__(self, configuration_file, enable_visualisation, game_steps_per_update):
         self.done = False
         self.was_done = False
         self.reward = 0
@@ -98,12 +99,13 @@ class Pysc2EnvRunner(threading.Thread):
         self.step_count = 0
         self.last_obs = None
         self.stats = None
+        self.game_steps_per_update = game_steps_per_update
         # variable for stats
         self.episodes_reward = []
         self.start_time = 0
         self.learning_agent_step = 0
         # setup env
-        self.env = Pysc2GeneralEnv(configuration_file, enable_visualisation)
+        self.env = Pysc2GeneralEnv(configuration_file, enable_visualisation, game_steps_per_update)
         # get shared memory from general
         self.shared_memory = self.env.general.training_memory
         self.semaphore_obs_ready = self.shared_memory.semaphore_obs_ready
@@ -170,7 +172,7 @@ class Pysc2EnvRunner(threading.Thread):
         to determine if the agent win / loss / null
         :return: int: 0 loss, 1 null and 2 win
         """
-        if self.step_count >= GAME_MAX_STEP:
+        if self.step_count >= GAME_MAX_STEP / self.game_steps_per_update:
             return 1
         elif self.last_obs.observation['player'][ARMY_COUNT] > 10:
             return 2
