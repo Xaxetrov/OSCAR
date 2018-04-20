@@ -90,33 +90,23 @@ if __name__ == '__main__':
     else:
         print("state generation already done")
 
-    # if not os.path.isfile(UTILITY_FILE) or not os.path.isfile(POLICY_FILE):
-    #     utility, pi, iteration = value_iteration(0.1, 1000, 0.000001, file_path=STATE_FILE)
-    #     np.save(UTILITY_FILE, utility)
-    #     np.save(POLICY_FILE, pi)
-    # else:
-    #     utility = np.load(UTILITY_FILE, 'r')
-    #     pi = np.load(POLICY_FILE, 'r')
-
     env = GeneralLearningEnv("config/learning_complex.json", False)
 
-    first = True
-    done = False
     obs = env.reset()
     for i, (pi, error) in enumerate(value_iteration_iterator(0.1, 10, file_path=STATE_FILE, dump_file_path=Q_SAVE_PATH)):
         for n in range(NUMBER_OF_TEST):
-            while not done:
+            while True:
                 s = state_from_obs(obs)
                 a = pi[s.id()]
                 obs, _, done, debug_dict = env.step(a)
+                if done:
+                    break
             obs = env.reset()
-            done = False
             df = debug_dict['stats']
             df = df.assign(value_change=[error])
             df = df.assign(value_iteration=[i])
-            if os.path.isfile(RESULT_FILE) or first:
+            if not os.path.isfile(RESULT_FILE):
                 df.to_csv(RESULT_FILE, sep=',', mode='w', header=True)
-                first = False
             else:
                 df.to_csv(RESULT_FILE, sep=',', mode='a', header=False)
 

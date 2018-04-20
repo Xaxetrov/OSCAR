@@ -44,27 +44,26 @@ def value_iteration_iterator(gamma, max_iter):
 
 
 if __name__ == '__main__':
-    env = GeneralLearningEnv("config/learning.json", True)
+    env = GeneralLearningEnv("config/learning.json", False)
 
-    done = False
     obs = env.reset()
-    first = True
 
     obs_to_s = np.array([-1, 2, 8, 4, 16], dtype=np.int)
 
-    for p, error in value_iteration_iterator(0.1, 10):
-        for i in range(NUMBER_OF_TEST):
-            while not done:
+    for i, (p, error) in enumerate(value_iteration_iterator(0.1, 10)):
+        for j in range(NUMBER_OF_TEST):
+            while True:
                 s = int(np.sum(obs * obs_to_s) + 1)
                 a = p[s]
                 obs, _, done, debug_dict = env.step(a)
+                if done:
+                    break
             obs = env.reset()
-            done = False
             df = debug_dict['stats']
             df = df.assign(value_change=[error])
-            if os.path.isfile(RESULT_FILE) or first:
+            df = df.assign(valueiteration=[i])
+            if os.path.isfile(RESULT_FILE):
                 df.to_csv(RESULT_FILE, sep=',', mode='w', header=True)
-                first = False
             else:
                 df.to_csv(RESULT_FILE, sep=',', mode='a', header=False)
 

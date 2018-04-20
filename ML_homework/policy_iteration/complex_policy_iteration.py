@@ -83,9 +83,7 @@ if __name__ == '__main__':
 
     env = GeneralLearningEnv("config/learning.json", True)
 
-    done = False
     obs = env.reset()
-    first = True
 
     for i, p in enumerate(policy_iteration_iterator(0.1, 10, file_path=STATE_FILE), save_path=P_SAVE_PATH):
         print(p)
@@ -97,12 +95,10 @@ if __name__ == '__main__':
                 if done:
                     break
             obs = env.reset()
-            done = False
             df = debug_dict['stats']
             df = df.assign(policy_iteration=[i])
-            if os.path.isfile(RESULT_FILE) or first:
+            if not os.path.isfile(RESULT_FILE):
                 df.to_csv(RESULT_FILE, sep=',', mode='w', header=True)
-                first = False
             else:
                 df.to_csv(RESULT_FILE, sep=',', mode='a', header=False)
 

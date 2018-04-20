@@ -7,7 +7,7 @@ from oscar.env.envs.general_learning_env import GeneralLearningEnv
 from ML_homework.value_iteration.generate_transition import generate_transition_basic_env
 
 RESULT_FILE = "ML_homework/policy_iteration/basic.csv"
-NUMBER_OF_TEST = 1
+NUMBER_OF_TEST = 10
 
 
 def policy_iteration(gamma=0.99, max_iterations=10**6, delta=10**-3):
@@ -65,28 +65,27 @@ def policy_iteration_iterator(iteration, gamma=0.99, max_iterations=10**6, delta
 
 
 if __name__ == '__main__':
-    env = GeneralLearningEnv("config/learning.json", True)
+    env = GeneralLearningEnv("config/learning.json", False)
 
-    done = False
     obs = env.reset()
-    first = True
 
     obs_to_s = np.array([-1, 2, 8, 4, 16], dtype=np.int)
 
     for i, p in enumerate(policy_iteration_iterator(10, 0.1)):
         print(p)
         for j in range(NUMBER_OF_TEST):
-            while not done:
+            while True:
                 s = int(np.sum(obs * obs_to_s) + 1)
                 a = p[s]
                 obs, _, done, debug_dict = env.step(a)
+                if done:
+                    break
             obs = env.reset()
-            done = False
             df = debug_dict['stats']
             df = df.assign(policy_iteration=[i])
-            if os.path.isfile(RESULT_FILE) or first:
+            print(df)
+            if not os.path.isfile(RESULT_FILE):
                 df.to_csv(RESULT_FILE, sep=',', mode='w', header=True)
-                first = False
             else:
                 df.to_csv(RESULT_FILE, sep=',', mode='a', header=False)
 
