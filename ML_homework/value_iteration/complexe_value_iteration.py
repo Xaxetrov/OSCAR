@@ -44,9 +44,9 @@ def value_iteration_iterator(gamma, max_iter, file_path: str='state_table.csv',
     u = np.random.normal(0.0, 1.0, size=number_of_state)
 
     with open(file_path, 'r') as state_file:
-        for i in range(max_iter):
+        for n in range(max_iter):
             previous_u = u.copy()
-            q_file = os.path.join(q_file_path, "q_" + str(i) + ".npy")
+            q_file = os.path.join(q_file_path, "q_" + str(n) + ".npy")
             if os.path.exists(q_file):
                 q = np.load(q_file, 'r')
             else:
@@ -94,7 +94,7 @@ if __name__ == '__main__':
 
     obs = env.reset()
     for i, (pi, error) in enumerate(value_iteration_iterator(0.1, 10, file_path=STATE_FILE, dump_file_path=Q_SAVE_PATH)):
-        for n in range(NUMBER_OF_TEST):
+        for j in range(NUMBER_OF_TEST):
             while True:
                 s = state_from_obs(obs)
                 a = pi[s.id()]
