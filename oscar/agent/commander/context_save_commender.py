@@ -67,6 +67,13 @@ class ContextSaveCommander(BaseCommander):
         :return: A subordinate among the list of subordinates.
         """
 
+    def reset(self):
+        super().reset()
+        self._subordinate_context = {}
+        self._is_changing_context = False
+        self.add_shared('env', Env())
+        self.add_shared('camera', Camera())
+
 
 class AgentContext:
     def __init__(self):

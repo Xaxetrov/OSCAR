@@ -36,7 +36,11 @@ class IdleSCVManagerBasic(CustomAgent):
         elif SELECT_IDLE_WORKER in obs.observation['available_actions']:
             play['actions'] = select_idle_scv(obs)
             try:
-                play['actions'] += harvest_mineral(obs)
+                # if we still have a command center somewhere
+                if obs.observation['player'][FOOD_CAP] % 8 != 0:
+                    play['actions'] += harvest_mineral(obs)
+                else:
+                    play['actions'] += attack_minimap(obs, queued=True)
             except NoUnitError:
                 play['actions'] += [actions.FunctionCall(MOVE_CAMERA, [self.command_center_pos.to_array()])]
                 play['locked_choice'] = True
@@ -45,4 +49,8 @@ class IdleSCVManagerBasic(CustomAgent):
 
         return play
 
-
+    def reset(self):
+        super().reset()
+        self.command_center_pos = None
+        self.add_shared('env', Env())
+        self.add_shared('camera', Camera())
