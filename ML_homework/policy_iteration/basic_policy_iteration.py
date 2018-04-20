@@ -83,7 +83,6 @@ if __name__ == '__main__':
             obs = env.reset()
             df = debug_dict['stats']
             df = df.assign(policy_iteration=[i])
-            print(df)
             if not os.path.isfile(RESULT_FILE):
                 df.to_csv(RESULT_FILE, sep=',', mode='w', header=True)
             else:
