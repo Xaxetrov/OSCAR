@@ -20,7 +20,7 @@ def attack_minimap(obs, queued=True):
         self_y, self_x = (minimap_player_relative == PLAYER_SELF).nonzero()
         delta_x = np.abs(self_x.reshape((1, -1)) - enemy_pos_x.reshape((-1, 1)))
         delta_y = np.abs(self_y.reshape((1, -1)) - enemy_pos_y.reshape((-1, 1)))
-        closest = np.min(delta_x + delta_y, axis=0)
+        closest = np.min(delta_x + delta_y, axis=1)
         closest_enemy_id = np.argmin(closest)
         pos = (enemy_pos_x[closest_enemy_id], enemy_pos_y[closest_enemy_id])
     else:
