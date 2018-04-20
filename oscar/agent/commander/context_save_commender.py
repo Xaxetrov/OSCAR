@@ -68,6 +68,7 @@ class ContextSaveCommander(BaseCommander):
         """
 
     def reset(self):
+        super().reset()
         self._subordinate_context = {}
         self._is_changing_context = False
         self.add_shared('env', Env())

@@ -49,4 +49,8 @@ class IdleSCVManagerBasic(CustomAgent):
 
         return play
 
-
+    def reset(self):
+        super().reset()
+        self.command_center_pos = None
+        self.add_shared('env', Env())
+        self.add_shared('camera', Camera())

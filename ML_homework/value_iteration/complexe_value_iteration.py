@@ -90,7 +90,7 @@ if __name__ == '__main__':
     else:
         print("state generation already done")
 
-    env = GeneralLearningEnv("config/learning_complex.json", False)
+    env = GeneralLearningEnv("config/learning_complex.json", True)
 
     obs = env.reset()
     for i, (pi, error) in enumerate(value_iteration_iterator(0.1, 10, file_path=STATE_FILE, dump_file_path=Q_SAVE_PATH)):
