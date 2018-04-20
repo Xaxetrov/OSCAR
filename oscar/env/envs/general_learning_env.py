@@ -9,7 +9,7 @@ import os
 from oscar.env.envs.pysc2_general_env import Pysc2GeneralEnv
 from oscar.constants import *
 
-from baselines import logger
+# from baselines import logger
 
 GAME_MAX_STEP = 1700
 
@@ -23,6 +23,7 @@ LOSS_REWARD = 0.0
 STATE_MATE_REWARD = 0.2
 
 DEFAULT_CONFIGURATION = "config/learning.json"
+
 
 
 class GeneralLearningEnv(gym.Env):
