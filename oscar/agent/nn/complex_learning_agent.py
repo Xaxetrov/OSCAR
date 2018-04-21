@@ -48,19 +48,19 @@ class ComplexLearningAgent(LearningAgent):
         ret_obs_list = deque()
         # minerals available
         minerals = full_obs.observation['player'][MINERALS]
-        ret_obs_list.append(min(minerals / (10 * 40.0), 1.0))
+        ret_obs_list.append(min(minerals / (10 * 40.0), 2.0))
         # food supply: are we on max
         food_available = full_obs.observation['player'][FOOD_CAP]
         ret_obs_list.append(food_available / 100.0)
         # is army count
         ret_obs_list.append(full_obs.observation['player'][ARMY_COUNT] / 100.0)
         # scv count
-        ret_obs_list.append(full_obs.observation['player'][FOOD_USED_BY_WORKERS] / 24.0)
+        ret_obs_list.append(min(full_obs.observation['player'][FOOD_USED_BY_WORKERS] / 24.0, 1.5))
         # information on which building are already build (don't check player id)
         # experimental measure: barrack surface is 118 with 84x84 screen
-        ret_obs_list.append((np.count_nonzero(unit_type == TERRAN_BARRACKS_ID) // 100) / 4.0 )
+        ret_obs_list.append((np.count_nonzero(unit_type == TERRAN_BARRACKS_ID) // 110) / 4.0)
         # time step info
-        ret_obs_list.append(self.episode_steps / 100.0)
+        ret_obs_list.append(min(self.episode_steps / (100.0 * 10.0), 2.0))
         # self.pr.disable()
         return np.array(ret_obs_list, copy=True, dtype=float)
     
