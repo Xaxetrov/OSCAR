@@ -1,9 +1,9 @@
 # constants
 ENV = 'general-learning-v0'  # deprecated
-CONFIGURATION_FILE = 'config/learning_complex.json'
+CONFIGURATION_FILE = 'config/learning.json'
 ENABLE_PYSC2_GUI = False
 
-RUN_TIME = 60 * 60 * 16
+RUN_TIME = 60 * 60 * 23
 THREADS = 8
 OPTIMIZERS = 2
 THREAD_DELAY = 0.0001
