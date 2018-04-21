@@ -62,7 +62,7 @@ def state_from_obs(obs):
     state.army_count = int(min(int(obs[2] * 100) // 10, ARMY_COUNT_LIMIT))
     state.scv_count = int(max(12, min(int(obs[3] * 24), SCV_COUNT_LIMIT + 12)))
     state.barracks = int(min(int(obs[4] * 4), BARRACK_LIMIT))
-    state.time_step = int(min(int(obs[5]), TIME_STEP_LIMIT))
+    state.time_step = int(min(int(obs[5] * 10.0), TIME_STEP_LIMIT))
     return state
 
 
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     P_SAVE_PATH = "/tmp/OSCAR/"
     # UTILITY_FILE = "ML_homework/utility.npy"
     # POLICY_FILE = "ML_homework/policy.npy"
-    NUMBER_OF_TEST = 10
+    NUMBER_OF_TEST = 30
     RESULT_FILE = "ML_homework/policy_iteration/complex.csv"
     if not os.path.isfile(STATE_FILE):
         generate_transition_complex_env(STATE_FILE)
@@ -80,7 +80,7 @@ if __name__ == '__main__':
     else:
         print("state generation already done")
 
-    env = GeneralLearningEnv("config/learning_complex.json", True)
+    env = GeneralLearningEnv("config/learning_complex.json", False)
 
     obs = env.reset()
 

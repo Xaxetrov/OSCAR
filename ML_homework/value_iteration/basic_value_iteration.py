@@ -9,7 +9,7 @@ from ML_homework.value_iteration.generate_transition import generate_transition_
 
 
 RESULT_FILE = "ML_homework/value_iteration/basic.csv"
-NUMBER_OF_TEST = 5
+NUMBER_OF_TEST = 25
 
 
 def value_iteration(gamma, max_iter, delta):
