@@ -27,11 +27,13 @@ DEFAULT_CONFIGURATION = "config/learning.json"
 
 
 class GeneralLearningEnv(gym.Env):
-    def __init__(self, configuration_file=DEFAULT_CONFIGURATION, enable_visualisation=True, game_steps_per_update=8):
+    def __init__(self, configuration_file=DEFAULT_CONFIGURATION, enable_visualisation=True, game_steps_per_update=8,
+                 log_file_path=None):
         self.env_thread = Pysc2EnvRunner(configuration_file=configuration_file,
                                          enable_visualisation=enable_visualisation,
                                          game_steps_per_update=game_steps_per_update)
         self.shared_memory = self.env_thread.shared_memory
+        self.log_file = log_file_path
         # get semaphores from shared memory
         self.semaphore_obs_ready = self.shared_memory.semaphore_obs_ready
         self.semaphore_action_set = self.shared_memory.semaphore_action_set
@@ -62,6 +64,12 @@ class GeneralLearningEnv(gym.Env):
             self.env_thread.was_done = False  # reset was_done to false for next loop
             # info_dict["win_state"] = self.env_thread.get_win_state()
             info_dict["stats"] = self.env_thread.stats
+            # log result to disk if asked
+            if self.log_file is not None and self.env_thread.stats is not None:
+                if os.path.isfile(self.log_file):
+                    self.env_thread.stats.to_csv(self.log_file, sep=',', mode='a', header=False)
+                else:
+                    self.env_thread.stats.to_csv(self.log_file, sep=',', mode='w', header=True)
         # return current obs
         return obs, reward, done, info_dict
 

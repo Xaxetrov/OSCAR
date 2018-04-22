@@ -7,7 +7,7 @@ from oscar.env.envs.general_learning_env import GeneralLearningEnv
 from ML_homework.value_iteration.generate_transition import generate_transition_basic_env
 
 RESULT_FILE = "ML_homework/policy_iteration/basic.csv"
-NUMBER_OF_TEST = 10
+NUMBER_OF_TEST = 30
 
 
 def policy_iteration(gamma=0.99, max_iterations=10**6, delta=10**-3):
