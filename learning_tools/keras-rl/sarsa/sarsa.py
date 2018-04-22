@@ -11,7 +11,7 @@ from rl.policy import BoltzmannQPolicy
 from oscar.env.envs.general_learning_env import GeneralLearningEnv
 
 CONFIG_FILE = 'config/learning.json'
-LOG_FILE = 'learning_tools/learning_nn/keras-rl/duel_dqn_{}_weights.csv'.format(CONFIG_FILE[7:-4])
+LOG_FILE = 'learning_tools/learning_nn/keras-rl/sarsa_{}_weights.csv'.format(CONFIG_FILE[7:-4])
 
 
 # Get the environment and extract the number of actions.
