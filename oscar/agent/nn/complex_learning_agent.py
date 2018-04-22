@@ -2,6 +2,7 @@ from collections import deque
 import numpy as np
 from gym import spaces
 # import cProfile, pstats, io
+from keras.models import load_model
 
 from oscar.agent.learning_agent import LearningAgent
 from oscar import meta_action
@@ -19,6 +20,9 @@ class ComplexLearningAgent(LearningAgent):
         self.action_space = spaces.Discrete(ACTION_SPACE_SIZE)
         self.observation_space = spaces.Box(low=0.0, high=200.0, shape=OBSERVATION_SPACE_SHAPE)
         super().__init__(train_mode, shared_memory)
+        if not train_mode:
+            self.model = load_model("learning_tools/learning_nn/learning_complex.knn")
+            self.model.summary()
         # self.pr = cProfile.Profile()
 
     def _step(self, obs):
@@ -28,13 +32,18 @@ class ComplexLearningAgent(LearningAgent):
         :return: a dict of the agent's choice for this step (action list, callbacks)
         """
         self.last_obs = obs
-        # use a random meta action
-        action_id = np.random.randint(0, ACTION_SPACE_SIZE)
-        print("random action id:", action_id, flush=True)
+        nn_obs = self._format_observation(obs)
+        action_probability, value = self.model.predict(nn_obs.reshape((1, ACTION_SPACE_SIZE)))
+        action_probability *= self._available_action_mask()
+        action_sum = np.sum(action_probability)
+        if action_sum == 0.0:
+            action_probability = self._available_action_mask()
+            action_probability /= np.sum(action_probability)
+        else:
+            action_probability = action_probability / np.sum(action_probability)
+        action_id = np.random.choice(range(ACTION_SPACE_SIZE), p=action_probability.reshape(ACTION_SPACE_SIZE))
         play = self._transform_action(action_id)
-        print("play returned:", play, flush=True)
         return play
-        # raise RuntimeError("Not implemented yet...")
 
     def _format_observation(self, full_obs):
         """
@@ -58,7 +67,7 @@ class ComplexLearningAgent(LearningAgent):
         ret_obs_list.append(full_obs.observation['player'][FOOD_USED_BY_WORKERS] / 24.0)
         # information on which building are already build (don't check player id)
         # experimental measure: barrack surface is 118 with 84x84 screen
-        ret_obs_list.append((np.count_nonzero(unit_type == TERRAN_BARRACKS_ID) // 100) / 4.0 )
+        ret_obs_list.append((np.count_nonzero(unit_type == TERRAN_BARRACKS_ID) // 100) / 4.0)
         # time step info
         ret_obs_list.append(self.episode_steps / 100.0)
         # self.pr.disable()
