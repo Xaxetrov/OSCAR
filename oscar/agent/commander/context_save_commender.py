@@ -42,7 +42,6 @@ class ContextSaveCommander(BaseCommander):
 
     def restore_context(self, subordinate, obs):
         if subordinate not in self._subordinate_context:
-            print("context unavailable")
             context = AgentContext()
             location = self._shared['camera'].location(obs=obs, shared=self._shared)
             context.camera = location
