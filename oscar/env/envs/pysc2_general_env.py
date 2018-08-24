@@ -1,7 +1,7 @@
 import gym
 from gym import spaces
 
-from pysc2.env.sc2_env import SC2Env
+from pysc2.env.sc2_env import SC2Env, AgentInterfaceFormat, Race, Difficulty, Agent, Bot, Dimensions
 from pysc2.env import environment
 
 from oscar.env.envs.pysc2_env import Pysc2Env
@@ -27,9 +27,14 @@ class Pysc2GeneralEnv(Pysc2Env):
                  game_step_per_update=8):
         self.pysc2_env = SC2Env(  # map_name='CollectMineralsAndGas',
             map_name='Simple64',
-            agent_race='T',
-            screen_size_px=(SCREEN_RESOLUTION, SCREEN_RESOLUTION),
-            minimap_size_px=(MINIMAP_RESOLUTION, MINIMAP_RESOLUTION),
+            players=[Agent(Race.terran),
+                     Bot(Race.random, Difficulty.very_easy)],
+            agent_interface_format=[AgentInterfaceFormat(feature_dimensions=Dimensions(screen=(SCREEN_RESOLUTION,
+                                                                                               SCREEN_RESOLUTION),
+                                                                                       minimap=(MINIMAP_RESOLUTION,
+                                                                                                MINIMAP_RESOLUTION)),
+                                                         camera_width_world_units=TILES_VISIBLE_ON_SCREEN_WIDTH)],
+            # git version give camera position in observation if asked
             visualize=enable_visualisation,
             step_mul=game_step_per_update,
             game_steps_per_episode=None  # use map default
@@ -41,7 +46,7 @@ class Pysc2GeneralEnv(Pysc2Env):
         # self.observation_space = self.general.training_memory.observation_space
         super().__init__()
 
-    def _step(self, action):
+    def step(self, action):
         """
         This beautiful environment as a good sens of hierarchy.
         He has a general and his general is better than you, and so the action you give
@@ -52,7 +57,7 @@ class Pysc2GeneralEnv(Pysc2Env):
         :return: a tuple with the observation, reward, done and an empty dict
         """
         action = self.general.step(self.last_obs)
-        obs, reward, done, debug_dict = super()._step([action])
+        obs, reward, done, debug_dict = super().step([action])
         # explore observation to decide if agent can still play
         # first condition is to check if a command center exist
         # second is to check if the agent has unit or minerals to create one
@@ -62,18 +67,18 @@ class Pysc2GeneralEnv(Pysc2Env):
             done = True
         return obs, reward, done, debug_dict
 
-    def _reset(self):
+    def reset(self):
         self.general.reset()
-        return super()._reset()
+        return super().reset()
 
-    def _render(self, mode='human', close=False):
-        super()._render(mode, close)
+    def render(self, mode='human', close=False):
+        super().render(mode, close)
 
-    def _close(self):
-        super()._close()
+    def close(self):
+        super().close()
 
-    def _seed(self, seed=None):
-        super()._seed(seed)
+    def seed(self, seed=None):
+        super().seed(seed)
 
     def get_action_mask(self):
         return None  # no action required here

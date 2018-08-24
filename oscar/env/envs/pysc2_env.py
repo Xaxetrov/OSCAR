@@ -23,7 +23,7 @@ class Pysc2Env(gym.Env):
     def __init__(self):
         pass
 
-    def _step(self, action):
+    def step(self, action):
         """
         move the environment forward of one step
         :param action: a pysc2 action (a list of one pysc2 function call)
@@ -36,17 +36,17 @@ class Pysc2Env(gym.Env):
         done = self.last_obs.step_type == environment.StepType.LAST
         return self.last_obs, self.last_obs.reward, done, {}
 
-    def _reset(self):
+    def reset(self):
         self.last_obs = self.pysc2_env.reset()[0]
         return self.last_obs
 
-    def _render(self, mode='human', close=False):
+    def render(self, mode='human', close=False):
         pass
 
-    def _close(self):
+    def close(self):
         self.pysc2_env.close()
 
-    def _seed(self, seed=None):
+    def seed(self, seed=None):
         # any way to set the seed of pysc2 ?
         pass
 
