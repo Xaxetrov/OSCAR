@@ -5,8 +5,8 @@ from oscar.hiearchy_factory import build_hierarchy
 from oscar.constants import NO_OP
 import time
 
-# DEFAULT_CONFIGURATION = "config/full_hierarchy.json"
-DEFAULT_CONFIGURATION = "config/idleSCVtest.json"
+DEFAULT_CONFIGURATION = "config/full_hierarchy.json"
+# DEFAULT_CONFIGURATION = "config/idleSCVtest.json"
 
 
 class General(BaseAgent):
@@ -25,6 +25,7 @@ class General(BaseAgent):
         self._failure_callback = None
         self._success_callback = None
         self._success = False
+        self._function_dict = None
 
     def step(self, obs):
         """
@@ -91,8 +92,8 @@ class General(BaseAgent):
         :param current_action: action with arguments to check
         :return: Valid or not
         """
-        # TODO: check why 0: multi player ?
-        asked_args = self.action_spec[0].functions[current_action.function].args
+
+        asked_args = self._function_dict[current_action.function].args
         args = current_action.arguments
         if len(args) != len(asked_args):
             print("---- Error args size not accurate ----")
@@ -116,6 +117,12 @@ class General(BaseAgent):
 
     def setup(self, obs_spec, action_spec):
         super().setup(obs_spec, action_spec)
+        # setup function dict
+        if type(self.action_spec) == tuple:
+            # TODO: check why 0: multi player ? and why format vary between gym env and pysc2.bin.agent launch
+            self._function_dict = self.action_spec[0].functions
+        else:
+            self._function_dict = self.action_spec.functions
         self._child.setup(obs_spec, action_spec)
 
     def reset(self):

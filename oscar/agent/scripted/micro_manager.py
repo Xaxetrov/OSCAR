@@ -1,10 +1,5 @@
-import random
-import time
 from oscar.agent.custom_agent import CustomAgent
-from oscar.constants import *
 from oscar.util.micro_management import *
-from oscar.util.location import Location
-from oscar.util.debug import *
 
 
 class MicroManager(CustomAgent):

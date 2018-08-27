@@ -1,5 +1,6 @@
 import numpy as np
 from oscar.util.point import Point
+from oscar.constants import MINIMAP
 
 
 class Minimap(object):
