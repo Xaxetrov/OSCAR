@@ -19,10 +19,11 @@ class MetaActionPerceptronAgent(LearningAgent):
         self.observation_space = spaces.Box(low=0, high=float('Inf'), shape=OBSERVATION_SPACE_SHAPE)
         super().__init__(train_mode, shared_memory)
 
-    def _step(self, obs):
+    def step(self, obs, locked_choice=None):
         """
         Method called when in playing mod (cf LearningAgent)
         :param obs: current observation
+        :param locked_choice: useless (compatibility)
         :return: a dict of the agent's choice for this step (action list, callbacks)
         """
         self.last_obs = obs
@@ -41,22 +42,22 @@ class MetaActionPerceptronAgent(LearningAgent):
         :return: agent observation
         """
         self.last_obs = full_obs
-        unit_type = full_obs.observation["screen"][SCREEN_UNIT_TYPE]
-        minimap_player_relative = full_obs.observation['minimap'][MINI_PLAYER_RELATIVE]
+        unit_type = full_obs.observation[SCREEN][SCREEN_UNIT_TYPE]
+        minimap_player_relative = full_obs.observation[MINIMAP][MINI_PLAYER_RELATIVE]
         ret_obs_list = deque()
         # current mineral reserves (normalized on 1000 max 1000)
-        minerals = full_obs.observation['player'][MINERALS] / 1000.0
+        minerals = full_obs.observation[PLAYER][MINERALS] / 1000.0
         ret_obs_list.append(min(minerals, 1.0))
         # current vespene reserves (normalized on 1000 max 1000)
-        vespene = full_obs.observation['player'][VESPENE] / 1000.0
+        vespene = full_obs.observation[PLAYER][VESPENE] / 1000.0
         ret_obs_list.append(min(vespene, 1.0))
         # food supply: total used, army, scv and max
-        ret_obs_list.append(full_obs.observation['player'][FOOD_USED] / 200.0)
-        ret_obs_list.append(full_obs.observation['player'][FOOD_USED_BY_ARMY] / 200.0)
-        ret_obs_list.append(full_obs.observation['player'][FOOD_USED_BY_WORKERS] / 200.0)
-        ret_obs_list.append(full_obs.observation['player'][FOOD_CAP] / 200.0)
+        ret_obs_list.append(full_obs.observation[PLAYER][FOOD_USED] / 200.0)
+        ret_obs_list.append(full_obs.observation[PLAYER][FOOD_USED_BY_ARMY] / 200.0)
+        ret_obs_list.append(full_obs.observation[PLAYER][FOOD_USED_BY_WORKERS] / 200.0)
+        ret_obs_list.append(full_obs.observation[PLAYER][FOOD_CAP] / 200.0)
         # army count (very similar to food used by army with only marines)
-        ret_obs_list.append(full_obs.observation['player'][ARMY_COUNT] / 100.0)
+        ret_obs_list.append(full_obs.observation[PLAYER][ARMY_COUNT] / 100.0)
         # information on which building are already build (don't check player id)
         ret_obs_list.append(np.count_nonzero(unit_type == TERRAN_BARRACKS_ID) > 0)
         ret_obs_list.append(np.count_nonzero(unit_type == TERRAN_SUPPLYDEPOT) > 0)
@@ -132,12 +133,12 @@ class MetaActionPerceptronAgent(LearningAgent):
         """
         mask = np.ones(shape=self.action_space.n)
         # get useful information
-        unit_type = self.last_obs.observation["screen"][SCREEN_UNIT_TYPE]
-        minerals = self.last_obs.observation['player'][MINERALS]
-        vespene = self.last_obs.observation['player'][VESPENE]
-        food_used = self.last_obs.observation['player'][FOOD_USED]
-        food_used_worker = self.last_obs.observation['player'][FOOD_USED_BY_WORKERS]
-        food_cap = self.last_obs.observation['player'][FOOD_CAP]
+        unit_type = self.last_obs.observation[SCREEN][SCREEN_UNIT_TYPE]
+        minerals = self.last_obs.observation[PLAYER][MINERALS]
+        vespene = self.last_obs.observation[PLAYER][VESPENE]
+        food_used = self.last_obs.observation[PLAYER][FOOD_USED]
+        food_used_worker = self.last_obs.observation[PLAYER][FOOD_USED_BY_WORKERS]
+        food_cap = self.last_obs.observation[PLAYER][FOOD_CAP]
         has_supply_depot = np.count_nonzero(unit_type == TERRAN_SUPPLYDEPOT) > 0
         has_barrack = np.count_nonzero(unit_type == TERRAN_BARRACKS_ID) > 0
         # information on the currently selected unit

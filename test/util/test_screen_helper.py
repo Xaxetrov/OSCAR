@@ -10,11 +10,11 @@ class Obs:
     def __init__(self, screen_unit_type, player_relative, unit_density):
         self.observation = {"screen": []}
         for i in range(17):
-            self.observation["screen"].append(None)
+            self.observation[SCREEN].append(None)
 
-        self.observation["screen"][SCREEN_UNIT_TYPE] = screen_unit_type
-        self.observation["screen"][SCREEN_PLAYER_RELATIVE] = player_relative
-        self.observation["screen"][SCREEN_UNIT_DENSITY] = unit_density
+        self.observation[SCREEN][SCREEN_UNIT_TYPE] = screen_unit_type
+        self.observation[SCREEN][SCREEN_PLAYER_RELATIVE] = player_relative
+        self.observation[SCREEN][SCREEN_UNIT_DENSITY] = unit_density
 
 
 def print_screen(screen):
@@ -141,11 +141,11 @@ def test_get_center():
     obs_id = 49
 
     print("screen_unit_type:")
-    print_screen(obs[obs_id].observation["screen"][SCREEN_UNIT_TYPE])
+    print_screen(obs[obs_id].observation[SCREEN][SCREEN_UNIT_TYPE])
     print("player_relative:")
-    print_screen(obs[obs_id].observation["screen"][SCREEN_PLAYER_RELATIVE])
+    print_screen(obs[obs_id].observation[SCREEN][SCREEN_PLAYER_RELATIVE])
     print("unit_density:")
-    print_screen(obs[obs_id].observation["screen"][SCREEN_UNIT_DENSITY])
+    print_screen(obs[obs_id].observation[SCREEN][SCREEN_UNIT_DENSITY])
 
     print(get_center(obs[obs_id], TERRAN_COMMAND_CENTER, 1))
     print(get_center(obs[obs_id], TERRAN_SCV, 1))

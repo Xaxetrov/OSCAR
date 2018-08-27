@@ -11,9 +11,9 @@ def attack_minimap(obs, queued=True):
     :param queued: if the returned action must be queued or not
     :return: a list of one attack minimap action
     """
-    minimap_player_relative = obs.observation['minimap'][MINI_PLAYER_RELATIVE]
-    minimap_height = obs.observation['minimap'][MINI_HEIGHT_MAP]
-    minimap_visibility = obs.observation['minimap'][MINI_VISIBILITY]
+    minimap_player_relative = obs.observation[MINIMAP][MINI_PLAYER_RELATIVE]
+    minimap_height = obs.observation[MINIMAP][MINI_HEIGHT_MAP]
+    minimap_visibility = obs.observation[MINIMAP][MINI_VISIBILITY]
     enemy_pos_y, enemy_pos_x = (minimap_player_relative == PLAYER_HOSTILE).nonzero()
     if len(enemy_pos_x) > 0:
         # find the closest enemy and set him as target

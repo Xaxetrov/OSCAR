@@ -28,16 +28,16 @@ class EconomyManager(CustomAgent):
             self._worker_selected = False
             self._command_center_selected = False
 
-            if obs.observation['player'][FOOD_CAP] - obs.observation['player'][FOOD_USED] < 5 \
-                and obs.observation['player'][MINERALS] >= 100:
+            if obs.observation[PLAYER][FOOD_CAP] - obs.observation[PLAYER][FOOD_USED] < 5 \
+                and obs.observation[PLAYER][MINERALS] >= 100:
                 self._state = EconomyManager._BUILDING_SUPPLY_DEPOT
 
-            elif obs.observation['player'][FOOD_CAP] - obs.observation['player'][FOOD_USED] > 0 \
-                and obs.observation['player'][MINERALS] >= 50 \
+            elif obs.observation[PLAYER][FOOD_CAP] - obs.observation[PLAYER][FOOD_USED] > 0 \
+                and obs.observation[PLAYER][MINERALS] >= 50 \
                 and self._shared['economy'].scv < 20:
                 self._state = EconomyManager._TRAINING_SCV
 
-            elif obs.observation["player"][IDLE_WORKER_COUNT] > 0:
+            elif obs.observation[PLAYER][IDLE_WORKER_COUNT] > 0:
                 self._state = EconomyManager._HARVESTING
 
         """ Executes states """
@@ -57,7 +57,7 @@ class EconomyManager(CustomAgent):
                 
         elif self._state == EconomyManager._BUILDING_SUPPLY_DEPOT:
             if not self._worker_selected:
-                if obs.observation["player"][IDLE_WORKER_COUNT] > 0:
+                if obs.observation[PLAYER][IDLE_WORKER_COUNT] > 0:
                     play['actions'] = [actions.FunctionCall(SELECT_IDLE_WORKER, [NEW_SELECTION])]
                     self._worker_selected = True
 

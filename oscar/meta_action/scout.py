@@ -34,7 +34,7 @@ def _score_target(obs, shared, camera_location, target):
     _VISIBLE_SCORE = 0
     _DISTANCE_WEIGHT = 0.0
 
-    visibility = obs.observation['minimap'][MINI_VISIBILITY]
+    visibility = obs.observation[MINIMAP][MINI_VISIBILITY]
     distance = camera_location.distance(target)
 
     visibility_score = 0

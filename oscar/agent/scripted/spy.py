@@ -6,10 +6,10 @@ import time
 
 
 class Spy(CustomAgent):
-    '''
+    """
     Positions units at strategic locations and moves camera
     in order to collect information on the enemy.
-    '''
+    """
 
     # states
     _INITIAL_STATE = 0
@@ -24,10 +24,8 @@ class Spy(CustomAgent):
         self._state = Spy._INITIAL_STATE
         self._target = None
 
-
     def spy_sent(self):
         print('spy sent')
-
 
     def step(self, obs, locked_choice=None):
 
@@ -61,7 +59,8 @@ class Spy(CustomAgent):
 
             if res['unit']:
                 play['actions'] = \
-                    [actions.FunctionCall(SELECT_POINT, [NEW_SELECTION, res['unit'].location.screen.get_flipped().to_array()])] \
+                    [actions.FunctionCall(SELECT_POINT,
+                                          [NEW_SELECTION, res['unit'].location.screen.get_flipped().to_array()])] \
                     + [actions.FunctionCall(MOVE_MINIMAP, [NOT_QUEUED, self._target.to_array()])]
                 play['success_callback'] = self.spy_sent
                 self._state = Spy._INITIAL_STATE
@@ -70,25 +69,23 @@ class Spy(CustomAgent):
                 play['actions'] = res['actions']
                 play['locked_choice'] = True
 
-            else: # failed to find an idle unit
+            else:  # failed to find an idle unit
                 play['actions'] = [actions.FunctionCall(NO_OP, [])]
                 self._state = Spy._INITIAL_STATE
 
         return play
 
-
     def _is_location_visible(self, obs, location):
         _MIN_VISIBLE_RATIO = 0.5
 
-        visibles, non_visibles = 0, 0
+        visible, non_visible = 0, 0
         for p in self._shared['camera'].iterate(obs, location):
-            if obs.observation['minimap'][MINI_VISIBILITY][p.y, p.x] == VISIBLE_CELL:
-                visibles += 1
+            if obs.observation[MINIMAP][MINI_VISIBILITY][p.y, p.x] == VISIBLE_CELL:
+                visible += 1
             else:
-                non_visibles += 1
+                non_visible += 1
 
-        return (visibles/(visibles+non_visibles) >= _MIN_VISIBLE_RATIO)
-
+        return visible / (visible + non_visible) >= _MIN_VISIBLE_RATIO
 
     def print_tree(self, depth):
         return 'I am a {} and my depth is {}. I have a message to tell you : {}'.format(type(self).__name__, depth

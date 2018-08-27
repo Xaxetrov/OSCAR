@@ -43,7 +43,7 @@ class GeneralLearningEnv(gym.Env):
         # start thread
         self.env_thread.start()
 
-    def _step(self, action):
+    def step(self, action):
         info_dict = {}
         # set action into shared memory
         self.shared_memory.shared_action = action
@@ -73,19 +73,19 @@ class GeneralLearningEnv(gym.Env):
         # return current obs
         return obs.copy(), reward, done, info_dict
 
-    def _reset(self):
+    def reset(self):
         # wait for the env to stop as waiting action
         self.semaphore_obs_ready.acquire(blocking=True, timeout=None)
         return self.shared_memory.shared_obs
 
-    def _close(self):
+    def close(self):
         self.env_thread.stop = True
         self.semaphore_action_set.release()  # to be sure that the thread go to stop condition
 
-    def _render(self, mode='human', close=False):
+    def render(self, mode='human', close=False):
         pass
 
-    def _seed(self, seed=None):
+    def seed(self, seed=None):
         pass
 
     def get_action_mask(self):
@@ -157,7 +157,7 @@ class Pysc2EnvRunner(threading.Thread):
         self.last_killed_units = killed_units
         self.last_killed_building = killed_buildings
 
-        army_count = self.last_obs.observation['player'][ARMY_COUNT]
+        army_count = self.last_obs.observation[PLAYER][ARMY_COUNT]
         step_reward += max(0, army_count - self.last_army_count) * CREATED_MARINES_REWARD
         self.last_army_count = army_count
         if army_count == 0:
@@ -182,7 +182,7 @@ class Pysc2EnvRunner(threading.Thread):
         """
         if self.step_count >= GAME_MAX_STEP / self.game_steps_per_update:
             return 1
-        elif self.last_obs.observation['player'][ARMY_COUNT] > 10:
+        elif self.last_obs.observation[PLAYER][ARMY_COUNT] > 10:
             return 2
         else:
             return 0

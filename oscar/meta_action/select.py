@@ -42,7 +42,7 @@ def select_idle_scv_screen_priority(obs):
 """ Selects an idle scv, using built-in pySc2 function. """
 def select_idle_scv(obs):
     # Select an idle SCV
-    if obs.observation["player"][IDLE_WORKER_COUNT] != 0:
+    if obs.observation[PLAYER][IDLE_WORKER_COUNT] != 0:
         return [actions.FunctionCall(SELECT_IDLE_WORKER, [NEW_SELECTION])]
     raise NoValidSCVError()
 

@@ -28,7 +28,7 @@ class LearningStructure:
             shared_memory.action_space = self.action_space
             shared_memory.observation_space = self.observation_space
         else:
-            self.do_step = self._step
+            self.do_step = self._playing_step
         super().__init__()
 
     def step(self, obs, locked_choice=None):
@@ -39,7 +39,7 @@ class LearningStructure:
         """
         return self.do_step(obs)
 
-    def _step(self, obs):
+    def _playing_step(self, obs):
         """
         Step function to be used when not in training mode, but when training but must be
         available.

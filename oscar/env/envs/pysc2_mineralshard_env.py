@@ -40,7 +40,7 @@ class Pysc2MineralshardEnv(Pysc2Env):
                                 )
         super().__init__()
 
-    def _step(self, action):
+    def step(self, action):
         if _MOVE_SCREEN in self.last_obs.observation["available_actions"]:
                 # and action > 1:
                 # and action["non-spacial"] == 2:
@@ -59,20 +59,20 @@ class Pysc2MineralshardEnv(Pysc2Env):
         # print(sc2_action)
         formatted_action = actions.FunctionCall(sc2_action[0], sc2_action[1])
         # call mother class to run action in SC2
-        full_obs, reward, done, debug_dic = super()._step([formatted_action])
+        full_obs, reward, done, debug_dic = super().step([formatted_action])
         # format observation to be the one corresponding to observation_space
         obs = self.format_observation(full_obs)
         return obs, reward, done, debug_dic
 
-    def _reset(self):
+    def reset(self):
         # call mother class to reset env
-        full_obs = super()._reset()
+        full_obs = super().reset()
         # format observation to be the one corresponding to observation_space
         obs = self.format_observation(full_obs)
         return obs
 
-    def _render(self, mode='human', close=False):
-        super()._render(mode, close)
+    def render(self, mode='human', close=False):
+        super().render(mode, close)
 
     """
         Methods used for the translation of Gym's action to pysc2's action
@@ -106,8 +106,8 @@ class Pysc2MineralshardEnv(Pysc2Env):
 
     @staticmethod
     def format_observation(obs):
-        player_relative = obs.observation["screen"][features.SCREEN_FEATURES.player_relative.index]
-        selected = obs.observation["screen"][features.SCREEN_FEATURES.selected.index]
+        player_relative = obs.observation[SCREEN][features.SCREEN_FEATURES.player_relative.index]
+        selected = obs.observation[SCREEN][features.SCREEN_FEATURES.selected.index]
         formatted_obs = np.array([player_relative, selected])
         # formatted_obs = np.zeros(shape=(64, 64, 2))
         # for formatted_row, pr_row, selected_row in zip(formatted_obs, player_relative, selected):

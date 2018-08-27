@@ -41,7 +41,7 @@ class CollectMyShards(CustomAgent):
         # First call
         if self.state == 0:
             # Find our units and targets
-            player_relative = obs.observation["screen"][_PLAYER_RELATIVE]
+            player_relative = obs.observation[SCREEN][_PLAYER_RELATIVE]
             neutral_y, neutral_x = (player_relative == _PLAYER_NEUTRAL).nonzero()
             player_y, player_x = (player_relative == _PLAYER_FRIENDLY).nonzero()
 
@@ -92,7 +92,7 @@ class CollectMyShards(CustomAgent):
         # Done wait for new points
         else:  # state == 2
             # Find our units and targets
-            player_relative = obs.observation["screen"][_PLAYER_RELATIVE]
+            player_relative = obs.observation[SCREEN][_PLAYER_RELATIVE]
             neutral_y, neutral_x = (player_relative == _PLAYER_NEUTRAL).nonzero()
             if len(neutral_y) == 20:
                 self.state = 0

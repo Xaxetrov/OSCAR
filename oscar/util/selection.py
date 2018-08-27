@@ -20,8 +20,8 @@ def find_position(obs, unit_type_id, select_method="random_center", player_relat
     except TypeError:
         unit_type_id_list = [unit_type_id]
 
-    unit_type_map = obs.observation["screen"][SCREEN_UNIT_TYPE]
-    player_relative_map = obs.observation["screen"][SCREEN_PLAYER_RELATIVE]
+    unit_type_map = obs.observation[SCREEN][SCREEN_UNIT_TYPE]
+    player_relative_map = obs.observation[SCREEN][SCREEN_PLAYER_RELATIVE]
     correct_unit_type_array = np.isin(unit_type_map, unit_type_id_list)
     correct_player_relative_array = (player_relative_map == player_relative)
     unit_y, unit_x = (correct_unit_type_array & correct_player_relative_array).nonzero()

@@ -36,7 +36,7 @@ class CollectMineralGas(base_agent.BaseAgent):
         # Phase 0 : select idle guy
         if self.state == 0:
             # There are some idle guys
-            if obs.observation["player"][_IDLE_WORKER_COUNT] != 0:
+            if obs.observation[PLAYER][_IDLE_WORKER_COUNT] != 0:
                 self.state = 1
                 return actions.FunctionCall(_SELECT_IDLE_WORKER, [_SET])
         # Idle selected, right click on mineral

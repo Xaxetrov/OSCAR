@@ -36,7 +36,7 @@ class Pysc2Simple64MetaEnv(Pysc2Env):
         self.step_reward = 0
         super().__init__()
 
-    def _step(self, action):
+    def step(self, action):
         self.action_list += self.get_meta_action(action)
         while True:
             formatted_action = self.action_list.popleft()
@@ -44,17 +44,17 @@ class Pysc2Simple64MetaEnv(Pysc2Env):
                 self.action_list.clear()
                 formatted_action = actions.FunctionCall(NO_OP, [])
             # call mother class to run action in SC2
-            full_obs, reward, done, debug_dic = super()._step([formatted_action])
+            full_obs, reward, done, debug_dic = super().step([formatted_action])
             if len(self.action_list) == 0 or done:
                 self.action_list.clear()
                 break
         self.update_reward()
         return self.get_return_obs(full_obs), self.step_reward, done, debug_dic
 
-    def _reset(self):
+    def reset(self):
         self.total_reward = 0
         # call mother class to reset env
-        full_obs = super()._reset()
+        full_obs = super().reset()
         # format observation to be the one corresponding to observation_space
         obs = self.format_observation(full_obs)
         self.obs_list = deque()
@@ -62,8 +62,8 @@ class Pysc2Simple64MetaEnv(Pysc2Env):
             self.obs_list += obs
         return self.get_return_obs(full_obs)
 
-    def _render(self, mode='human', close=False):
-        super()._render(mode, close)
+    def render(self, mode='human', close=False):
+        super().render(mode, close)
 
     """
         Methods used for the translation of Gym's action to pysc2's action
@@ -108,18 +108,18 @@ class Pysc2Simple64MetaEnv(Pysc2Env):
         formatted_obs = self.format_observation(currant_obs)
         self.add_to_obs_list(formatted_obs)
         ret_obs_list = deque()
-        ret_obs_list.append(np.full(shape=(64, 64), fill_value=currant_obs.observation['player'][MINERALS]))
-        ret_obs_list.append(np.full(shape=(64, 64), fill_value=currant_obs.observation['player'][VESPENE]))
-        ret_obs_list.append(np.full(shape=(64, 64), fill_value=currant_obs.observation['player'][FOOD_USED]))
-        ret_obs_list.append(np.full(shape=(64, 64), fill_value=currant_obs.observation['player'][FOOD_CAP]))
+        ret_obs_list.append(np.full(shape=(64, 64), fill_value=currant_obs.observation[PLAYER][MINERALS]))
+        ret_obs_list.append(np.full(shape=(64, 64), fill_value=currant_obs.observation[PLAYER][VESPENE]))
+        ret_obs_list.append(np.full(shape=(64, 64), fill_value=currant_obs.observation[PLAYER][FOOD_USED]))
+        ret_obs_list.append(np.full(shape=(64, 64), fill_value=currant_obs.observation[PLAYER][FOOD_CAP]))
         ret_obs_list += self.obs_list
         return np.array(ret_obs_list, copy=True)
 
     @staticmethod
     def format_observation(obs):
-        unit_type = obs.observation["screen"][SCREEN_UNIT_TYPE]
-        player_relative = obs.observation["screen"][SCREEN_PLAYER_RELATIVE]
-        selected = obs.observation["screen"][SCREEN_SELECTED]
+        unit_type = obs.observation[SCREEN][SCREEN_UNIT_TYPE]
+        player_relative = obs.observation[SCREEN][SCREEN_PLAYER_RELATIVE]
+        selected = obs.observation[SCREEN][SCREEN_SELECTED]
         formatted_obs = [player_relative,
                          selected, unit_type]
         return formatted_obs
@@ -144,7 +144,7 @@ class Pysc2Simple64MetaEnv(Pysc2Env):
         new_total_reward += self.last_obs.observation['score_cumulative'][6]
         self.step_reward = new_total_reward - self.total_reward
         self.total_reward = new_total_reward
-        army_count = self.last_obs.observation['player'][ARMY_COUNT]
+        army_count = self.last_obs.observation[PLAYER][ARMY_COUNT]
         self.step_reward += max(0, army_count - self.last_army_count)
         self.last_army_count = army_count
 

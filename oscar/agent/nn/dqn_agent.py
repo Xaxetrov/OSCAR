@@ -101,16 +101,17 @@ class DQNAgent(base_agent.BaseAgent):
             self.best_action_pos = [0, 0]
         return selected_action, action_args
 
-    def step(self, obs):
+    def step(self, obs, locked_choice=None):
         """
         A deep Q learning iteration
         :param obs:
+        :param locked_choice: useless (compatibility)
         :return:
         """
         super(DQNAgent, self).step(obs)
 
-        state = [obs.observation["screen"][features.SCREEN_FEATURES.player_relative.index],
-                 obs.observation["screen"][features.SCREEN_FEATURES.selected.index]]
+        state = [obs.observation[SCREEN][features.SCREEN_FEATURES.player_relative.index],
+                 obs.observation[SCREEN][features.SCREEN_FEATURES.selected.index]]
         formatted_state = numpy.zeros(shape=(1, self.spatial_action_size, self.spatial_action_size, 2), dtype=float)
         for formatted_row, state0_row, state1_row in zip(formatted_state[0], state[0], state[1]):
             for formatted_case, state0_case, state1_case in zip(formatted_row, state0_row, state1_row):

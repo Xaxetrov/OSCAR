@@ -7,7 +7,7 @@ from oscar.util.point import Point
 def get_micro_management_location(obs, shared):
     _MICRO_DISTANCE = 6
 
-    player_relative = obs.observation['minimap'][MINI_PLAYER_RELATIVE]
+    player_relative = obs.observation[MINIMAP][MINI_PLAYER_RELATIVE]
     locations = []
 
     for y in range(shared['minimap'].height(obs)):
@@ -54,7 +54,7 @@ def get_enemy_influence_map(obs, shared):
 
 
 def get_closest_enemy(obs, shared, loc):
-    player_relative = obs.observation['minimap'][MINI_PLAYER_RELATIVE]
+    player_relative = obs.observation[MINIMAP][MINI_PLAYER_RELATIVE]
     hostile_y, hostile_x = (player_relative == PLAYER_HOSTILE).nonzero()
 
     closest, min_dist = None, None
@@ -68,7 +68,7 @@ def get_closest_enemy(obs, shared, loc):
 
 
 def _is_close_to_enemy(obs, shared, point, max_dist):
-    player_relative = obs.observation['minimap'][MINI_PLAYER_RELATIVE]
+    player_relative = obs.observation[MINIMAP][MINI_PLAYER_RELATIVE]
 
     for y in range(point.y-max_dist, point.y+max_dist+1):
         if y < 0 or y >= shared['minimap'].height(obs):

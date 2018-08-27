@@ -151,7 +151,7 @@ class IdleTracker():
         return friendly_units
 
     def _update_idle_units_map(self, obs, shared):
-        cur_minimap = obs.observation['minimap'][MINI_PLAYER_RELATIVE]
+        cur_minimap = obs.observation[MINIMAP][MINI_PLAYER_RELATIVE]
         for x in range(shared['minimap'].width(obs)):
             for y in range(shared['minimap'].height(obs)):
                 if cur_minimap[y, x] != PLAYER_SELF \
@@ -163,7 +163,7 @@ class IdleTracker():
                             self._idle_units.remove(u)
 
     def _update_blacklist_map(self, obs, shared):
-        cur_minimap = obs.observation['minimap'][MINI_PLAYER_RELATIVE]
+        cur_minimap = obs.observation[MINIMAP][MINI_PLAYER_RELATIVE]
         for x in range(shared['minimap'].width(obs)):
             for y in range(shared['minimap'].height(obs)):
                 if cur_minimap[y, x] != PLAYER_SELF \
@@ -171,8 +171,8 @@ class IdleTracker():
                     self._blacklist_map[x, y] = 0
 
     def _blacklist_screen(self, obs, shared):
-        camera = obs.observation['minimap'][MINI_CAMERA]
-        player_relative = obs.observation['minimap'][MINI_PLAYER_RELATIVE]
+        camera = obs.observation[MINIMAP][MINI_CAMERA]
+        player_relative = obs.observation[MINIMAP][MINI_PLAYER_RELATIVE]
 
         for x in range(shared['minimap'].width(obs)):
             for y in range(shared['minimap'].height(obs)):
@@ -192,7 +192,7 @@ class IdleTracker():
                 for i in range(IdleTracker._MINIMAP_IDLE_STEPS):
                     if not self._last_obs[i]:
                         return []
-                    if self._last_obs[i].observation['minimap'][MINI_PLAYER_RELATIVE][y, x] != PLAYER_SELF:
+                    if self._last_obs[i].observation[MINIMAP][MINI_PLAYER_RELATIVE][y, x] != PLAYER_SELF:
                         is_idle = False
                         break
 

@@ -174,8 +174,8 @@ def get_units_id(obs, player_id):
     units_dic = {}
     units_list = []
 
-    screen_unit_type = obs.observation["screen"][SCREEN_UNIT_TYPE]
-    player_relative = obs.observation["screen"][SCREEN_PLAYER_RELATIVE]
+    screen_unit_type = obs.observation[SCREEN][SCREEN_UNIT_TYPE]
+    player_relative = obs.observation[SCREEN][SCREEN_PLAYER_RELATIVE]
 
     for x in range(len(screen_unit_type)):
         for y in range(len(screen_unit_type[0])):
@@ -315,9 +315,9 @@ def get_center(obs, unit_id, player_id):
     else:
         raise ValueError("Unit id ({0}) not handled.".format(unit_id))
 
-    return match_all(obs.observation["screen"][SCREEN_UNIT_TYPE],
+    return match_all(obs.observation[SCREEN][SCREEN_UNIT_TYPE],
                      unit_id,
-                     obs.observation["screen"][SCREEN_PLAYER_RELATIVE],
+                     obs.observation[SCREEN][SCREEN_PLAYER_RELATIVE],
                      player_id,
-                     obs.observation["screen"][SCREEN_UNIT_DENSITY],
+                     obs.observation[SCREEN][SCREEN_UNIT_DENSITY],
                      floor(unit_tile_size * TILES_SIZE_IN_CELL / 2.))

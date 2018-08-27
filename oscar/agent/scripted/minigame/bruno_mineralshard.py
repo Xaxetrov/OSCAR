@@ -35,7 +35,7 @@ class CollectMineralShards(base_agent.BaseAgent):
         super(CollectMineralShards, self).step(obs)
 
         # Find our units and targets
-        player_relative = obs.observation["screen"][_PLAYER_RELATIVE]
+        player_relative = obs.observation[SCREEN][_PLAYER_RELATIVE]
         self.neutral_y, self.neutral_x = (player_relative == _PLAYER_NEUTRAL).nonzero()
         self.player_y, self.player_x = (player_relative == _PLAYER_FRIENDLY).nonzero()
 

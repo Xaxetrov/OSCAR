@@ -25,10 +25,11 @@ class ComplexLearningAgent(LearningAgent):
             self.model.summary()
         # self.pr = cProfile.Profile()
 
-    def _step(self, obs):
+    def step(self, obs, locked_choice=None):
         """
         Method called when in playing mod (cf LearningAgent)
         :param obs: current observation
+        :param locked_choice: useless (compatibility)
         :return: a dict of the agent's choice for this step (action list, callbacks)
         """
         self.last_obs = obs
@@ -53,18 +54,18 @@ class ComplexLearningAgent(LearningAgent):
         """
         # self.pr.enable()
         self.last_obs = full_obs
-        unit_type = full_obs.observation["screen"][SCREEN_UNIT_TYPE]
+        unit_type = full_obs.observation[SCREEN][SCREEN_UNIT_TYPE]
         ret_obs_list = deque()
         # minerals available
-        minerals = full_obs.observation['player'][MINERALS]
+        minerals = full_obs.observation[PLAYER][MINERALS]
         ret_obs_list.append(min(minerals / (10 * 40.0), 2.0))
         # food supply: are we on max
-        food_available = full_obs.observation['player'][FOOD_CAP]
+        food_available = full_obs.observation[PLAYER][FOOD_CAP]
         ret_obs_list.append(food_available / 100.0)
         # is army count
-        ret_obs_list.append(full_obs.observation['player'][ARMY_COUNT] / 100.0)
+        ret_obs_list.append(full_obs.observation[PLAYER][ARMY_COUNT] / 100.0)
         # scv count
-        ret_obs_list.append(min(full_obs.observation['player'][FOOD_USED_BY_WORKERS] / 24.0, 1.5))
+        ret_obs_list.append(min(full_obs.observation[PLAYER][FOOD_USED_BY_WORKERS] / 24.0, 1.5))
         # information on which building are already build (don't check player id)
         # experimental measure: barrack surface is 118 with 84x84 screen
         ret_obs_list.append((np.count_nonzero(unit_type == TERRAN_BARRACKS_ID) // 110) / 4.0)
@@ -129,12 +130,12 @@ class ComplexLearningAgent(LearningAgent):
         # self.pr.enable()
         mask = np.ones(shape=self.action_space.n)
         # get useful information
-        unit_type = self.last_obs.observation["screen"][SCREEN_UNIT_TYPE]
-        minerals = self.last_obs.observation['player'][MINERALS]
-        food_used = self.last_obs.observation['player'][FOOD_USED]
-        food_cap = self.last_obs.observation['player'][FOOD_CAP]
-        food_used_worker = self.last_obs.observation['player'][FOOD_USED_BY_WORKERS]
-        food_used_army = self.last_obs.observation['player'][ARMY_COUNT]
+        unit_type = self.last_obs.observation[SCREEN][SCREEN_UNIT_TYPE]
+        minerals = self.last_obs.observation[PLAYER][MINERALS]
+        food_used = self.last_obs.observation[PLAYER][FOOD_USED]
+        food_cap = self.last_obs.observation[PLAYER][FOOD_CAP]
+        food_used_worker = self.last_obs.observation[PLAYER][FOOD_USED_BY_WORKERS]
+        food_used_army = self.last_obs.observation[PLAYER][ARMY_COUNT]
         has_supply_depot = np.count_nonzero(unit_type == TERRAN_SUPPLYDEPOT) > 0
         has_barrack = np.count_nonzero(unit_type == TERRAN_BARRACKS_ID) > 0
 

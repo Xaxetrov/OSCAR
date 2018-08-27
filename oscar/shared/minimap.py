@@ -6,11 +6,11 @@ class Minimap(object):
 
     @staticmethod
     def width(obs):
-        return len(obs.observation['minimap'][0])
+        return len(obs.observation[MINIMAP][0])
 
     @staticmethod
     def height(obs):
-        return len(obs.observation['minimap'][0][0])
+        return len(obs.observation[MINIMAP][0][0])
 
     @staticmethod
     def random_point(obs):

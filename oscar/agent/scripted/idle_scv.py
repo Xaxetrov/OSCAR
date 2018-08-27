@@ -37,7 +37,7 @@ class IdleSCVManagerBasic(CustomAgent):
             play['actions'] = select_idle_scv(obs)
             try:
                 # if we still have a command center somewhere
-                if obs.observation['player'][FOOD_CAP] % 8 != 0:
+                if obs.observation[PLAYER][FOOD_CAP] % 8 != 0:
                     play['actions'] += harvest_mineral(obs)
                 else:
                     play['actions'] += attack_minimap(obs, queued=True)

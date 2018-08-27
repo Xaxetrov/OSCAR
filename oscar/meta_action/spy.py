@@ -41,7 +41,7 @@ def _score_spy_target(obs, shared, target):
 
     """ Computes a score based on the presence of enemies """
     enemy_score = 0
-    mini_player_relative = obs.observation["minimap"][MINI_PLAYER_RELATIVE]
+    mini_player_relative = obs.observation[MINIMAP][MINI_PLAYER_RELATIVE]
     for p in shared['camera'].iterate(obs, target):
         if mini_player_relative[p.y, p.x] == PLAYER_HOSTILE:
             enemy_score += 1

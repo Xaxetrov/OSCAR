@@ -20,6 +20,9 @@ MOVE_MINIMAP = actions.FUNCTIONS.Move_minimap.id
 NO_OP = actions.FUNCTIONS.no_op.id
 
 # Features
+SCREEN = 'feature_screen'
+MINIMAP = 'feature_minimap'
+PLAYER = 'player'
 SCREEN_PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
 SCREEN_SELECTED = features.SCREEN_FEATURES.selected.index
 SCREEN_UNIT_TYPE = features.SCREEN_FEATURES.unit_type.index

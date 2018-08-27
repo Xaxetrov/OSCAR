@@ -24,9 +24,9 @@ class CollectMineralShards(base_agent.BaseAgent):
 
     def step(self, obs):
         super(CollectMineralShards, self).step(obs)
-        player_relative = obs.observation["screen"][_PLAYER_RELATIVE]
+        player_relative = obs.observation[SCREEN][_PLAYER_RELATIVE]
         if _MOVE_SCREEN in obs.observation["available_actions"]:
-            selected = obs.observation["screen"][_PLAYER_SELECTED]
+            selected = obs.observation[SCREEN][_PLAYER_SELECTED]
             neutral_y, neutral_x = (player_relative == _PLAYER_NEUTRAL).nonzero()
             player_y, player_x = (selected == 1).nonzero()
             if not neutral_y.any() or not player_y.any():
@@ -56,9 +56,9 @@ class CollectMineralShardsP(base_agent.BaseAgent):
 
     def step(self, obs):
         super(CollectMineralShardsP, self).step(obs)
-        player_relative = obs.observation["screen"][_PLAYER_RELATIVE]
+        player_relative = obs.observation[SCREEN][_PLAYER_RELATIVE]
         if _MOVE_SCREEN in obs.observation["available_actions"]:
-            selected = obs.observation["screen"][_PLAYER_SELECTED]
+            selected = obs.observation[SCREEN][_PLAYER_SELECTED]
             neutral_y, neutral_x = (player_relative == _PLAYER_NEUTRAL).nonzero()
             player_y, player_x = (selected == 1).nonzero()
             if self.action == 'move':

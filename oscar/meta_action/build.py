@@ -23,8 +23,8 @@ def build(obs, building_tiles_size, building_id, propagate_error=True, use_slow_
     # Find a valid emplacement
     building_tiles_size += 0  # Handle the free space needed around the building.
     building_cell_size = int(building_tiles_size * TILES_SIZE_IN_CELL)
-    unit_type = obs.observation["screen"][SCREEN_UNIT_TYPE]
-    height_map = obs.observation["screen"][HEIGHT_MAP]
+    unit_type = obs.observation[SCREEN][SCREEN_UNIT_TYPE]
+    height_map = obs.observation[SCREEN][HEIGHT_MAP]
     valid_point_center_list = find_valid_building_point(unit_type, height_map, building_cell_size)
     if not valid_point_center_list:
         valid_point_center_list = find_valid_building_point(unit_type, height_map, building_cell_size,
@@ -55,8 +55,8 @@ def get_random_building_point(obs, shared, building_size, samples=20):
         center = shared['screen'].random_point(obs, half_building_size)
         is_valid = True
 
-        screen_unit_type = obs.observation["screen"][SCREEN_UNIT_TYPE]
-        height_map = obs.observation["screen"][HEIGHT_MAP]
+        screen_unit_type = obs.observation[SCREEN][SCREEN_UNIT_TYPE]
+        height_map = obs.observation[SCREEN][HEIGHT_MAP]
 
         for y in range(center.y - half_building_size, center.y + half_building_size+1):
             for x in range(center.x - half_building_size, center.x + half_building_size+1):

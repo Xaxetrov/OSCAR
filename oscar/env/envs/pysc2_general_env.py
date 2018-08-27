@@ -61,8 +61,8 @@ class Pysc2GeneralEnv(Pysc2Env):
         # explore observation to decide if agent can still play
         # first condition is to check if a command center exist
         # second is to check if the agent has unit or minerals to create one
-        if obs.observation['player'][FOOD_CAP] < 15 \
-                or (obs.observation['player'][FOOD_USED] == 0 and obs.observation['player'][MINERALS] < 50):
+        if obs.observation[PLAYER][FOOD_CAP] < 15 \
+                or (obs.observation[PLAYER][FOOD_USED] == 0 and obs.observation[PLAYER][MINERALS] < 50):
             warnings.warn("Environment decided that game is lost")
             done = True
         return obs, reward, done, debug_dict

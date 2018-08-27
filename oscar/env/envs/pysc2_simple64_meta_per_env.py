@@ -15,22 +15,22 @@ class Pysc2Simple64MetaPerEnv(Pysc2Simple64MetaEnv):
         self.observation_space.n = self.observation_space.shape[0]
 
     def get_return_obs(self, currant_obs):
-        unit_type = currant_obs.observation["screen"][SCREEN_UNIT_TYPE]
-        minimap_player_relative = currant_obs.observation['minimap'][MINI_PLAYER_RELATIVE]
+        unit_type = currant_obs.observation[SCREEN][SCREEN_UNIT_TYPE]
+        minimap_player_relative = currant_obs.observation[MINIMAP][MINI_PLAYER_RELATIVE]
         ret_obs_list = deque()
         # current mineral reserves (normalized on 1000 max 1000)
-        minerals = currant_obs.observation['player'][MINERALS] / 1000.0
+        minerals = currant_obs.observation[PLAYER][MINERALS] / 1000.0
         ret_obs_list.append(min(minerals, 1.0))
         # current vespene reserves (normalized on 1000 max 1000)
-        vespene = currant_obs.observation['player'][VESPENE] / 1000.0
+        vespene = currant_obs.observation[PLAYER][VESPENE] / 1000.0
         ret_obs_list.append(min(vespene, 1.0))
         # food supply: total used, army, scv and max
-        ret_obs_list.append(currant_obs.observation['player'][FOOD_USED] / 200.0)
-        ret_obs_list.append(currant_obs.observation['player'][FOOD_USED_BY_ARMY] / 200.0)
-        ret_obs_list.append(currant_obs.observation['player'][FOOD_USED_BY_WORKERS] / 200.0)
-        ret_obs_list.append(currant_obs.observation['player'][FOOD_CAP] / 200.0)
+        ret_obs_list.append(currant_obs.observation[PLAYER][FOOD_USED] / 200.0)
+        ret_obs_list.append(currant_obs.observation[PLAYER][FOOD_USED_BY_ARMY] / 200.0)
+        ret_obs_list.append(currant_obs.observation[PLAYER][FOOD_USED_BY_WORKERS] / 200.0)
+        ret_obs_list.append(currant_obs.observation[PLAYER][FOOD_CAP] / 200.0)
         # army count (very similar to food used by army with only marines)
-        ret_obs_list.append(currant_obs.observation['player'][ARMY_COUNT] / 100.0)
+        ret_obs_list.append(currant_obs.observation[PLAYER][ARMY_COUNT] / 100.0)
         # information on which building are already build (don't check player id)
         ret_obs_list.append(np.count_nonzero(unit_type == TERRAN_BARRACKS_ID) > 0)
         ret_obs_list.append(np.count_nonzero(unit_type == TERRAN_SUPPLYDEPOT) > 0)

@@ -14,7 +14,7 @@ class Camera(object):
 
     def location(self, obs, shared):
         if not self._location_timestamp or self._location_timestamp != shared['env'].timestamp:
-            mini_camera = obs.observation['minimap'][MINI_CAMERA]
+            mini_camera = obs.observation[MINIMAP][MINI_CAMERA]
             camera_y, camera_x = (mini_camera == 1).nonzero()
             self._location = Point(round(sum(camera_x)/len(camera_x)), round(sum(camera_y)/len(camera_y)))
             self._location_timestamp = shared['env'].timestamp
@@ -22,21 +22,21 @@ class Camera(object):
 
     def width(self, obs):
         if not self._width:
-            mini_camera = obs.observation['minimap'][MINI_CAMERA]
+            mini_camera = obs.observation[MINIMAP][MINI_CAMERA]
             _, camera_x = (mini_camera == 1).nonzero()
             self._width = max(camera_x) - min(camera_x) + 1
         return self._width
 
     def height(self, obs):
         if not self._height:
-            mini_camera = obs.observation['minimap'][MINI_CAMERA]
+            mini_camera = obs.observation[MINIMAP][MINI_CAMERA]
             camera_y, _ = (mini_camera == 1).nonzero()
             self._height = max(camera_y) - min(camera_y) + 1
         return self._height
 
     def random_target(self, obs):
-        minimap_width = len(obs.observation['minimap'][0])
-        minimap_height = len(obs.observation['minimap'][0][0])
+        minimap_width = len(obs.observation[MINIMAP][0])
+        minimap_height = len(obs.observation[MINIMAP][0][0])
 
         loc = Point()
         loc.x = np.random.randint(int(self.width(obs)/2), minimap_width - int(self.width(obs)/2))
@@ -45,7 +45,7 @@ class Camera(object):
 
     def iterate(self, obs, camera_loc=None):
         """ Generates camera pixels location """
-        mini_camera = obs.observation['minimap'][MINI_CAMERA]
+        mini_camera = obs.observation[MINIMAP][MINI_CAMERA]
 
         if not camera_loc:
             camera_y, camera_x = (mini_camera == 1).nonzero()

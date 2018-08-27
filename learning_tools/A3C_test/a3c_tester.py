@@ -78,8 +78,8 @@ class A3CTester(base_agent.BaseAgent):
             return actions.FunctionCall(_SELECT_ARMY, [_SELECT_ALL])
 
         if True:  # numpy.random.rand() < self.epsilon:
-            state = [obs.observation["screen"][features.SCREEN_FEATURES.player_relative.index],
-                     obs.observation["screen"][features.SCREEN_FEATURES.selected.index]]
+            state = [obs.observation[SCREEN][features.SCREEN_FEATURES.player_relative.index],
+                     obs.observation[SCREEN][features.SCREEN_FEATURES.selected.index]]
             formatted_state = numpy.zeros(shape=(1, 64, 64, 2), dtype=float)
             for formatted_row, state0_row, state1_row in zip(formatted_state[0], state[0], state[1]):
                 for formatted_case, state0_case, state1_case in zip(formatted_row, state0_row, state1_row):
