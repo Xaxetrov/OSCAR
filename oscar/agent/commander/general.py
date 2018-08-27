@@ -91,7 +91,8 @@ class General(BaseAgent):
         :param current_action: action with arguments to check
         :return: Valid or not
         """
-        asked_args = self.action_spec.functions[current_action.function].args
+        # TODO: check why 0: multi player ?
+        asked_args = self.action_spec[0].functions[current_action.function].args
         args = current_action.arguments
         if len(args) != len(asked_args):
             print("---- Error args size not accurate ----")
