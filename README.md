@@ -20,7 +20,7 @@ Add current directory to Python path: `export PYTHONPATH=$(pwd)`
 
 #### Scripted bot
 The General agent should be launched with PySc2. For example,    
-`python -m pysc2.bin.agent --agent_race T --bot_race T --difficulty 1 --map Flat64 --agent oscar.agent.commander.general.General`
+`python3 -m pysc2.bin.agent --agent_race terran --agent2_race terran --difficulty very_easy --map Flat64 --agent oscar.agent.commander.general.General`
 
 #### Deep Q-Network
 training: `python learning_tools/baseline/dqn/custom_learn.py`    
