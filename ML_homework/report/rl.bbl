@@ -1,0 +1,28 @@
+\begin{thebibliography}{1}
+
+\bibitem{DQNpretraining}
+Gabriel~V Cruz~Jr, Yunshu Du, and Matthew~E Taylor.
+\newblock Pre-training neural networks with human demonstrations for deep
+  reinforcement learning.
+\newblock {\em arXiv preprint arXiv:1709.04083}, 2017.
+
+\bibitem{A3C}
+Volodymyr Mnih, Adria~Puigdomenech Badia, Mehdi Mirza, Alex Graves, Timothy
+  Lillicrap, Tim Harley, David Silver, and Koray Kavukcuoglu.
+\newblock Asynchronous methods for deep reinforcement learning.
+\newblock In {\em International Conference on Machine Learning}, pages
+  1928--1937, 2016.
+
+\bibitem{AlphaGo0}
+David Silver, Julian Schrittwieser, Karen Simonyan, Ioannis Antonoglou, Aja
+  Huang, Arthur Guez, Thomas Hubert, Lucas Baker, Matthew Lai, Adrian Bolton,
+  et~al.
+\newblock Mastering the game of go without human knowledge.
+\newblock {\em Nature}, 550(7676):354, 2017.
+
+\bibitem{DuelingQL}
+Ziyu Wang, Nando de~Freitas, and Marc Lanctot.
+\newblock Dueling network architectures for deep reinforcement learning.
+\newblock {\em CoRR}, abs/1511.06581, 2015.
+
+\end{thebibliography}

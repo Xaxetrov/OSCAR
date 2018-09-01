@@ -1,0 +1,33 @@
+\select@language {english}
+\contentsline {section}{\numberline {1}Introduction}{1}{section.1}
+\contentsline {paragraph}{}{1}{section*.2}
+\contentsline {subsection}{\numberline {1.1}Problems}{1}{subsection.1.1}
+\contentsline {paragraph}{}{1}{section*.3}
+\contentsline {subsubsection}{\numberline {1.1.1}Basic version}{2}{subsubsection.1.1.1}
+\contentsline {paragraph}{}{2}{section*.4}
+\contentsline {subsubsection}{\numberline {1.1.2}Complex version}{2}{subsubsection.1.1.2}
+\contentsline {paragraph}{}{2}{section*.5}
+\contentsline {section}{\numberline {2}Solving MDP}{2}{section.2}
+\contentsline {subsection}{\numberline {2.1}Introduction}{2}{subsection.2.1}
+\contentsline {paragraph}{}{2}{section*.6}
+\contentsline {subsection}{\numberline {2.2}Value Iteration}{3}{subsection.2.2}
+\contentsline {paragraph}{}{3}{section*.7}
+\contentsline {paragraph}{}{4}{section*.10}
+\contentsline {subsection}{\numberline {2.3}Policy Iteration}{5}{subsection.2.3}
+\contentsline {paragraph}{}{5}{section*.11}
+\contentsline {paragraph}{}{6}{section*.14}
+\contentsline {subsection}{\numberline {2.4}Conclusion}{6}{subsection.2.4}
+\contentsline {section}{\numberline {3}Dueling Q-Learning}{7}{section.3}
+\contentsline {subsection}{\numberline {3.1}Introduction}{7}{subsection.3.1}
+\contentsline {paragraph}{}{7}{section*.15}
+\contentsline {subsection}{\numberline {3.2}Basic Idea of the algorithm}{7}{subsection.3.2}
+\contentsline {paragraph}{}{7}{section*.16}
+\contentsline {subsection}{\numberline {3.3}Experiments}{7}{subsection.3.3}
+\contentsline {paragraph}{}{7}{section*.18}
+\contentsline {paragraph}{}{7}{section*.19}
+\contentsline {paragraph}{}{8}{section*.22}
+\contentsline {paragraph}{}{8}{section*.25}
+\contentsline {subsection}{\numberline {3.4}Discussions}{8}{subsection.3.4}
+\contentsline {paragraph}{}{8}{section*.27}
+\contentsline {section}{\numberline {4}Conclusion}{9}{section.4}
+\contentsline {paragraph}{}{9}{section*.28}
